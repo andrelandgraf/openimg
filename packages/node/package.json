@@ -1,0 +1,14 @@
+{
+  "name": "open-image",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

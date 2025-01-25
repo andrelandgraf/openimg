@@ -1,0 +1,7 @@
+{
+  "name": "openimg",
+  "type": "module",
+  "workspaces": [
+    "packages/node",
+  ],
+}
