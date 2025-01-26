@@ -1,14 +1,15 @@
 {
-  "name": "open-image",
+  "name": "openimg-node",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
+    "sharp": "^0.33.5",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "sharp": "^0.33.5"
   }
 }

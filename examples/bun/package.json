@@ -1,0 +1,14 @@
+{
+  "name": "openimg-bun-example",
+  "module": "server.ts",
+  "type": "module",
+  "dependencies": {
+    "openimg-node": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

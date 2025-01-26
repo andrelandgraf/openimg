@@ -89,7 +89,7 @@ function getImgSources(url: URL, params: ImgParams): ImgSources {
   };
 }
 
-async function isInCache(path: string) {
+async function exists(path: string) {
   try {
     const stats = await fsp.stat(path);
     if (stats.size === 0) {
@@ -135,7 +135,7 @@ export async function getImgResponse(request: Request, headers = new Headers(), 
   const sources: ImgSources = config?.getImgSources ? config.getImgSources(request, params) : getImgSources(url, params);
   console.log("Hello World", params, sources);
 
-  if (await isInCache(sources.cacheSrc)) {
+  if (await exists(sources.cacheSrc)) {
     return streamFromCache(sources.cacheSrc, headers);
   }
 
@@ -147,6 +147,9 @@ export async function getImgResponse(request: Request, headers = new Headers(), 
     }
     nodeStream = Readable.fromWeb(fetchRes.body as any);
   } else {
+    if (!await exists(sources.originSrc)) {
+      return new Response('Image not found', { status: 404 });
+    }
     nodeStream = createReadStream(sources.originSrc);
   }
 
