@@ -24,8 +24,8 @@ type ImgSources = {
 };
 
 type Config = {
-  getImgParams?: (request: Request) => ImgParams;
-  getImgSources?: (request: Request, params: ImgParams) => ImgSources;
+  getImgParams?: (request: Request) => ImgParams | Response;
+  getImgSources?: (request: Request, params: ImgParams) => ImgSources | Response;
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -48,7 +48,8 @@ function isFormatValue(format: string | undefined): format is Format | undefined
   return (FORMATS as any as string[]).includes(format);
 }
 
-function getImgParams(url: URL): ImgParams {
+function getImgParams(request: Request): ImgParams {
+  const url = new URL(request.url);
   const w = url.searchParams.get('w') || undefined;
   assert((w && !Number.isNaN(w)) || !w, 'Search param "w" must be a either number or unset');
   const width = w ? Number.parseInt(w, 10) : undefined;
@@ -71,7 +72,8 @@ function getImgParams(url: URL): ImgParams {
   };
 }
 
-function getImgSources(url: URL, params: ImgParams): ImgSources {
+function getImgSources(request: Request, params: ImgParams): ImgSources {
+  const url = new URL(request.url);
   const endpointPath = '/img';
   const remainingPath = url.pathname.slice(endpointPath.length); // "/funny/cat.webp"
   const originSrc = './public' + remainingPath;
@@ -130,10 +132,29 @@ function isUrl(src: string) {
 }
 
 export async function getImgResponse(request: Request, headers = new Headers(), config?: Config) {
-  const url = new URL(request.url);
-  const params: ImgParams = config?.getImgParams ? config.getImgParams(request) : getImgParams(url);
-  const sources: ImgSources = config?.getImgSources ? config.getImgSources(request, params) : getImgSources(url, params);
-  console.log("Hello World", params, sources);
+  let params: ImgParams;
+  if (config?.getImgParams) {
+    const res = config.getImgParams(request);
+    if (res instanceof Response) {
+      return res;
+    }
+    params = res;
+  } else {
+    // Use default getImgParams
+    params = getImgParams(request);
+  }
+
+  let sources: ImgSources;
+  if (config?.getImgSources) {
+    const res = config.getImgSources(request, params);
+    if (res instanceof Response) {
+      return res;
+    }
+    sources = res;
+  } else {
+    // Use default getImgSources
+    sources = getImgSources(request, params);
+  }
 
   if (await exists(sources.cacheSrc)) {
     return streamFromCache(sources.cacheSrc, headers);

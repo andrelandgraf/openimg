@@ -1,9 +1,29 @@
 {
   "name": "openimg-node",
-  "module": "index.ts",
+  "version": "0.0.2",
+  "homepage": "https://github.com/andrelandgraf/openimg",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrelandgraf/openimg.git",
+    "directory": "packages/node"
+  },
+  "license": "MIT",
+  "author": "Andre Landgraf <andre.timo.landgraf@gmail.com> (https://andrelandgraf.com)",
   "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/esm/*.js",
+      "types": "./dist/types/*.d.ts"
+    }
+  },
   "scripts": {
-    "build": "bun scripts/build.ts"
+    "build": "bun scripts/build.ts && bun run build:ts",
+    "build:ts": "tsc"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -11,5 +31,9 @@
   "peerDependencies": {
     "sharp": "^0.33.5",
     "typescript": "^5.0.0"
-  }
+  },
+  "files": [
+    "src",
+    "dist"
+  ]
 }

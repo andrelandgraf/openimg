@@ -1,15 +1,13 @@
-# open-image
+# openimg-node
 
-To install dependencies:
+openimg-node (Open Image Node) provides an HTTP request handler function to optimize images using sharp.
 
-```bash
-bun install
-```
-
-To run:
+## Installation
 
 ```bash
-bun run index.ts
+npm i sharp openimg-node
 ```
 
-This project was created using `bun init` in bun v1.1.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+openimg-node uses [sharp](https://sharp.pixelplumbing.com) and can only be used in environments that can run sharp (and [libvips](https://github.com/libvips/libvips)).
+
+
