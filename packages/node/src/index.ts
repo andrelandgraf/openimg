@@ -11,19 +11,19 @@ type Format = (typeof FORMATS)[number];
 const FITS = ['cover', 'contain'] as const;
 type Fit = (typeof FITS)[number];
 
-type ImgParams = {
+export type ImgParams = {
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
   targetFormat?: Format | undefined;
 };
 
-type ImgSources = {
+export type ImgSources = {
   cacheSrc: string;
   originSrc: string;
 };
 
-type Config = {
+export type Config = {
   getImgParams?: (request: Request) => ImgParams | Response;
   getImgSources?: (request: Request, params: ImgParams) => ImgSources | Response;
 };

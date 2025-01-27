@@ -1,6 +1,6 @@
 {
   "name": "openimg-node",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -13,11 +13,11 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
+      "import": "./dist/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./*": {
-      "import": "./dist/esm/*.js",
+      "import": "./dist/*.js",
       "types": "./dist/types/*.d.ts"
     }
   },
