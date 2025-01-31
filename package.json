@@ -1,8 +1,11 @@
 {
   "name": "openimg",
   "type": "module",
+  "scripts": {
+    "fmt": "bunx prettier . -w"
+  },
   "workspaces": [
     "packages/*",
     "examples/*"
-  ],
+  ]
 }

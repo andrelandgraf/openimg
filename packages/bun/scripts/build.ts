@@ -1,11 +1,11 @@
-import fs from 'node:fs';
+import fs from "node:fs";
 
 try {
-  fs.rmdirSync('./dist', { recursive: true });
-} catch { }
+  fs.rmdirSync("./dist", { recursive: true });
+} catch {}
 
 await Bun.build({
-  entrypoints: ['./src/index.ts'],
-  outdir: './dist',
-  target: 'node',
+  entrypoints: ["./src/index.ts"],
+  outdir: "./dist",
+  target: "node",
 });
