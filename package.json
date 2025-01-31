@@ -2,8 +2,7 @@
   "name": "openimg",
   "type": "module",
   "workspaces": [
-    "packages/node",
-    "packages/react",
-    "examples/bun",
+    "packages/*",
+    "examples/*"
   ],
 }

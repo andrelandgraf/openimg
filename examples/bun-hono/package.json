@@ -1,0 +1,15 @@
+{
+  "name": "openimg-bun-hono-example",
+  "module": "server.ts",
+  "type": "module",
+  "dependencies": {
+    "hono": "^4.6.19",
+    "openimg-node": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
