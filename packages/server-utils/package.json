@@ -1,11 +1,11 @@
 {
-  "name": "openimg-bun",
-  "version": "0.0.2",
+  "name": "openimg-server-utils",
+  "version": "0.0.1",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andrelandgraf/openimg.git",
-    "directory": "packages/bun"
+    "directory": "packages/server-utils"
   },
   "license": "MIT",
   "author": "Andre Landgraf <andre.timo.landgraf@gmail.com> (https://andrelandgraf.com)",
@@ -25,14 +25,10 @@
     "build": "bun scripts/build.ts && bun run build:ts",
     "build:ts": "tsc"
   },
-  "dependencies": {
-    "openimg-server-utils": "workspace:*"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "sharp": "^0.33.5",
     "typescript": "^5.0.0"
   },
   "files": [

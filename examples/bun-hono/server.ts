@@ -7,7 +7,7 @@ app.get("/", (c) => {
   return c.json({ message: "Hello Bun!" });
 });
 
-app.get("/img/*", (c) => {
+app.get("/img", (c) => {
   return getImgResponse(c.req.raw);
 });
 
