@@ -34,7 +34,7 @@
     },
     "packages/bun": {
       "name": "openimg-bun",
-      "version": "0.0.5",
+      "version": "0.0.6",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -43,9 +43,16 @@
         "typescript": "^5.0.0",
       },
     },
+    "packages/core": {
+      "name": "openimg",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
     "packages/node": {
       "name": "openimg-node",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -199,6 +206,8 @@
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 
     "min-indent": ["min-indent@1.0.1", "", {}, "sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg=="],
+
+    "openimg": ["openimg@workspace:packages/core"],
 
     "openimg-bun": ["openimg-bun@workspace:packages/bun"],
 

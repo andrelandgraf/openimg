@@ -1,0 +1,29 @@
+{
+    "name": "openimg",
+    "version": "0.0.1",
+    "homepage": "https://github.com/andrelandgraf/openimg",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/andrelandgraf/openimg.git"
+    },
+    "license": "MIT",
+    "author": "Andre Landgraf <andre.timo.landgraf@gmail.com> (https://andrelandgraf.com)",
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+      "./*": {
+        "import": "./dist/*.js",
+        "types": "./dist/types/*.d.ts"
+      }
+    },
+    "scripts": {
+      "build": "./scripts/build.sh"
+    },
+    "devDependencies": {
+      "@types/bun": "latest"
+    },
+    "files": [
+      "dist"
+    ]
+  }
+  
