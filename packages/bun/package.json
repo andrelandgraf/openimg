@@ -1,6 +1,6 @@
 {
   "name": "openimg-bun",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -22,21 +22,8 @@
     }
   },
   "scripts": {
-    "build": "bun ./scripts/build.ts && bun run build:ts && bun run build:execs",
-    "build:ts": "tsc",
-    "build-server:linux-64": "bun build --compile --minify --bytecode --target=bun-linux-x64 ./src/server.ts --outfile ./dist/server-linux-64",
-    "build-server:arm-64": "bun build --compile --minify --bytecode --target=bun-linux-arm64 ./src/server.ts --outfile ./dist/server-arm-64",
-    "build-server:windows-64": "bun build --compile --minify --bytecode --target=bun-windows-x64 ./src/server.ts --outfile ./dist/server-windows-64",
-    "build-server:darwin-64": "bun build --compile --minify --bytecode --target=bun-darwin-x64 ./src/server.ts --outfile ./dist/server-darwin-64",
-    "build-server:darwin-arm64": "bun build --compile --minify --bytecode --target=bun-darwin-arm64 ./src/server.ts --outfile ./dist/server-darwin-arm-64",
-    "build:execs": "bun run build-server:linux-64 && bun run build-server:arm-64 && bun run build-server:windows-64 && bun run build-server:darwin-64 && bun run build-server:darwin-arm64"
-  },
-  "bin": {
-    "openimg-linux-64": "./dist/server-linux-64",
-    "openimg-arm-64": "./dist/server-arm-64",
-    "openimg-windows-64": "./dist/server-windows-64.exe",
-    "openimg-darwin-64": "./dist/server-darwin-64",
-    "openimg-darwin-arm64": "./dist/server-darwin-arm-64"
+    "build": "bun ./scripts/build.ts && bun run build:ts",
+    "build:ts": "tsc"
   },
   "dependencies": {
     "openimg-server-utils": "workspace:*"

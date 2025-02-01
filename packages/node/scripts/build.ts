@@ -9,5 +9,6 @@ await Bun.build({
   outdir: "./dist",
   target: "node",
   format: "esm",
+  packages: "bundle",
   external: ["sharp"],
 });
