@@ -34,7 +34,7 @@
   "bin": {
     "openimg-linux-64": "./dist/server-linux-64",
     "openimg-arm-64": "./dist/server-arm-64",
-    "openimg-windows-64": "./dist/server-windows-64",
+    "openimg-windows-64": "./dist/server-windows-64.exe",
     "openimg-darwin-64": "./dist/server-darwin-64",
     "openimg-darwin-arm64": "./dist/server-darwin-arm-64"
   },

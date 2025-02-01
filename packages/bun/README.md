@@ -1,6 +1,6 @@
 # openimg-bun
 
-openimg-bun (Open Image Bun) provides an HTTP request handler function (`getImgResponse`) to optimize images using sharp, using Bun APIs where possible. It also provides a standalone HTTP server executable via the Bun CLI. The standalone server can be deployed to a server via Docker.
+openimg-bun (Open Image Bun) provides an HTTP request handler function (`getImgResponse`) to optimize images using sharp, using Bun APIs where possible. It also provides a standalone HTTP server executable via `bunx`. The standalone server can be deployed via Docker or wherever bun can run natively.
 
 ## Standalone server
 
@@ -20,8 +20,12 @@ ENV=production bunx openimg-darwin-arm64
 
 You can further provide a `config.json` file in the root folder to configure the server. The config file is a JSON file with the following options:
 
+- `host`: The host to listen on. Default: `localhost`.
+- `port`: The port to listen on. Default: `3000`.
 - `publicFolderPath`: The folder to source images from. Default: `./public`.
 - `allowlistedOrigins`: List of allowed origins. If empty, only pathnames are allowed (e.g., `/cat.png`). Example allowlist: `['example.com', 'example.com:3000']`
+
+Add a `public` folder to the root folder with an image (png, jpg), e.g., `img.png` and run visit `http://localhost:3000?src=img.png&w=300&h=300&format=avif` to see the optimized image.
 
 ## HTTP request handler
 
