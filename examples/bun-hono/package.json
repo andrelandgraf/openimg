@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "hono": "^4.6.19",
-    "openimg-node": "workspace:*"
+    "openimg": "latest"
   },
   "devDependencies": {
     "@types/bun": "latest"

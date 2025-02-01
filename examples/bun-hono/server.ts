@@ -1,5 +1,7 @@
 import { Hono } from "hono";
-import { getImgResponse } from "openimg-node";
+// import { getImgResponse } from "openimg-node";
+// import { getImgResponse } from "openimg-bun";
+import { getImgResponse } from "openimg/node";
 
 const app = new Hono();
 

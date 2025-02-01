@@ -3,7 +3,7 @@
   "module": "server.ts",
   "type": "module",
   "dependencies": {
-    "openimg-node": "workspace:*"
+    "openimg": "latest"
   },
   "devDependencies": {
     "@types/bun": "latest"

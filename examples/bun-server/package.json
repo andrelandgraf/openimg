@@ -1,7 +1,0 @@
-{
-  "name": "openimg-standalone-bun-server-example",
-  "type": "module",
-  "scripts": {
-    "server": "ENV=production NODE_ENV=production bunx openimg-darwin-arm64"
-  }
-}
