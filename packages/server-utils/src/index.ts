@@ -6,6 +6,13 @@ export type Format = (typeof FORMATS)[number];
 const FITS = ["cover", "contain"] as const;
 export type Fit = (typeof FITS)[number];
 
+/**
+ * ImgParams specifies the parameters for image processing.
+ * - width: The target width of the image.
+ * - height: The target height of the image.
+ * - fit: The fit mode for resizing the image: "cover" or "contain".
+ * - targetFormat: The target format of the image: "webp", "avif", "png", "jpeg", or "jpg".
+ */
 export type ImgParams = {
   width?: number | undefined;
   height?: number | undefined;
@@ -13,27 +20,52 @@ export type ImgParams = {
   targetFormat?: Format | undefined;
 };
 
+/**
+ * ImgSources specifies the origin and cache origins to source the images from.
+ * If the image is found in the cacheSrc, it will be streamed from there.
+ * If the image is not found in the cacheSrc, it will be fetched from the originSrc,
+ * processed, and then stored in the cacheSrc, and then streamed from there.
+ *
+ * If cacheSrc is set to null, the image will not be cached. This is useful for serverless
+ * environments that can't access the filesystem. In this case, you most likely want a CDN
+ * in front of your server to cache the images.
+ */
 export type ImgSources = {
-  cacheSrc: string;
+  cacheSrc: string | null;
   originSrc: string;
 };
 
+/**
+ * Called to get the target image parameters for a given request.
+ * The default implementation reads the parameters w (width), h (height), fit, and format from the search parameters.
+ */
 export type GetImgParams = (request: Request) => ImgParams | Response;
 
-export type GetImgSources = (request: Request, params: ImgParams, config: {
-  publicFolderPath: string,
-  allowlistedOrigins: string[],
-}) => ImgSources | Response;
+/**
+ * Called to get the sources for a given request.
+ * The default implementation reads the parameters src (source) from the search parameters
+ * to determine the originSrc and cacheSrc. The default origin is mapped to "./public"
+ * and the default cache to "./data/images".
+ */
+export type GetImgSources = (
+  request: Request,
+  params: ImgParams,
+  config: {
+    publicFolderPath: string;
+    allowlistedOrigins: string[];
+  },
+) => ImgSources | Response;
 
 /**
- * - responseHeaders: Headers to be added to the response. Note that no caching headers will be added automatically.
+ * Configuration values for the getImgResponse function.
+ * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
  * - publicFolderPath: Default: "./public". Use getImgSources if you need more control
  * - allowlistedOrigins: Default: []. List of allowed origins. If empty, only pathnames are allowed (e.g., /cat.png). Example allowlist: ['example.com', 'example.com:3000']
  * - getImgParams: Customize where to get img params
  * - getImgSources: Customize where to get img sources.
  */
 export type Config = {
-  responseHeaders?: Headers;
+  headers?: Headers;
   publicFolderPath?: string; // default: "./public".
   allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
@@ -96,7 +128,7 @@ export const getImgParams: GetImgParams = (request) => {
     targetFormat,
     fit,
   };
-}
+};
 
 export const getImgSources: GetImgSources = (request, params, config) => {
   const url = new URL(request.url);
@@ -105,7 +137,7 @@ export const getImgSources: GetImgSources = (request, params, config) => {
 
   const originUrl = isUrl(originSrc) ? new URL(originSrc) : null;
   const host = originUrl ? originUrl.hostname : ""; // "example.com", ""
-  if(originUrl && !config.allowlistedOrigins.includes(host)) {
+  if (originUrl && !config.allowlistedOrigins.includes(host)) {
     return new Response(`Origin ${host} not in allowlist`, { status: 403 });
   }
 
@@ -118,16 +150,20 @@ export const getImgSources: GetImgSources = (request, params, config) => {
   assert(!!fileNameNoExt, "file name must be a valid file name");
 
   let idPath = host + originPath; // "example.com/folder/cat.png", "/cat.png"
-  idPath = idPath.startsWith("/") ? idPath : '/' + idPath; // "/example.com/folder/cat.png", "/cat.png"
+  idPath = idPath.startsWith("/") ? idPath : "/" + idPath; // "/example.com/folder/cat.png", "/cat.png"
   idPath = idPath.replaceAll(".", "-");
   idPath = idPath.replaceAll(":", "-");
-  const cacheSrc = "./data/images" + idPath + `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` + extension;
+  const cacheSrc =
+    "./data/images" +
+    idPath +
+    `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` +
+    extension;
 
   return {
     cacheSrc,
     originSrc: originUrl ? originSrc : config.publicFolderPath + originSrc,
   };
-}
+};
 
 export function isUrl(src: string) {
   try {
@@ -137,4 +173,3 @@ export function isUrl(src: string) {
     return false;
   }
 }
-

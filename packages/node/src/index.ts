@@ -4,16 +4,8 @@ import fsp from "node:fs/promises";
 import { createReadStream, ReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
-import type {
-  ImgParams,
-  ImgSources,
-  Config,
-} from "openimg-server-utils";
-import {
-  getImgParams,
-  getImgSources,
-  isUrl,
-} from "openimg-server-utils";
+import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
+import { getImgParams, getImgSources, isUrl } from "openimg-server-utils";
 
 async function exists(path: string) {
   try {
@@ -40,6 +32,19 @@ function toWebStream(nodeStream: ReadStream) {
   });
 }
 
+function toWebStreamFromReadable(readable: Readable) {
+  return new ReadableStream({
+    start(controller) {
+      readable.on("data", (chunk) => controller.enqueue(chunk));
+      readable.on("end", () => controller.close());
+      readable.on("error", (error) => controller.error(error));
+    },
+    cancel() {
+      readable.destroy();
+    },
+  });
+}
+
 function streamFromCache(path: string, headers: Headers) {
   const nodeStream = createReadStream(path);
   const webStream = toWebStream(nodeStream);
@@ -51,17 +56,14 @@ function streamFromCache(path: string, headers: Headers) {
  * @param config - the config object
  * @returns - a Response object
  */
-export async function getImgResponse(
-  request: Request,
-  config?: Config,
-) {
-  const headers = config?.responseHeaders || new Headers();
+export async function getImgResponse(request: Request, config?: Config) {
+  const headers = config?.headers || new Headers();
   const configValues = {
     publicFolderPath: config?.publicFolderPath || "./public",
     allowlistedOrigins: config?.allowlistedOrigins || [],
   } as const;
 
- let params: ImgParams;
+  let params: ImgParams;
   if (config?.getImgParams) {
     const res = config.getImgParams(request);
     if (res instanceof Response) {
@@ -93,7 +95,7 @@ export async function getImgResponse(
     sources = res;
   }
 
-  if (await exists(sources.cacheSrc)) {
+  if (sources.cacheSrc && (await exists(sources.cacheSrc))) {
     return streamFromCache(sources.cacheSrc, headers);
   }
 
@@ -126,19 +128,24 @@ export async function getImgResponse(
     pipeline.resize(params.width, params.height, { fit: params.fit });
   }
 
-  fsp
-    .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
-    .catch(() => {});
+  if (!!sources.cacheSrc) {
+    fsp
+      .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
+      .catch(() => {});
 
-  await new Promise<void>((resolve, reject) => {
-    const writeStream = fs.createWriteStream(sources.cacheSrc);
-    nodeStream
-      .pipe(pipeline)
-      .on("error", reject)
-      .pipe(writeStream)
-      .on("error", reject)
-      .on("finish", resolve);
+    await new Promise<void>((resolve, reject) => {
+      const writeStream = fs.createWriteStream(sources.cacheSrc!);
+      nodeStream
+        .pipe(pipeline)
+        .on("error", reject)
+        .pipe(writeStream)
+        .on("error", reject)
+        .on("finish", resolve);
+    });
+
+    return streamFromCache(sources.cacheSrc, headers);
+  }
+  return new Response(toWebStreamFromReadable(nodeStream.pipe(pipeline)), {
+    headers,
   });
-
-  return streamFromCache(sources.cacheSrc, headers);
 }

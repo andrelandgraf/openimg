@@ -29,9 +29,14 @@
         "typescript": "^5.0.0",
       },
     },
+    "examples/bun-server": {
+      "name": "openimg-standalone-bun-server-example",
+    },
     "packages/bun": {
       "name": "openimg-bun",
-      "version": "0.0.2",
+      "version": "0.0.3",
+      "bin": {
+        "openimg-linux-64": "./dist/server-linux-64",        "openimg-arm-64": "./dist/server-arm-64",        "openimg-windows-64": "./dist/server-windows-64",        "openimg-darwin-64": "./dist/server-darwin-64",        "openimg-darwin-arm64": "./dist/server-darwin-arm-64"      },
       "dependencies": {
         "openimg-server-utils": "workspace:*",
       },
@@ -214,6 +219,8 @@
     "openimg-react": ["openimg-react@workspace:packages/react"],
 
     "openimg-server-utils": ["openimg-server-utils@workspace:packages/server-utils"],
+
+    "openimg-standalone-bun-server-example": ["openimg-standalone-bun-server-example@workspace:examples/bun-server"],
 
     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
 
