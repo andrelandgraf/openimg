@@ -63,4 +63,24 @@ Bun.serve({
 console.log(`Server listening on http://localhost:3000`);
 ```
 
-By default, this server will store/cache optimized images in the `./data/img` folder. Given you have your web server running on port 3001, you can make requests from your web server to the image optimization server on port 3000. Visit `http://localhost:3000/img?src=http://localhost:3001/cat.png&w=300&h=300&format=avif&fit=cover` to see the optimized image, given your web server is running on port 3001 and can serve `cat.png`.
+By default, this server will store/cache optimized images in the `./data/img` folder. Given you have your web server running on port 3001, you can make requests from your web server to the image optimization server on port 3000. Visit `http://localhost:3000?src=http://localhost:3001/cat.png&w=300&h=300&format=avif&fit=cover` to see the optimized image, given your web server is running on port 3001 and can serve `cat.png`.
+
+You can configure `openimg-react` to query the image optimization server by wrapping your app in `OpenImgContextProvider`:
+
+```tsx
+import { OpenImgContextProvider, Img } from "openimg-react";
+
+export default function App() {
+  return (
+    <OpenImgContextProvider optimizerSrc="http://localhost:3000">
+      <Img
+        src="http://localhost:3001/image.jpg"
+        width={1200}
+        height={800}
+        fit="contain"
+        alt="Example Image"
+      />
+    </OpenImgContextProvider>
+  );
+}
+```
