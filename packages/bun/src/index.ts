@@ -115,7 +115,7 @@ export async function getImgResponse(request: Request, config?: Config) {
   }
 
   if (sources.cacheSrc) {
-    fsp
+    await fsp
       .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
       .catch(() => {});
 

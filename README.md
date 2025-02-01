@@ -16,17 +16,26 @@ The easiest way to use openimg is to create an image optimization endpoint in yo
 
 Below is an example for an `/img` endpoint in Remix/React Router using `openimg-node`:
 
+```bash
+npm i openimg-node sharp
+```
+
 ```typescript
+import type { Route } from "./+types/img";
 import { getImgResponse } from "openimg-node";
 
-export const loader = async ({ request }) => {
-  const headers = new Headers();
-  headers.set("Cache-Control", "public, max-age=31536000, immutable");
-  return getImgResponse(request, { headers });
-};
+export function loader({ request }: Route.LoaderArgs) {
+    const headers = new Headers();
+    headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    return getImgResponse(request, { headers });
+}
 ```
 
 You can serve optimized images by visiting `http://localhost:3000/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder. You can further use `openimg-react` to query for optimized images in your React components. It will automatically query the `/img` endpoint for optimized images, so you can use `openimg-react` without any configuration:
+
+```bash
+npm i openimg-react
+```
 
 ```tsx
 import { Img } from "openimg-react";
