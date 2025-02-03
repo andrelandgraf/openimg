@@ -26,9 +26,9 @@ import type { Route } from "./+types/img";
 import { getImgResponse } from "openimg/node";
 
 export function loader({ request }: Route.LoaderArgs) {
-    const headers = new Headers();
-    headers.set("Cache-Control", "public, max-age=31536000, immutable");
-    return getImgResponse(request, { headers });
+  const headers = new Headers();
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  return getImgResponse(request, { headers });
 }
 ```
 
