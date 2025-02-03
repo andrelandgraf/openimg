@@ -61,8 +61,9 @@ type ImgSourcesConfig = {
  * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
  * - cacheFolder: Default: ".data/images". Set to "no_cache" for no caching. Each request will fetch the original image and process it again.
  * - publicFolder: Default: "./public". Set to "no_public" for remote only origins. Use getImgSources if you need more control.
- * - allowlistedOrigins: Default: []. List of allowed origins. If empty, only pathnames are allowed (e.g., /cat.png).
+ * - allowlistedOrigins: Default: []. List of allowed origins. If empty, no remote origins will be allowed and only relative pathnames are permitted (e.g., /cat.png).
  *   Example allowlist: ['https://example.com', 'http://localhost:3000']
+ *   Adding an '*' entry, ['*'], allows all remote origins.
  * - getImgParams: Provide a custom getImgParams function for more control over where to retrieve the image parameters from the request.
  * - getImgSources: Provide a custom getImgSources function for more control over allow list and mapping the request to the original and cache sources
  */
@@ -161,8 +162,10 @@ export function getImgSources(
   if (!srcUrl && publicFolder === "no_public") {
     return new Response("Relative src not allowed", { status: 403 });
   }
-  if (srcUrl && !allowlistedOrigins.includes(srcUrl.origin)) {
-    return new Response(`Origin ${ srcUrl.origin } not in allowlist`, {
+
+  const allAllowed = allowlistedOrigins.includes("*");
+  if (!allAllowed && srcUrl && !allowlistedOrigins.includes(srcUrl.origin)) {
+    return new Response(`Origin ${srcUrl.origin} not in allowlist`, {
       status: 403,
     });
   }
@@ -184,7 +187,7 @@ export function getImgSources(
   const cacheSrc =
     cacheFolder +
     slug +
-    `- w - ${ params.width || "base" } - h - ${ params.height || "base" } - fit - ${ params.fit || "base" }` +
+    `- w - ${params.width || "base"} - h - ${params.height || "base"} - fit - ${params.fit || "base"}` +
     `.{ params.format }`;
 
   return {
@@ -198,5 +201,32 @@ export function parseUrl(src: string) {
     return new URL(src);
   } catch {
     return false;
+  }
+}
+
+export class PipelineLock {
+  pipelines = new Map<string, { p: Promise<void>; resolve: () => void }>();
+
+  get(originalSrc: string) {
+    const pipeline = this.pipelines.get(originalSrc);
+    if (pipeline) {
+      return pipeline.p;
+    }
+    return null;
+  }
+
+  add(originalSrc: string) {
+    const p = new Promise<void>((resolve) => {
+      this.pipelines.set(originalSrc, { p, resolve });
+    });
+  }
+
+  resolve(originalSrc: string) {
+    const pipeline = this.pipelines.get(originalSrc);
+    if (!pipeline) {
+      throw new Error("Trying to resolve a non-existing pipeline");
+    }
+    pipeline.resolve();
+    this.pipelines.delete(originalSrc);
   }
 }

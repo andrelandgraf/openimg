@@ -57,7 +57,10 @@ Bun.serve({
   async fetch(req) {
     try {
       const headers = new Headers();
-      const allowlistedOrigins = ["http://localhost:3001", "https://example.com"];
+      const allowlistedOrigins = [
+        "http://localhost:3001",
+        "https://example.com",
+      ];
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       return getImgResponse(req, {
         headers,

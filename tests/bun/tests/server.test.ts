@@ -51,6 +51,13 @@ test("it returns 404 if the img path maps to not image in the public folder", as
   expect(res.status).toBe(404);
 });
 
+test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
+  const res = await fetch(
+    origin + "?src=https://example.com/cat2.png&w=100&h=100&format=avif",
+  );
+  expect(res.status).toBe(403);
+});
+
 test("it caches and returns webp", async () => {
   const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=webp");
   expect(res.status).toBe(200);

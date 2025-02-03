@@ -5,7 +5,14 @@ import { createReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
 import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
-import { getImgParams, getImgSources, parseUrl } from "openimg-server-utils";
+import {
+  getImgParams,
+  getImgSources,
+  parseUrl,
+  PipelineLock,
+} from "openimg-server-utils";
+
+const pipelineLock = new PipelineLock();
 
 async function exists(path: string) {
   try {
@@ -81,8 +88,18 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     sources = res;
   }
 
-  if (sources.cacheSrc !== "no_cache" && (await exists(sources.cacheSrc))) {
-    return streamFromCache(sources.cacheSrc, headers);
+  if (sources.cacheSrc != "no_cache") {
+    const lock = pipelineLock.get(sources.originalSrc);
+    if (lock) {
+      await lock;
+    }
+
+    const fileInCache = await exists(sources.cacheSrc);
+    if (fileInCache) {
+      return streamFromCache(sources.cacheSrc, headers);
+    }
+
+    pipelineLock.add(sources.originalSrc);
   }
 
   let nodeStream: Readable;
@@ -117,7 +134,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
   if (sources.cacheSrc !== "no_cache") {
     await fsp
       .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
-      .catch(() => { });
+      .catch(() => {});
 
     await new Promise<void>((resolve, reject) => {
       const writeStream = fs.createWriteStream(sources.cacheSrc!);
@@ -128,6 +145,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
         .on("error", reject)
         .on("finish", resolve);
     });
+
+    pipelineLock.resolve(sources.originalSrc);
 
     return streamFromCache(sources.cacheSrc, headers);
   } else {

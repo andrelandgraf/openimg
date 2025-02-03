@@ -63,7 +63,7 @@ Default: `./data/img`. The folder to cache optimized images to. Can be set to ei
 ```typescript
 const headers = new Headers();
 headers.set("Cache-Control", "public, max-age=31536000, immutable");
-return getImgResponse(c.req.raw, { headers, cacheFolder: 'no_cache' });
+return getImgResponse(c.req.raw, { headers, cacheFolder: "no_cache" });
 ```
 
 If you set `cacheFolder` to `no_cache`, the optimized image will not be cached to disk. This is useful for serverless environments or when you want to cache the image only via a CDN.
@@ -75,7 +75,10 @@ Note, `getImgSources` can be used to implement custom path logic based on the `R
 Default: `./public`. The folder to source images from. Can be set to either a string path or `no_public` to not permit relative src paths.
 
 ```typescript
-getImgResponse(c.req.raw, { cacheFolder: './cache', publicFolder: './dist/public' });
+getImgResponse(c.req.raw, {
+  cacheFolder: "./cache",
+  publicFolder: "./dist/public",
+});
 ```
 
 Note, `getImgSources` can be used to implement custom path logic based on the `Request` object. If `getImgSources` is set, then setting `cacheFolder` will have no effect, as `getImgSources` will return the `cacheSrc` and `originSrc` values.
@@ -85,8 +88,12 @@ Note, `getImgSources` can be used to implement custom path logic based on the `R
 Default: `[]`. List of allowed origins. If empty, only relative pathnames are allowed (e.g., `/cat.png`) for local images hosted on the server. If set, `getImgResponse` will fetch the image from the origin when `src` is a full URL. Relative URLs are still resolved relative to the `publicFolder`.
 
 ```typescript
-getImgResponse(c.req.raw, { allowlistedOrigins: ['https://example.com', 'http://localhost:3000'] });
+getImgResponse(c.req.raw, {
+  allowlistedOrigins: ["https://example.com", "http://localhost:3000"],
+});
 ```
+
+Unset `allowlistedOrigins` or pass `[]` to prevent fetching images from remote origins. Set `allowlistedOrigins` to `['*']` to allow all remote origins. You should probably only do this if your image service is within a private network. Otherwise, everyone can utilize your server to optimize any images.
 
 Note, if `getImgSources` is set, `allowlistedOrigins` has no effect. Instead, you have to enforce the allowlist yourself (e.g., return a `Response` with a 403 status code if the origin is not allowed).
 

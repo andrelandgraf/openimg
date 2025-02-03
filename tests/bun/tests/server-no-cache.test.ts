@@ -44,7 +44,14 @@ test("it returns 404 if the img path maps to not image in the public folder", as
   expect(res.status).toBe(404);
 });
 
-test("it caches and returns webp", async () => {
+test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
+  const res = await fetch(
+    origin + "?src=https://example.com/cat2.png&w=100&h=100&format=avif",
+  );
+  expect(res.status).toBe(403);
+});
+
+test("it does not cache and returns webp", async () => {
   const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=webp");
   expect(res.status).toBe(200);
   expect(res.headers.get("Content-Type")).toBe("image/webp");
@@ -55,7 +62,7 @@ test("it caches and returns webp", async () => {
   expect(await cachedFile.exists()).toBe(false);
 });
 
-test("it caches and returns avif", async () => {
+test("it does not cache and returns avif", async () => {
   const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=avif");
   expect(res.status).toBe(200);
   expect(res.headers.get("Content-Type")).toBe("image/avif");
@@ -66,7 +73,7 @@ test("it caches and returns avif", async () => {
   expect(await cachedFile.exists()).toBe(false);
 });
 
-test("it caches and returns original format", async () => {
+test("it does not cache and returns original format", async () => {
   const res = await fetch(origin + "?src=/cat.png&w=100&h=100");
   expect(res.status).toBe(200);
 
