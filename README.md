@@ -4,10 +4,10 @@ openimg (Open Image) is a collection of JavaScript packages for working with ima
 
 ## Packages
 
-- openimg-bun: Image optimization request handler for Bun
-- openimg-node: Node-compatible image optimization request handler for Bun, Deno, and Node
-- openimg-react: Image React component to query for optimized images
-- openimg: All-in-one package bundling `openimg/bun`, `openimg/node`, `openimg/react`
+- [openimg-bun](./packages/bun/): Image optimization request handler for Bun
+- [openimg-node](./packages/node/): Node-compatible image optimization request handler for Bun, Deno, and Node
+- [openimg-react](./packages/react/): Image React component to query for optimized images
+- [openimg](./packages/core/): All-in-one package bundling `openimg/bun`, `openimg/node`, `openimg/react`
 
 ## Use cases
 
@@ -44,7 +44,7 @@ export default function MyComponent() {
 
 ### Standalone server
 
-You can easily spin up a custom image optimization server. Below is an example using Bun:
+You can also easily spin up a custom image optimization server. Below is an example using Bun:
 
 ```bash
 npm i openimg@latest sharp@latest
@@ -57,7 +57,7 @@ Bun.serve({
   async fetch(req) {
     try {
       const headers = new Headers();
-      const allowlistedOrigins = ["localhost:3001", "example.com"];
+      const allowlistedOrigins = ["http://localhost:3001", "https://example.com"];
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       return getImgResponse(req, {
         headers,

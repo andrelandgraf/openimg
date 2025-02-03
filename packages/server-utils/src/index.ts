@@ -1,5 +1,3 @@
-import path from "node:path";
-
 const FORMATS = ["webp", "avif", "png", "jpeg", "jpg"] as const;
 export type Format = (typeof FORMATS)[number];
 
@@ -8,31 +6,31 @@ export type Fit = (typeof FITS)[number];
 
 /**
  * ImgParams specifies the parameters for image processing.
- * - width: The target width of the image.
- * - height: The target height of the image.
- * - fit: The fit mode for resizing the image: "cover" or "contain".
- * - targetFormat: The target format of the image: "webp", "avif", "png", "jpeg", or "jpg".
+ * - width: The target width of the image. If not set, the original image's width will be used.
+ * - height: The target height of the image. If not set, the original image's height will be used.
+ * - fit: The fit mode for resizing the image: "cover" or "contain". Defaults to sharp's default "cover".
+ * - format: The target format of the image: "webp", "avif", "png", "jpeg", or "jpg". If not specified, the format will be inferred from the source.
  */
 export type ImgParams = {
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
-  targetFormat?: Format | undefined;
+  format?: Format | undefined;
 };
 
 /**
- * ImgSources specifies the origin and cache origins to source the images from.
+ * ImgSources specifies the original and cache sources
  * If the image is found in the cacheSrc, it will be streamed from there.
- * If the image is not found in the cacheSrc, it will be fetched from the originSrc,
+ * If the image is not found in the cacheSrc, it will be fetched from the originalSrc,
  * processed, and then stored in the cacheSrc, and then streamed from there.
  *
- * If cacheSrc is set to null, the image will not be cached. This is useful for serverless
+ * If cacheSrc is set to "no_cache, the image will not be cached. This is useful for serverless
  * environments that can't access the filesystem. In this case, you most likely want a CDN
  * in front of your server to cache the images.
  */
 export type ImgSources = {
-  cacheSrc: string | null;
-  originSrc: string;
+  originalSrc: string;
+  cacheSrc: string | "no_cache";
 };
 
 /**
@@ -44,39 +42,35 @@ export type GetImgParams = (request: Request) => ImgParams | Response;
 /**
  * Called to get the sources for a given request.
  * The default implementation reads the parameters src (source) from the search parameters
- * to determine the originSrc and cacheSrc. The default origin is mapped to "./public"
+ * to determine the originalSrc and cacheSrc. The default origin is mapped to "./public"
  * and the default cache to "./data/images".
  */
 export type GetImgSources = (
   request: Request,
   params: ImgParams,
-  config: {
-    publicFolderPath: string;
-    allowlistedOrigins: string[];
-  },
 ) => ImgSources | Response;
+
+type ImgSourcesConfig = {
+  cacheFolder?: string | "no_cache"; // default: "./data/images"
+  publicFolder?: string | "no_public"; // default: "./public".
+  allowlistedOrigins?: string[]; // default: []
+};
 
 /**
  * Configuration values for the getImgResponse function.
  * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
- * - publicFolderPath: Default: "./public". Use getImgSources if you need more control
- * - allowlistedOrigins: Default: []. List of allowed origins. If empty, only pathnames are allowed (e.g., /cat.png). Example allowlist: ['example.com', 'example.com:3000']
- * - getImgParams: Customize where to get img params
- * - getImgSources: Customize where to get img sources.
+ * - cacheFolder: Default: ".data/images". Set to "no_cache" for no caching. Each request will fetch the original image and process it again.
+ * - publicFolder: Default: "./public". Set to "no_public" for remote only origins. Use getImgSources if you need more control.
+ * - allowlistedOrigins: Default: []. List of allowed origins. If empty, only pathnames are allowed (e.g., /cat.png).
+ *   Example allowlist: ['https://example.com', 'http://localhost:3000']
+ * - getImgParams: Provide a custom getImgParams function for more control over where to retrieve the image parameters from the request.
+ * - getImgSources: Provide a custom getImgSources function for more control over allow list and mapping the request to the original and cache sources
  */
 export type Config = {
   headers?: Headers;
-  publicFolderPath?: string; // default: "./public".
-  allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
   getImgSources?: GetImgSources;
-};
-
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
+} & ImgSourcesConfig;
 
 function isFitValue(fit: string | undefined): fit is Fit | undefined {
   if (fit === undefined) {
@@ -94,81 +88,114 @@ function isFormatValue(
   return (FORMATS as any as string[]).includes(format);
 }
 
-export const getImgParams: GetImgParams = (request) => {
+export function getImgParams(request: Request): ImgParams | Response {
   const url = new URL(request.url);
   const w = url.searchParams.get("w") || undefined;
-  assert(
-    (w && !Number.isNaN(w)) || !w,
-    'Search param "w" must be a either number or unset',
-  );
+  if (w && Number.isNaN(w)) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "w" must be either a number or unset',
+    });
+  }
   const width = w ? Number.parseInt(w, 10) : undefined;
 
   const h = url.searchParams.get("h") || undefined;
-  assert(
-    (h && !Number.isNaN(h)) || !h,
-    'Search param "h" must be either a number or unset',
-  );
+  if (h && Number.isNaN(h)) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "h" must be either a number or unset',
+    });
+  }
   const height = h ? Number.parseInt(h, 10) : undefined;
 
   const fit = url.searchParams.get("fit") || undefined;
-  assert(
-    isFitValue(fit),
-    `Search param "fit" must be one of ${FITS.join(", ")} or unset`,
-  );
+  if (!isFitValue(fit)) {
+    return new Response(null, {
+      status: 400,
+      statusText: `Search param "fit" must be one of ${FITS.join(", ")} or unset`,
+    });
+  }
 
-  const targetFormat = url.searchParams.get("format") || undefined;
-  assert(
-    isFormatValue(targetFormat),
-    `Target format must be one of ${FORMATS.join(", ")} or unset`,
-  );
+  let format = url.searchParams.get("format") || undefined;
+  if (!isFormatValue(format)) {
+    return new Response(null, {
+      status: 400,
+      statusText: `Search param "format" must be one of ${FORMATS.join(", ")} or unset`,
+    });
+  }
 
   return {
     width,
     height,
-    targetFormat,
+    format,
     fit,
   };
-};
+}
 
-export const getImgSources: GetImgSources = (request, params, config) => {
-  const url = new URL(request.url);
-  const originSrc = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
-  assert(!!originSrc, "origin src must be a valid path");
-
-  const originUrl = isUrl(originSrc) ? new URL(originSrc) : null;
-  const host = originUrl ? originUrl.hostname : ""; // "example.com", ""
-  if (originUrl && !config.allowlistedOrigins.includes(host)) {
-    return new Response(`Origin ${host} not in allowlist`, { status: 403 });
+export function getImgSources(
+  request: Request,
+  params: ImgParams,
+  config: ImgSourcesConfig,
+): ImgSources | Response {
+  const allowlistedOrigins = config.allowlistedOrigins || [];
+  const publicFolder = config.publicFolder || "./public";
+  const cacheFolder = config.cacheFolder || "./data/images";
+  if (publicFolder === "no_public" && !allowlistedOrigins.length) {
+    return new Response(null, {
+      status: 500,
+      statusText:
+        'At least one remote origin must be allowlisted if "no_public" is set',
+    });
   }
 
-  const originPath = originUrl ? originUrl.pathname : originSrc; // "/folder/cat.png", "/cat.png"
-  const originExtension = path.extname(originPath); // ".png"
-  const fileNameNoExt = path.basename(originPath, originExtension); // "/cat"
-  const extension = params.targetFormat
-    ? "." + params.targetFormat
-    : originExtension;
-  assert(!!fileNameNoExt, "file name must be a valid file name");
+  const url = new URL(request.url);
+  const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: "src search parameter must be set",
+    });
+  }
 
-  let idPath = host + originPath; // "example.com/folder/cat.png", "/cat.png"
-  idPath = idPath.startsWith("/") ? idPath : "/" + idPath; // "/example.com/folder/cat.png", "/cat.png"
-  idPath = idPath.replaceAll(".", "-");
-  idPath = idPath.replaceAll(":", "-");
+  const srcUrl = parseUrl(src);
+  if (!srcUrl && publicFolder === "no_public") {
+    return new Response("Relative src not allowed", { status: 403 });
+  }
+  if (srcUrl && !allowlistedOrigins.includes(srcUrl.origin)) {
+    return new Response(`Origin ${ srcUrl.origin } not in allowlist`, {
+      status: 403,
+    });
+  }
+
+  const originalSrc = srcUrl ? src : publicFolder + src;
+  if (cacheFolder === "no_cache") {
+    return {
+      originalSrc,
+      cacheSrc: "no_cache",
+    };
+  }
+
+  const srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
+  const host = srcUrl ? srcUrl.hostname : ""; // "example.com", ""
+  let slug = host + srcPath; // "example.com/folder/cat.png", "/cat.png"
+  slug = slug.startsWith("/") ? slug : "/" + slug; // "/example.com/folder/cat.png", "/cat.png"
+  slug = slug.replaceAll(".", "-");
+  slug = slug.replaceAll(":", "-");
   const cacheSrc =
-    "./data/images" +
-    idPath +
-    `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` +
-    extension;
+    cacheFolder +
+    slug +
+    `- w - ${ params.width || "base" } - h - ${ params.height || "base" } - fit - ${ params.fit || "base" }` +
+    `.{ params.format }`;
 
   return {
+    originalSrc,
     cacheSrc,
-    originSrc: originUrl ? originSrc : config.publicFolderPath + originSrc,
   };
-};
+}
 
-export function isUrl(src: string) {
+export function parseUrl(src: string) {
   try {
-    new URL(src);
-    return true;
+    return new URL(src);
   } catch {
     return false;
   }

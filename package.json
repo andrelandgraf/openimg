@@ -2,10 +2,11 @@
   "name": "openimg-monorepo",
   "type": "module",
   "scripts": {
-    "fmt": "bunx prettier . -w"
+    "fmt": "bunx prettier . -w",
+    "build": "./scripts/build.sh"
   },
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "tests/*"
   ]
 }

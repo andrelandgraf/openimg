@@ -5,7 +5,7 @@ import { createReadStream, ReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
 import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
-import { getImgParams, getImgSources, isUrl } from "openimg-server-utils";
+import { getImgParams, getImgSources, parseUrl } from "openimg-server-utils";
 
 async function exists(path: string) {
   try {
@@ -56,15 +56,11 @@ function streamFromCache(path: string, headers: Headers) {
  * @param config - the config object
  * @returns - a Response object
  */
-export async function getImgResponse(request: Request, config?: Config) {
-  const headers = config?.headers || new Headers();
-  const configValues = {
-    publicFolderPath: config?.publicFolderPath || "./public",
-    allowlistedOrigins: config?.allowlistedOrigins || [],
-  } as const;
+export async function getImgResponse(request: Request, config: Config = {}) {
+  const headers = config.headers || new Headers();
 
   let params: ImgParams;
-  if (config?.getImgParams) {
+  if (config.getImgParams) {
     const res = config.getImgParams(request);
     if (res instanceof Response) {
       return res;
@@ -80,28 +76,32 @@ export async function getImgResponse(request: Request, config?: Config) {
   }
 
   let sources: ImgSources;
-  if (config?.getImgSources) {
-    const res = config.getImgSources(request, params, configValues);
+  if ("getImgSources" in config && config.getImgSources) {
+    const res = config.getImgSources(request, params);
     if (res instanceof Response) {
       return res;
     }
     sources = res;
   } else {
     // Use default getImgSources
-    const res = getImgSources(request, params, configValues);
+    const res = getImgSources(request, params, {
+      allowlistedOrigins: config.allowlistedOrigins,
+      cacheFolder: config.cacheFolder,
+      publicFolder: config.publicFolder,
+    });
     if (res instanceof Response) {
       return res;
     }
     sources = res;
   }
 
-  if (sources.cacheSrc && (await exists(sources.cacheSrc))) {
+  if (sources.cacheSrc !== "no_cache" && (await exists(sources.cacheSrc))) {
     return streamFromCache(sources.cacheSrc, headers);
   }
 
   let nodeStream: Readable;
-  if (isUrl(sources.originSrc)) {
-    const fetchRes = await fetch(sources.originSrc);
+  if (parseUrl(sources.originalSrc)) {
+    const fetchRes = await fetch(sources.originalSrc);
     if (!fetchRes.ok || !fetchRes.body) {
       return new Response(fetchRes.statusText || "Image not found", {
         status: fetchRes.status || 404,
@@ -109,17 +109,17 @@ export async function getImgResponse(request: Request, config?: Config) {
     }
     nodeStream = Readable.fromWeb(fetchRes.body as any);
   } else {
-    if (!(await exists(sources.originSrc))) {
+    if (!(await exists(sources.originalSrc))) {
       return new Response("Image not found", { status: 404 });
     }
-    nodeStream = createReadStream(sources.originSrc);
+    nodeStream = createReadStream(sources.originalSrc);
   }
 
   const pipeline = sharp();
-  if (params.targetFormat === "avif") {
+  if (params.format === "avif") {
     pipeline.avif();
     headers.set("content-type", "image/avif");
-  } else if (params.targetFormat === "webp") {
+  } else if (params.format === "webp") {
     pipeline.webp();
     headers.set("content-type", "image/webp");
   }
@@ -128,7 +128,7 @@ export async function getImgResponse(request: Request, config?: Config) {
     pipeline.resize(params.width, params.height, { fit: params.fit });
   }
 
-  if (!!sources.cacheSrc) {
+  if (sources.cacheSrc !== "no_cache") {
     await fsp
       .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
       .catch(() => {});

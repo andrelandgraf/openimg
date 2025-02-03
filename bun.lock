@@ -4,34 +4,9 @@
     "": {
       "name": "openimg",
     },
-    "examples/bun": {
-      "name": "openimg-bun-example",
-      "dependencies": {
-        "openimg": "latest",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5.0.0",
-      },
-    },
-    "examples/bun-hono": {
-      "name": "openimg-bun-hono-example",
-      "dependencies": {
-        "hono": "^4.6.19",
-        "openimg": "latest",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5.0.0",
-      },
-    },
     "packages/bun": {
       "name": "openimg-bun",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -49,7 +24,7 @@
     },
     "packages/node": {
       "name": "openimg-node",
-      "version": "0.0.9",
+      "version": "0.0.10",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -81,6 +56,20 @@
     "packages/server-utils": {
       "name": "openimg-server-utils",
       "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5.0.0",
+      },
+    },
+    "tests/bun": {
+      "name": "openimg-bun-example",
+      "dependencies": {
+        "openimg": "workspace:*",
+        "openimg-bun": "workspace:*",
+        "openimg-node": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -190,8 +179,6 @@
 
     "has-flag": ["has-flag@4.0.0", "", {}, "sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ=="],
 
-    "hono": ["hono@4.6.19", "", {}, "sha512-Xw5DwU2cewEsQ1DkDCdy6aBJkEBARl5loovoL1gL3/gw81RdaPbXrNJYp3LoQpzpJ7ECC/1OFi/vn3UZTLHFEw=="],
-
     "indent-string": ["indent-string@4.0.0", "", {}, "sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg=="],
 
     "is-arrayish": ["is-arrayish@0.3.2", "", {}, "sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ=="],
@@ -208,9 +195,7 @@
 
     "openimg-bun": ["openimg-bun@workspace:packages/bun"],
 
-    "openimg-bun-example": ["openimg-bun-example@workspace:examples/bun"],
-
-    "openimg-bun-hono-example": ["openimg-bun-hono-example@workspace:examples/bun-hono"],
+    "openimg-bun-example": ["openimg-bun-example@workspace:tests/bun"],
 
     "openimg-node": ["openimg-node@workspace:packages/node"],
 
@@ -259,10 +244,6 @@
     "@testing-library/jest-dom/chalk": ["chalk@3.0.0", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-4D3B6Wf41KOYRFdszmDqMCGq5VV/uMAB273JILmO+3jAlh8X4qDtdtgCR3fxtbLEMzSx22QdhnDcJvu2u1fVwg=="],
 
     "@testing-library/jest-dom/dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
-
-    "openimg-bun-example/openimg": ["openimg@0.0.1", "", {}, "sha512-n6i83NXz8QyzNA66xVQFjeLjSm1hPE5wAKaagEaNKvI6BKFmb+ooejR9a/DWVVY8H5jbRr8STIlzZvakUxw0Cw=="],
-
-    "openimg-bun-hono-example/openimg": ["openimg@0.0.1", "", {}, "sha512-n6i83NXz8QyzNA66xVQFjeLjSm1hPE5wAKaagEaNKvI6BKFmb+ooejR9a/DWVVY8H5jbRr8STIlzZvakUxw0Cw=="],
 
     "openimg-react/@types/bun": ["@types/bun@1.2.0", "", { "dependencies": { "bun-types": "1.2.0" } }, "sha512-5N1JqdahfpBlAv4wy6svEYcd/YfO2GNrbL95JOmFx8nkE6dbK4R0oSE5SpBA4vBRqgrOUAXF8Dpiz+gi7r80SA=="],
 
