@@ -1,3 +1,5 @@
+import path from "node:path";
+
 const FORMATS = ["webp", "avif", "png", "jpeg", "jpg"] as const;
 export type Format = (typeof FORMATS)[number];
 
@@ -183,6 +185,9 @@ export function getImgSources(
   }
 
   const srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
+  const originExtension = path.extname(srcPath); // ".png"
+  const extension = params.format ? "." + params.format : originExtension;
+
   const host = srcUrl ? srcUrl.hostname : ""; // "example.com", ""
   let slug = host + srcPath; // "example.com/folder/cat.png", "/cat.png"
   slug = slug.startsWith("/") ? slug : "/" + slug; // "/example.com/folder/cat.png", "/cat.png"
@@ -191,8 +196,8 @@ export function getImgSources(
   const cacheSrc =
     cacheFolder +
     slug +
-    `- w - ${params.width || "base"} - h - ${params.height || "base"} - fit - ${params.fit || "base"}` +
-    `.{ params.format }`;
+    `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` +
+    extension;
 
   return {
     originalSrc,
@@ -220,9 +225,11 @@ export class PipelineLock {
   }
 
   add(originalSrc: string) {
-    const p = new Promise<void>((resolve) => {
-      this.pipelines.set(originalSrc, { p, resolve });
+    let resolve: () => void;
+    const p = new Promise<void>((r) => {
+      resolve = r;
     });
+    this.pipelines.set(originalSrc, { p, resolve: resolve! });
   }
 
   resolve(originalSrc: string) {
