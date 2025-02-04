@@ -87,3 +87,10 @@ test("it caches and returns original format", async () => {
   const cachedFile = Bun.file("./data/images/cat-png-w-100-h-100-fit-base.png");
   expect(await cachedFile.exists()).toBe(true);
 });
+
+test("it returns a data URL when calling the placeholder endpoint", async () => {
+  const res = await fetch(origin + "placeholder?src=/cat.png");
+  expect(res.status).toBe(200);
+  const text = await res.text();
+  expect(text.startsWith("data:image/png;base64,")).toBe(true);
+});
