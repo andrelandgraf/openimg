@@ -6,18 +6,12 @@ import { Readable } from "node:stream";
 import sharp from "sharp";
 import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
 import { getImgParams, getImgSources, parseUrl } from "openimg-server-utils";
+import { exists } from "./utils";
 
-async function exists(path: string) {
-  try {
-    const stats = await fsp.stat(path);
-    if (stats.size === 0) {
-      return false;
-    }
-  } catch {
-    return false;
-  }
-  return true;
-}
+export {
+  getImgPlaceholderResponse,
+  getImgPlaceholderFromStream,
+} from "./placeholder";
 
 function toWebStream(nodeStream: ReadStream) {
   return new ReadableStream({

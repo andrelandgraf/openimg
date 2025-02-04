@@ -14,6 +14,9 @@ bun run build
 cd ../bun
 bun run build
 
+cd ../core
+bun run build
+
 echo "Built all packages!"
 
 bun i

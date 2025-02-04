@@ -1,6 +1,6 @@
 {
   "name": "openimg-bun",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -25,12 +25,15 @@
     "build": "bun ./scripts/build.ts && bun run build:ts",
     "build:ts": "tsc"
   },
+  "dependencies": {
+    "thumbhash": "^0.1.1"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "sharp": "^0.33.5",
-    "typescript": "^5.0.0"
+    "sharp": "^0.33.5"
   },
   "files": [
     "dist"

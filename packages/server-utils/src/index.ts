@@ -154,19 +154,23 @@ export function getImgSources(
   if (!src) {
     return new Response(null, {
       status: 400,
-      statusText: "src search parameter must be set",
+      statusText: 'Search param "src" must be set',
     });
   }
 
   const srcUrl = parseUrl(src);
   if (!srcUrl && publicFolder === "no_public") {
-    return new Response("Relative src not allowed", { status: 403 });
+    return new Response(null, {
+      status: 403,
+      statusText: "Relative src not allowed",
+    });
   }
 
   const allAllowed = allowlistedOrigins.includes("*");
   if (!allAllowed && srcUrl && !allowlistedOrigins.includes(srcUrl.origin)) {
-    return new Response(`Origin ${srcUrl.origin} not in allowlist`, {
+    return new Response(null, {
       status: 403,
+      statusText: `Origin ${srcUrl.origin} not in allowlist`,
     });
   }
 

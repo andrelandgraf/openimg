@@ -7,6 +7,9 @@
     "packages/bun": {
       "name": "openimg-bun",
       "version": "0.0.7",
+      "dependencies": {
+        "thumbhash": "^0.1.1",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -25,11 +28,12 @@
     "packages/node": {
       "name": "openimg-node",
       "version": "0.0.10",
+      "dependencies": {
+        "sharp": "^0.33.5",
+        "thumbhash": "^0.1.1",
+      },
       "devDependencies": {
         "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "sharp": "^0.33.5",
         "typescript": "^5.0.0",
       },
     },
@@ -228,6 +232,8 @@
     "strip-indent": ["strip-indent@3.0.0", "", { "dependencies": { "min-indent": "^1.0.0" } }, "sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ=="],
 
     "supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
+
+    "thumbhash": ["thumbhash@0.1.1", "", {}, "sha512-kH5pKeIIBPQXAOni2AiY/Cu/NKdkFREdpH+TLdM0g6WA7RriCv0kPLgP731ady67MhTAqrVG/4mnEeibVuCJcg=="],
 
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
