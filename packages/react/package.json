@@ -1,6 +1,6 @@
 {
   "name": "openimg-react",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -15,15 +15,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/types/index.d.ts"
-    },
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/types/*.d.ts"
     }
   },
   "scripts": {
-    "build": "bun scripts/build.ts && bun run build:ts",
-    "build:ts": "tsc"
+    "build": "./scripts/build.sh"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^16.7.3",

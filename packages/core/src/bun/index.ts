@@ -4,19 +4,16 @@ import fsp from "node:fs/promises";
 import { createReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
-import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
+import { exists } from "./utils";
 import {
+  Config,
   getImgParams,
   getImgSources,
+  ImgParams,
+  ImgSources,
   parseUrl,
   PipelineLock,
-} from "openimg-server-utils";
-import { exists } from "./utils";
-
-export {
-  getImgPlaceholderResponse,
-  getImgPlaceholderFromStream,
-} from "./placeholder";
+} from "../utils";
 
 const pipelineLock = new PipelineLock();
 

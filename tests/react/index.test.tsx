@@ -1,7 +1,7 @@
 import React from "react";
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
-import { Img, OpenImgContextProvider, Format } from "../src/index.tsx";
+import { Img, OpenImgContextProvider, Format } from "openimg-react";
 
 test("renders without errors when required props are provided", () => {
   render(<Img src="/cat.png" width={800} height={800} alt="A cute cat" />);

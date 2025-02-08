@@ -14,7 +14,7 @@
     "outDir": "dist/types",
     "declaration": true,
     "emitDeclarationOnly": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
 
     // Best practices
     "strict": true,

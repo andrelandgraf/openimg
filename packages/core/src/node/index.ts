@@ -4,14 +4,15 @@ import fsp from "node:fs/promises";
 import { createReadStream, ReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
-import type { ImgParams, ImgSources, Config } from "openimg-server-utils";
-import { getImgParams, getImgSources, parseUrl } from "openimg-server-utils";
+import {
+  Config,
+  getImgParams,
+  getImgSources,
+  ImgParams,
+  ImgSources,
+  parseUrl,
+} from "../utils";
 import { exists } from "./utils";
-
-export {
-  getImgPlaceholderResponse,
-  getImgPlaceholderFromStream,
-} from "./placeholder";
 
 function toWebStream(nodeStream: ReadStream) {
   return new ReadableStream({

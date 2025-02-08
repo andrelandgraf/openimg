@@ -6,40 +6,42 @@
     },
     "packages/bun": {
       "name": "openimg-bun",
-      "version": "0.0.7",
+      "version": "0.0.9",
       "dependencies": {
         "thumbhash": "^0.1.1",
       },
       "devDependencies": {
         "@types/bun": "latest",
+        "typescript": "^5.0.0",
       },
       "peerDependencies": {
         "sharp": "^0.33.5",
-        "typescript": "^5.0.0",
       },
     },
     "packages/core": {
       "name": "openimg",
-      "version": "0.0.1",
+      "version": "0.0.3",
       "devDependencies": {
         "@types/bun": "latest",
       },
     },
     "packages/node": {
       "name": "openimg-node",
-      "version": "0.0.10",
+      "version": "0.0.12",
       "dependencies": {
-        "sharp": "^0.33.5",
         "thumbhash": "^0.1.1",
       },
       "devDependencies": {
         "@types/bun": "latest",
         "typescript": "^5.0.0",
       },
+      "peerDependencies": {
+        "sharp": "^0.33.5",
+      },
     },
     "packages/react": {
       "name": "openimg-react",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "devDependencies": {
         "@happy-dom/global-registrator": "^16.7.3",
         "@testing-library/dom": "^10.4.0",
@@ -57,18 +59,8 @@
         "typescript": "^5.0.0",
       },
     },
-    "packages/server-utils": {
-      "name": "openimg-server-utils",
-      "version": "0.0.1",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5.0.0",
-      },
-    },
     "tests/bun": {
-      "name": "openimg-bun-example",
+      "name": "openimg-bun-tests",
       "dependencies": {
         "openimg": "workspace:*",
         "openimg-bun": "workspace:*",
@@ -78,6 +70,26 @@
         "@types/bun": "latest",
       },
       "peerDependencies": {
+        "typescript": "^5.0.0",
+      },
+    },
+    "tests/react": {
+      "name": "openimg-react-tests",
+      "dependencies": {
+        "openimg": "workspace:*",
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0",
+      },
+      "devDependencies": {
+        "@happy-dom/global-registrator": "^16.7.3",
+        "@testing-library/dom": "^10.4.0",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.2.0",
+        "@types/bun": "latest",
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
         "typescript": "^5.0.0",
       },
     },
@@ -93,7 +105,7 @@
 
     "@emnapi/runtime": ["@emnapi/runtime@1.3.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw=="],
 
-    "@happy-dom/global-registrator": ["@happy-dom/global-registrator@16.7.3", "", { "dependencies": { "happy-dom": "^16.7.3" } }, "sha512-mdV8FJsXEuRlTT5P6m+9GhjX6mTPOlaJWd+Lput+rFen9ZvF6cidKo1xHMrA1BrRFcCbgX4kGyvBUWJZ0BZd5Q=="],
+    "@happy-dom/global-registrator": ["@happy-dom/global-registrator@16.8.1", "", { "dependencies": { "happy-dom": "^16.8.1" } }, "sha512-EzV55rpNs5AXwFRb2tGrU6STr2Rgwtoi9awvh6vDglGZypXCFsJYYJpskZ2rhWaLL6Zbw5/+uJj+mocRPZuEUg=="],
 
     "@img/sharp-darwin-arm64": ["@img/sharp-darwin-arm64@0.33.5", "", { "optionalDependencies": { "@img/sharp-libvips-darwin-arm64": "1.0.4" }, "os": "darwin", "cpu": "arm64" }, "sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ=="],
 
@@ -179,7 +191,7 @@
 
     "dom-accessibility-api": ["dom-accessibility-api@0.5.16", "", {}, "sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg=="],
 
-    "happy-dom": ["happy-dom@16.7.3", "", { "dependencies": { "webidl-conversions": "^7.0.0", "whatwg-mimetype": "^3.0.0" } }, "sha512-76uiE9jCpC849cOyYZ8YBROpPcstW/hwCKoQYd3aiZaxHeR9zdjpup4z7qYEWbt+lY8Rb3efW2gmrckyoBftKg=="],
+    "happy-dom": ["happy-dom@16.8.1", "", { "dependencies": { "webidl-conversions": "^7.0.0", "whatwg-mimetype": "^3.0.0" } }, "sha512-n0QrmT9lD81rbpKsyhnlz3DgnMZlaOkJPpgi746doA+HvaMC79bdWkwjrNnGJRvDrWTI8iOcJiVTJ5CdT/AZRw=="],
 
     "has-flag": ["has-flag@4.0.0", "", {}, "sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ=="],
 
@@ -199,13 +211,13 @@
 
     "openimg-bun": ["openimg-bun@workspace:packages/bun"],
 
-    "openimg-bun-example": ["openimg-bun-example@workspace:tests/bun"],
+    "openimg-bun-tests": ["openimg-bun-tests@workspace:tests/bun"],
 
     "openimg-node": ["openimg-node@workspace:packages/node"],
 
     "openimg-react": ["openimg-react@workspace:packages/react"],
 
-    "openimg-server-utils": ["openimg-server-utils@workspace:packages/server-utils"],
+    "openimg-react-tests": ["openimg-react-tests@workspace:tests/react"],
 
     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
 
@@ -251,14 +263,6 @@
 
     "@testing-library/jest-dom/dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
 
-    "openimg-react/@types/bun": ["@types/bun@1.2.0", "", { "dependencies": { "bun-types": "1.2.0" } }, "sha512-5N1JqdahfpBlAv4wy6svEYcd/YfO2GNrbL95JOmFx8nkE6dbK4R0oSE5SpBA4vBRqgrOUAXF8Dpiz+gi7r80SA=="],
-
-    "openimg-server-utils/@types/bun": ["@types/bun@1.2.1", "", { "dependencies": { "bun-types": "1.2.1" } }, "sha512-iiCeMAKMkft8EPQJxSbpVRD0DKqrh91w40zunNajce3nMNNFd/LnAquVisSZC+UpTMjDwtcdyzbWct08IvEqRA=="],
-
     "pretty-format/ansi-styles": ["ansi-styles@5.2.0", "", {}, "sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA=="],
-
-    "openimg-react/@types/bun/bun-types": ["bun-types@1.2.0", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-KEaJxyZfbV/c4eyG0vyehDpYmBGreNiQbZIqvVHJwZ4BmeuWlNZ7EAzMN2Zcd7ailmS/tGVW0BgYbGf+lGEpWw=="],
-
-    "openimg-server-utils/@types/bun/bun-types": ["bun-types@1.2.1", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-p7bmXUWmrPWxhcbFVk7oUXM5jAGt94URaoa3qf4mz43MEhNAo/ot1urzBqctgvuq7y9YxkuN51u+/qm4BiIsHw=="],
   }
 }

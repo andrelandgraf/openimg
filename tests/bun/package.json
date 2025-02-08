@@ -1,5 +1,5 @@
 {
-  "name": "openimg-bun-example",
+  "name": "openimg-bun-tests",
   "module": "server.ts",
   "type": "module",
   "dependencies": {
