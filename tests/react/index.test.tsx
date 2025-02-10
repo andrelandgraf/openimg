@@ -24,15 +24,15 @@ test("applies additional attributes to the <img> tag", () => {
   expect(imgElement).toHaveClass("test-class");
 });
 
-test("generates <source> elements for each breakpoint and format", () => {
+test("generates <source> elements for each format", () => {
   const { container } = render(
     <Img src="/cat.png" width={800} height={800} alt="A cute cat" />,
   );
   const sourceElements = container.querySelectorAll("source");
-  expect(sourceElements.length).toEqual(12);
+  expect(sourceElements.length).toEqual(2);
 });
 
-test("generates only specified <source> elements when custom formats are provided", () => {
+test("generates only specified <source> element when custom formats are provided", () => {
   const customFormats = ["webp"] satisfies Format[]; // Only use "webp" format
   const { container } = render(
     <OpenImgContextProvider targetFormats={customFormats}>
@@ -42,12 +42,10 @@ test("generates only specified <source> elements when custom formats are provide
 
   const sourceElements = container.querySelectorAll("source");
 
-  expect(sourceElements.length).toEqual(6);
+  expect(sourceElements.length).toEqual(1);
 
-  // Verify that only "webp" sources are generated
-  sourceElements.forEach((source) => {
-    expect(source).toHaveAttribute("type", "image/webp");
-  });
+  // Verify that only "webp" source exists
+  expect(sourceElements[0]).toHaveAttribute("type", "image/webp");
 });
 
 test("verifies srcset strings and img src for /cat.png with 300w 300h", () => {
@@ -57,24 +55,20 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h", () => {
 
   const expectedBreakpoints = [
     { width: 300, height: 300 },
-    { width: 225, height: 225 },
-    { width: 200, height: 200 },
+    { width: 100, height: 100 },
   ];
-
-  console.log(container.innerHTML);
 
   const sourceElements = container.querySelectorAll("source");
   const imgElement = container.querySelector("img");
 
   // Verify srcset for each source element
   const formats = ["avif", "webp"];
-  let sourceIndex = 0;
 
-  formats.forEach((format) => {
+  formats.forEach((format, i) => {
     expectedBreakpoints.forEach(({ width, height }) => {
-      const source = sourceElements[sourceIndex++];
+      const source = sourceElements[i];
       const expectedSrcset = `/img?src=${encodeURIComponent("/cat.png")}&w=${width}&h=${height}&format=${format}`;
-      expect(source.getAttribute("srcset")).toBe(expectedSrcset);
+      expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
   });
 
@@ -85,7 +79,7 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h", () => {
 
 test("verifies srcset strings and img src for /cat.png with 300w 300h and optimizerSrc https://standalone.com/optimize", () => {
   const { container } = render(
-    <OpenImgContextProvider optimizerSrc="https://standalone.com/optimize">
+    <OpenImgContextProvider optimizerEndpoint="https://standalone.com/optimize">
       <Img src="/cat.png" width={800} height={800} alt="A cute cat" />
     </OpenImgContextProvider>,
   );
@@ -93,10 +87,9 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h and optimi
   const expectedBreakpoints = [
     { width: 800, height: 800 },
     { width: 600, height: 600 },
-    { width: 450, height: 450 },
-    { width: 337, height: 337 },
-    { width: 252, height: 252 },
+    { width: 400, height: 400 },
     { width: 200, height: 200 },
+    { width: 100, height: 100 },
   ];
 
   const sourceElements = container.querySelectorAll("source");
@@ -104,13 +97,12 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h and optimi
 
   // Verify srcset for each source element
   const formats = ["avif", "webp"];
-  let sourceIndex = 0;
 
-  formats.forEach((format) => {
+  formats.forEach((format, i) => {
     expectedBreakpoints.forEach(({ width, height }) => {
-      const source = sourceElements[sourceIndex++];
+      const source = sourceElements[i];
       const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=${width}&h=${height}&format=${format}`;
-      expect(source.getAttribute("srcset")).toBe(expectedSrcset);
+      expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
   });
 

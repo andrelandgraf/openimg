@@ -216,28 +216,33 @@ export function parseUrl(src: string) {
 export class PipelineLock {
   pipelines = new Map<string, { p: Promise<void>; resolve: () => void }>();
 
-  get(originalSrc: string) {
-    const pipeline = this.pipelines.get(originalSrc);
+  get(cacheSrc: string) {
+    const pipeline = this.pipelines.get(cacheSrc);
     if (pipeline) {
       return pipeline.p;
     }
     return null;
   }
 
-  add(originalSrc: string) {
+  add(cacheSrc: string) {
     let resolve: () => void;
     const p = new Promise<void>((r) => {
-      resolve = r;
+      const timeout = setTimeout(() => {
+        this.resolve(cacheSrc);
+      }, 10000); // kill lock after 10 seconds
+      resolve = () => {
+        clearTimeout(timeout);
+        r();
+      };
     });
-    this.pipelines.set(originalSrc, { p, resolve: resolve! });
+    this.pipelines.set(cacheSrc, { p, resolve: resolve! });
   }
 
-  resolve(originalSrc: string) {
-    const pipeline = this.pipelines.get(originalSrc);
-    if (!pipeline) {
-      throw new Error("Trying to resolve a non-existing pipeline");
+  resolve(cacheSrc: string) {
+    const pipeline = this.pipelines.get(cacheSrc);
+    if (pipeline) {
+      pipeline.resolve();
+      this.pipelines.delete(cacheSrc);
     }
-    pipeline.resolve();
-    this.pipelines.delete(originalSrc);
   }
 }

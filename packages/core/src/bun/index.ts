@@ -79,68 +79,77 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     sources = res;
   }
 
-  if (sources.cacheSrc != "no_cache") {
-    const lock = pipelineLock.get(sources.originalSrc);
-    if (lock) {
-      await lock;
+  try {
+    if (sources.cacheSrc != "no_cache") {
+      const lock = pipelineLock.get(sources.cacheSrc);
+      if (lock) {
+        await lock;
+      }
+
+      const fileInCache = await exists(sources.cacheSrc);
+      if (fileInCache) {
+        return streamFromCache(sources.cacheSrc, headers);
+      }
+
+      pipelineLock.add(sources.cacheSrc);
     }
 
-    const fileInCache = await exists(sources.cacheSrc);
-    if (fileInCache) {
-      return streamFromCache(sources.cacheSrc, headers);
+    let nodeStream: Readable;
+    if (parseUrl(sources.originalSrc)) {
+      const fetchRes = await fetch(sources.originalSrc);
+      if (!fetchRes.ok || !fetchRes.body) {
+        pipelineLock.resolve(sources.cacheSrc);
+        return new Response(fetchRes.statusText || "Image not found", {
+          status: fetchRes.status || 404,
+        });
+      }
+      nodeStream = Readable.fromWeb(fetchRes.body as any);
+    } else {
+      if (!(await exists(sources.originalSrc))) {
+        pipelineLock.resolve(sources.cacheSrc);
+        return new Response("Image not found", { status: 404 });
+      }
+      nodeStream = createReadStream(sources.originalSrc);
     }
 
-    pipelineLock.add(sources.originalSrc);
-  }
+    const pipeline = sharp();
+    if (params.format === "avif") {
+      pipeline.avif();
+      headers.set("content-type", "image/avif");
+    } else if (params.format === "webp") {
+      pipeline.webp();
+      headers.set("content-type", "image/webp");
+    }
 
-  let nodeStream: Readable;
-  if (parseUrl(sources.originalSrc)) {
-    const fetchRes = await fetch(sources.originalSrc);
-    if (!fetchRes.ok || !fetchRes.body) {
-      return new Response(fetchRes.statusText || "Image not found", {
-        status: fetchRes.status || 404,
+    if (params.width && params.height) {
+      pipeline.resize(params.width, params.height, { fit: params.fit });
+    }
+
+    if (sources.cacheSrc !== "no_cache") {
+      await fsp
+        .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
+        .catch(() => {});
+
+      await new Promise<void>((resolve, reject) => {
+        const writeStream = fs.createWriteStream(sources.cacheSrc!);
+        nodeStream
+          .pipe(pipeline)
+          .on("error", reject)
+          .pipe(writeStream)
+          .on("error", reject)
+          .on("finish", resolve);
       });
+
+      pipelineLock.resolve(sources.originalSrc);
+
+      return streamFromCache(sources.cacheSrc, headers);
+    } else {
+      return new Response(toWebStream(nodeStream.pipe(pipeline)), { headers });
     }
-    nodeStream = Readable.fromWeb(fetchRes.body as any);
-  } else {
-    if (!(await exists(sources.originalSrc))) {
-      return new Response("Image not found", { status: 404 });
-    }
-    nodeStream = createReadStream(sources.originalSrc);
-  }
-
-  const pipeline = sharp();
-  if (params.format === "avif") {
-    pipeline.avif();
-    headers.set("content-type", "image/avif");
-  } else if (params.format === "webp") {
-    pipeline.webp();
-    headers.set("content-type", "image/webp");
-  }
-
-  if (params.width && params.height) {
-    pipeline.resize(params.width, params.height, { fit: params.fit });
-  }
-
-  if (sources.cacheSrc !== "no_cache") {
-    await fsp
-      .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
-      .catch(() => {});
-
-    await new Promise<void>((resolve, reject) => {
-      const writeStream = fs.createWriteStream(sources.cacheSrc!);
-      nodeStream
-        .pipe(pipeline)
-        .on("error", reject)
-        .pipe(writeStream)
-        .on("error", reject)
-        .on("finish", resolve);
+  } catch (e: unknown) {
+    pipelineLock.resolve(sources.cacheSrc);
+    throw new Error(`Error while processing the image request`, {
+      cause: e,
     });
-
-    pipelineLock.resolve(sources.originalSrc);
-
-    return streamFromCache(sources.cacheSrc, headers);
-  } else {
-    return new Response(toWebStream(nodeStream.pipe(pipeline)), { headers });
   }
 }
