@@ -21,6 +21,9 @@
     "packages/core": {
       "name": "openimg",
       "version": "0.0.3",
+      "dependencies": {
+        "sharp": "^0.33.5",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },

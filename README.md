@@ -21,6 +21,8 @@ Below is an example for an `/img` endpoint in Remix/React Router using `openimg/
 npm i openimg@latest sharp@latest
 ```
 
+Note that you have to install `sharp` when using the server-side packages.
+
 ```typescript
 import type { Route } from "./+types/img";
 import { getImgResponse } from "openimg/node";

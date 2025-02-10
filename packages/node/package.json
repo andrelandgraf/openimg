@@ -1,6 +1,6 @@
 {
   "name": "openimg-node",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
     "@types/bun": "latest",
     "typescript": "^5.0.0"
   },
-  "peerDependencies": {
+  "optionalDependencies": {
     "sharp": "^0.33.5"
   },
   "files": [
