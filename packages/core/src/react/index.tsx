@@ -125,7 +125,10 @@ export function Image({
 
   const { getBreakpoints, getSrc, targetFormats, optimizerEndpoint } =
     useContext(OpenImgContext);
-  const breakpoints = getBreakpoints(widthNum, heightNum);
+  // Sorted from largest to smallest width
+  const breakpoints = getBreakpoints(widthNum, heightNum).sort(
+    ([w1], [w2]) => w2 - w1,
+  );
 
   return (
     <picture>
