@@ -27,7 +27,6 @@ type OpenImgContextProps = {
 const defaultContext: OpenImgContextProps = {
   getBreakpoints: (width, height) => {
     const breakpoints: [number, number][] = [];
-    breakpoints.push([width, height]);
 
     let currentWidth = width - 200;
     let currentHeight = height - 200;
@@ -127,7 +126,7 @@ export function Image({
     useContext(OpenImgContext);
   // Sorted from largest to smallest width
   const breakpoints = getBreakpoints(widthNum, heightNum).sort(
-    ([w1], [w2]) => w2 - w1,
+    ([w1], [w2]) => w1 - w2,
   );
 
   return (
@@ -135,6 +134,14 @@ export function Image({
       {targetFormats.map((format) => (
         <source
           key={format}
+          src={getSrc({
+            src,
+            width: widthNum,
+            height: heightNum,
+            fit,
+            format,
+            optimizerEndpoint,
+          })}
           srcSet={breakpoints
             .map(
               ([w, h]) =>

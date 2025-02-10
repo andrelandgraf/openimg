@@ -50,13 +50,16 @@ test("generates only specified <source> element when custom formats are provided
 
 test("verifies srcset strings and img src for /cat.png with 300w 300h", () => {
   const { container } = render(
-    <Img src="/cat.png" width={300} height={300} alt="A small cat" />,
+    <Img src="/cat.png" width={550} height={550} alt="A small cat" />,
   );
 
   const expectedBreakpoints = [
-    { width: 300, height: 300 },
+    { width: 350, height: 350 },
+    { width: 150, height: 150 },
     { width: 100, height: 100 },
   ];
+
+  console.log(container.innerHTML);
 
   const sourceElements = container.querySelectorAll("source");
   const imgElement = container.querySelector("img");
@@ -67,13 +70,15 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h", () => {
   formats.forEach((format, i) => {
     expectedBreakpoints.forEach(({ width, height }) => {
       const source = sourceElements[i];
+      const expectedSrc = `/img?src=${encodeURIComponent("/cat.png")}&w=550&h=550&format=${format}`;
+      expect(source.getAttribute("src")).toBe(expectedSrc);
       const expectedSrcset = `/img?src=${encodeURIComponent("/cat.png")}&w=${width}&h=${height}&format=${format}`;
       expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
   });
 
   // Verify the fallback img tag src
-  const expectedImgSrc = `/img?src=${encodeURIComponent("/cat.png")}&w=300&h=300`;
+  const expectedImgSrc = `/img?src=${encodeURIComponent("/cat.png")}&w=550&h=550`;
   expect(imgElement?.getAttribute("src")).toBe(expectedImgSrc);
 });
 
@@ -85,7 +90,6 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h and optimi
   );
 
   const expectedBreakpoints = [
-    { width: 800, height: 800 },
     { width: 600, height: 600 },
     { width: 400, height: 400 },
     { width: 200, height: 200 },
@@ -101,6 +105,8 @@ test("verifies srcset strings and img src for /cat.png with 300w 300h and optimi
   formats.forEach((format, i) => {
     expectedBreakpoints.forEach(({ width, height }) => {
       const source = sourceElements[i];
+      const expectedSrc = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=800&h=800&format=${format}`;
+      expect(source.getAttribute("src")).toBe(expectedSrc);
       const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=${width}&h=${height}&format=${format}`;
       expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
