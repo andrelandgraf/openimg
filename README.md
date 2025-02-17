@@ -17,13 +17,15 @@ The easiest way to use openimg is to create an image optimization endpoint in yo
 
 #### Example for Remix/React Router
 
-Below is an example for an `/img` endpoint in Remix/React Router using `openimg/node` and `openimg/react`:
+Here is an example for an `/img` endpoint in Remix/React Router using `openimg/node` and `openimg/react`.
 
 ```bash
 npm i openimg@latest sharp@latest
 ```
 
 Note that you have to install `sharp` when using the server-side packages.
+
+Add a new resource route in your app:
 
 ```typescript
 import { getImgResponse } from "openimg/node";
@@ -36,9 +38,9 @@ export function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-The added endpoint serves optimized images when visiting `/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder.
+The added endpoint serves optimized images when visiting `/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder. Note that `w`, `h`, `format`, and `fit` are optional.
 
-Use `openimg/react` to query for optimized images in React. By default, the `Img` component will query the `/img` endpoint for optimized images by default:
+Use `openimg/react` to query for optimized images in React:
 
 ```tsx
 import { Img } from "openimg/react";
@@ -47,6 +49,8 @@ export default function MyComponent() {
   return <Img src="/cat.png" w={300} h={300} fit="cover" />;
 }
 ```
+
+By default, the `Img` component will query the `/img` endpoint for optimized images, but this can be configured via the `OpenImgContextProvider`.
 
 #### Example for optimizing remote images
 
@@ -63,7 +67,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 ```
 
-The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket (injected via Remix/React Router's load context). Each allowlisted origin must be a valid URL, e.g. `https://example.com`.
+The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket (injected via Remix/React Router's load context). Each allowlisted origin must be a valid URL, e.g. `https://example.com`. The "src" parameter can then be used to query for optimized images from remote locations, e.g. `/img?src=https://example.com/cat.png&w=300&h=300&format=webp`.
 
 #### Example for serverless functions
 
@@ -111,7 +115,7 @@ Bun.serve({
 console.log(`Server listening on http://localhost:3001`);
 ```
 
-`getImgResponse` can be configured in different ways. See more below in the API reference. This example server runs on port 3001 and is configured to not have a public folder, which means it does not host images itself. Instead, all images are fetched from remote locations, optimized, stored in a cache, and then served. It is configured to only allow the remote origins `http://localhost:3000` and `https://example.com`.
+This example server runs on port 3001 and is configured to not have a public folder, which means it does not host images itself. Instead, all images are fetched from remote locations, optimized, stored in a cache, and then served. It is configured to only allow the remote origins `http://localhost:3000` and `https://example.com`.
 
 Given your web server is running on port 3000, you can visit `http://localhost:3001?src=http://localhost:3000/cat.png&w=300&h=300&format=avif&fit=cover` to fetch an image hosted on your web server's public folder.
 
