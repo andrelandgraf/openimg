@@ -46,7 +46,7 @@ The added endpoint serves optimized images when visiting `/img`. The following q
 - `format` (optional): The target format of the image. Supported formats are `avif` and `webp`.
 - `fit` (optional): Used when resizing the image. Supported values are `cover` and `contain`.
 
-For instance, given `cat.png` is in the `public` folder, you can visit `/img?src=cat.png&w=300&h=300&format=avif&fit=cover` to resize `cat.png` to 300x300 pixels in AVIF format with cover fit.
+For instance, given `cat.png` is in the `public` folder, you can visit `/img?src=cat.png&w=300&h=300&format=avif&fit=cover` to resize `./public/cat.png` to 300x300 pixels in AVIF format with cover fit. The location of `cat.png` can be configured via the `publicFolder` option.
 
 Use `openimg/react` to query for optimized images in React:
 
@@ -62,7 +62,7 @@ By default, the `Img` component will query the `/img` endpoint for optimized ima
 
 #### Example for optimizing remote images
 
-You can also easily configure the endpoint to support optimizing images from remote locations. This is useful if you have a few images on a remote server and want to optimize them on-demand.
+You can also easily configure the endpoint to support optimizing images from remote locations.
 
 ```typescript
 export async function loader({ request }: Route.LoaderArgs) {
@@ -78,11 +78,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket. Each allowlisted origin must be a valid URL, e.g. `https://example.com`. The "src" parameter can then be used to query for optimized images from remote locations, e.g. `/img?src=https://example.com/cat.png&w=300&h=300&format=webp`.
+The endpoint supports serving optimized images fetched from its own origin and from an S3 bucket. Each allowlisted origin must be a valid URL, e.g. `https://example.com`. The "src" parameter can then be used to query for optimized images from remote locations, e.g. `/img?src=https://example.com/cat.png&w=300&h=300&format=webp`. 
 
 #### Example for serverless functions
 
-In case you don't have access to a filesystem, make sure to set `cacheFolder` to `no_cache`. By default, all optimized images are cached in a local folder. In serverless environments, you can rely on HTTP caching instead.
+By default, optimized images are cached to `./data/img`. You can configure the cache location via the `cacheFolder` option. In case you don't have access to a filesystem, make sure to set `cacheFolder` to `no_cache`. You can rely utilize HTTP caching & CDNs instead for caching the optimized images.
+
+In the example below, we set a cache control header to cache the optimized images for 1 year and disable the local caching:
 
 ```typescript
 import { getImgResponse } from "openimg/node";
