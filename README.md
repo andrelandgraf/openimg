@@ -25,7 +25,7 @@ npm i openimg@latest sharp@latest
 
 Note that you have to install `sharp` when using the server-side packages.
 
-Add a new resource route in your app:
+Add a new resource route in your app for the route `/img`:
 
 ```typescript
 import { getImgResponse } from "openimg/node";
