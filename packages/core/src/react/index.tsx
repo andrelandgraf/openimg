@@ -147,6 +147,8 @@ export function Image({
     useContext(OpenImgContext);
   const filteredBreakpoints = breakpoints.filter((bp) => bp <= widthNum);
 
+  // Note fetchPriority is not supported in React 18, only in React 19
+  // So it's lowercased here to avoid React warnings in React 18
   return (
     <picture>
       {targetFormats.map((format) => (
@@ -194,7 +196,7 @@ export function Image({
         role={imgProps.alt ? undefined : "presentation"}
         loading={isAboveFold ? "eager" : "lazy"}
         decoding={isAboveFold ? "auto" : "async"}
-        fetchPriority={isAboveFold ? "high" : "low"}
+        fetchpriority={isAboveFold ? "high" : "low"}
         style={{
           backgroundImage: placeholder ? `url(${placeholder})` : undefined,
           backgroundSize: placeholder ? "cover" : undefined,
