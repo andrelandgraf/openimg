@@ -57,17 +57,20 @@ By default, the `Img` component will query the `/img` endpoint for optimized ima
 You can also easily configure the endpoint to support optimizing images from remote locations. This is useful if you have a few images on a remote server and want to optimize them on-demand.
 
 ```typescript
-export async function loader({ request, context }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const headers = new Headers();
   headers.set("Cache-Control", "public, max-age=31536000, immutable");
   return getImgResponse(request, {
     headers,
-    allowlistedOrigins: [context.config.origin, context.config.s3.url],
+    allowlistedOrigins: [
+      "http://localhost:3000",
+      "https://aws-s3-bucket.s3.eu-central-1.amazonaws.com",
+    ],
   });
 }
 ```
 
-The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket (injected via Remix/React Router's load context). Each allowlisted origin must be a valid URL, e.g. `https://example.com`. The "src" parameter can then be used to query for optimized images from remote locations, e.g. `/img?src=https://example.com/cat.png&w=300&h=300&format=webp`.
+The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket. Each allowlisted origin must be a valid URL, e.g. `https://example.com`. The "src" parameter can then be used to query for optimized images from remote locations, e.g. `/img?src=https://example.com/cat.png&w=300&h=300&format=webp`.
 
 #### Example for serverless functions
 
@@ -141,7 +144,7 @@ export default function App() {
 
 ## API reference
 
-`openimg/bun` and `openimg/node` currently have the same API surface. You can read on all supported arguments and props for each package in their respective README files:
+`openimg/bun` and `openimg/node` currently have the same API surface. You can read more about all supported arguments and props for each package in their respective README files:
 
 - [openimg-bun](./packages/bun/README.md)
 - [openimg-node](./packages/bun/README.md)
