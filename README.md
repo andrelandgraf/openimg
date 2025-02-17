@@ -38,7 +38,15 @@ export function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-The added endpoint serves optimized images when visiting `/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder. Note that `w`, `h`, `format`, and `fit` are optional.
+The added endpoint serves optimized images when visiting `/img`. The following query parameters are supported:
+
+- `src`: The source of the image to optimize. This can be a path to an image in the public folder or a remote URL.
+- `w` (optional): The target width of the image.
+- `h` (optional): The target height of the image.
+- `format` (optional): The target format of the image. Supported formats are `avif` and `webp`.
+- `fit` (optional): Used when resizing the image. Supported values are `cover` and `contain`.
+
+For instance, given `cat.png` is in the `public` folder, you can visit `/img?src=cat.png&w=300&h=300&format=avif&fit=cover` to resize `cat.png` to 300x300 pixels in AVIF format with cover fit.
 
 Use `openimg/react` to query for optimized images in React:
 
