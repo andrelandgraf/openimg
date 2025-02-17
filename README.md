@@ -4,7 +4,7 @@ openimg (Open Image) is a collection of JavaScript packages for working with ima
 
 ## Packages
 
-- [openimg-bun](./packages/bun/): Image optimization request handler for Bun
+- [openimg-bun](./packages/bun/): Image optimization request handler optimized for Bun
 - [openimg-node](./packages/node/): Node-compatible image optimization request handler for Bun, Deno, and Node
 - [openimg-react](./packages/react/): Image React component to query for optimized images
 - [openimg](./packages/core/): All-in-one package bundling `openimg/bun`, `openimg/node`, `openimg/react`
@@ -13,7 +13,9 @@ openimg (Open Image) is a collection of JavaScript packages for working with ima
 
 ### Image optimization endpoint
 
-The easiest way to use openimg is to create an image optimization endpoint in your application to optimize images from your existing web server.
+The easiest way to use openimg is to create an image optimization endpoint in your application to optimize images from your existing web server. This is useful if you have a few images in your public folder and want to optimize them on-demand.
+
+#### Example for Remix/React Router
 
 Below is an example for an `/img` endpoint in Remix/React Router using `openimg/node` and `openimg/react`:
 
@@ -24,8 +26,8 @@ npm i openimg@latest sharp@latest
 Note that you have to install `sharp` when using the server-side packages.
 
 ```typescript
-import type { Route } from "./+types/img";
 import { getImgResponse } from "openimg/node";
+import type { Route } from "./+types/img";
 
 export function loader({ request }: Route.LoaderArgs) {
   const headers = new Headers();
@@ -34,13 +36,46 @@ export function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-You can serve optimized images by visiting `http://localhost:3000/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder. You can further use `openimg/react` to query for optimized images in your React components. It will automatically query the `/img` endpoint for optimized images by default:
+The added endpoint serves optimized images when visiting `/img?src=cat.png&w=300&h=300&format=avif&fit=cover`, given `cat.png` is in the `public` folder.
+
+Use `openimg/react` to query for optimized images in React. By default, the `Img` component will query the `/img` endpoint for optimized images by default:
 
 ```tsx
 import { Img } from "openimg/react";
 
 export default function MyComponent() {
   return <Img src="/cat.png" w={300} h={300} fit="cover" />;
+}
+```
+
+#### Example for optimizing remote images
+
+You can also easily configure the endpoint to support optimizing images from remote locations. This is useful if you have a few images on a remote server and want to optimize them on-demand.
+
+```typescript
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const headers = new Headers();
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  return getImgResponse(request, {
+    headers,
+    allowlistedOrigins: [context.config.origin, context.config.s3.url],
+  });
+}
+```
+
+The added endpoint supports serving optimized images fetched from its own origin and from an S3 bucket (injected via Remix/React Router's load context). Each allowlisted origin must be a valid URL, e.g. `https://example.com`.
+
+#### Example for serverless functions
+
+In case you don't have access to a filesystem, make sure to set `cacheFolder` to `no_cache`. By default, all optimized images are cached in a local folder. In serverless environments, you can rely on HTTP caching instead.
+
+```typescript
+import { getImgResponse } from "openimg/node";
+
+export function loader({ request }: Route.LoaderArgs) {
+  const headers = new Headers();
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  return getImgResponse(request, { headers, cacheFolder: "no_cache" });
 }
 ```
 
@@ -56,17 +91,15 @@ npm i openimg@latest sharp@latest
 import { getImgResponse } from "openimg/bun";
 
 Bun.serve({
+  port: 3001,
   async fetch(req) {
     try {
       const headers = new Headers();
-      const allowlistedOrigins = [
-        "http://localhost:3001",
-        "https://example.com",
-      ];
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       return getImgResponse(req, {
         headers,
-        allowlistedOrigins,
+        allowlistedOrigins: ["http://localhost:3000", "https://example.com"],
+        publicFolder: "no_public",
       });
     } catch (err: unknown) {
       console.error(err);
@@ -75,21 +108,23 @@ Bun.serve({
   },
 });
 
-console.log(`Server listening on http://localhost:3000`);
+console.log(`Server listening on http://localhost:3001`);
 ```
 
-By default, this server will store/cache optimized images in the `./data/img` folder. Given you have your web server running on port 3001, you can make requests from your web server to the image optimization server on port 3000. Visit `http://localhost:3000?src=http://localhost:3001/cat.png&w=300&h=300&format=avif&fit=cover` to see the optimized image, given your web server is running on port 3001 and can serve `cat.png`.
+`getImgResponse` can be configured in different ways. See more below in the API reference. This example server runs on port 3001 and is configured to not have a public folder, which means it does not host images itself. Instead, all images are fetched from remote locations, optimized, stored in a cache, and then served. It is configured to only allow the remote origins `http://localhost:3000` and `https://example.com`.
 
-You can configure `openimg/react` to query the image optimization server by wrapping your app in `OpenImgContextProvider`:
+Given your web server is running on port 3000, you can visit `http://localhost:3001?src=http://localhost:3000/cat.png&w=300&h=300&format=avif&fit=cover` to fetch an image hosted on your web server's public folder.
+
+You can configure `openimg/react` to query images from a standalone image optimization server by wrapping your app in `OpenImgContextProvider`:
 
 ```tsx
 import { OpenImgContextProvider, Img } from "openimg/react";
 
 export default function App() {
   return (
-    <OpenImgContextProvider optimizerSrc="http://localhost:3000">
+    <OpenImgContextProvider optimizerEndpoint="http://localhost:3001">
       <Img
-        src="http://localhost:3001/image.jpg"
+        src="http://localhost:3000/image.jpg"
         width={1200}
         height={800}
         fit="contain"
@@ -99,3 +134,11 @@ export default function App() {
   );
 }
 ```
+
+## API reference
+
+`openimg/bun` and `openimg/node` currently have the same API surface. You can read on all supported arguments and props for each package in their respective README files:
+
+- [openimg-bun](./packages/bun/README.md)
+- [openimg-node](./packages/bun/README.md)
+- [openimg-react](./packages/bun/README.md)

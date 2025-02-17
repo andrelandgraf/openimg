@@ -1,23 +1,26 @@
 import React, { createContext, useContext } from "react";
 
 export type Fit = "cover" | "contain";
-export type Format = "webp" | "avif" | "png" | "jpeg" | "jpg";
 export type TargetFormat = "webp" | "avif";
 
 /**
- * getBreakpoints: return an array of width & height breakpoints for the picture element's srcsets
- * getSrc: return the src string for the picture element's img and sources
- * targetFormats: formats that should be included in the source options (default is avif, webp). It always includes the original format.
- * optimizerEndpoint: The path or URL to the image optimizer endpoint
+ * - breakpoints: width[] breakpoints for the picture's "sizes" attribute. Must be in ascending order.
+ *   Defaults to Tailwind's breakpoints (sm, md, lg, xl, 2xl): [640, 768, 1024, 1280, 1536]
+ * - getSrc: fn to return custom src string given the src, width, height, fit, format, and optimizerEndpoint
+ *   Defaults to function returning `{optimizerEndpoint}?src={src}&w={width}&h={height}&fit={fit}&format={format}`
+ * - targetFormats: string[] formats that are supported
+ *   Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified)
+ * - optimizerEndpoint: The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint
+ *   Defaults to "/img"
  */
 type OpenImgContextProps = {
-  getBreakpoints: (width: number, height: number) => [number, number][];
+  breakpoints: number[];
   getSrc: (args: {
     src: string;
     width: number;
     height: number;
     fit?: Fit;
-    format?: Format;
+    format?: TargetFormat;
     optimizerEndpoint: string;
   }) => string;
   targetFormats: TargetFormat[];
@@ -25,21 +28,7 @@ type OpenImgContextProps = {
 };
 
 const defaultContext: OpenImgContextProps = {
-  getBreakpoints: (width, height) => {
-    const breakpoints: [number, number][] = [];
-
-    let currentWidth = width - 200;
-    let currentHeight = height - 200;
-
-    while (currentWidth > 100 && currentHeight > 100) {
-      breakpoints.push([currentWidth, currentHeight]);
-      currentWidth = currentWidth - 200;
-      currentHeight = currentHeight - 200;
-    }
-
-    breakpoints.push([100, 100]);
-    return breakpoints;
-  },
+  breakpoints: [640, 768, 1024, 1280, 1536],
   getSrc: ({ src, width, height, fit, format, optimizerEndpoint }) => {
     const params = new URLSearchParams({
       src,
@@ -54,8 +43,18 @@ const defaultContext: OpenImgContextProps = {
   optimizerEndpoint: "/img",
 };
 
+/**
+ * - breakpoints: width[] breakpoints for the picture's "sizes" attribute. Must be in ascending order.
+ *   Defaults to Tailwind's breakpoints (sm, md, lg, xl, 2xl): [640, 768, 1024, 1280, 1536]
+ * - getSrc: fn to return custom src string given the src, width, height, fit, format, and optimizerEndpoint
+ *   Defaults to function returning `{optimizerEndpoint}?src={src}&w={width}&h={height}&fit={fit}&format={format}`
+ * - targetFormats: string[] formats that are supported
+ *   Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified)
+ * - optimizerEndpoint: The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint
+ *   Defaults to "/img"
+ */
 export type OpenImgContextProviderProps = {
-  getBreakpoints?: OpenImgContextProps["getBreakpoints"];
+  breakpoints?: OpenImgContextProps["breakpoints"];
   getSrc?: OpenImgContextProps["getSrc"];
   targetFormats?: OpenImgContextProps["targetFormats"];
   optimizerEndpoint?: OpenImgContextProps["optimizerEndpoint"];
@@ -64,15 +63,27 @@ export type OpenImgContextProviderProps = {
 
 const OpenImgContext = createContext<OpenImgContextProps>(defaultContext);
 
+/**
+ * OpenImgContextProvider component
+ * @param {OpenImgContextProviderProps} props - The props for the provider
+ * @param {string[]} props.breakpoints - width[] breakpoints for the picture's "sizes" attribute. Must be in ascending order.
+ *   Defaults to Tailwind's breakpoints (sm, md, lg, xl, 2xl): [640, 768, 1024, 1280, 1536]
+ * @param {() => string} props.getSrc - fn to return custom src string given the src, width, height, fit, format, and optimizerEndpoint
+ *   Defaults to function returning `{optimizerEndpoint}?src={src}&w={width}&h={height}&fit={fit}&format={format}`
+ * @param {string[]} props.targetFormats - formats that are supported
+ *   Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified)
+ * @param {string} props.optimizerEndpoint - The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint
+ *   Defaults to "/img"
+ */
 export function OpenImgContextProvider({
-  getBreakpoints,
+  breakpoints,
   getSrc,
   targetFormats,
   optimizerEndpoint,
   children,
 }: OpenImgContextProviderProps) {
   const contextValue = {
-    getBreakpoints: getBreakpoints || defaultContext.getBreakpoints,
+    breakpoints: breakpoints || defaultContext.breakpoints,
     getSrc: getSrc || defaultContext.getSrc,
     targetFormats: targetFormats || defaultContext.targetFormats,
     optimizerEndpoint: optimizerEndpoint || defaultContext.optimizerEndpoint,
@@ -85,6 +96,13 @@ export function OpenImgContextProvider({
   );
 }
 
+/**
+ * - width: the intrinsic width of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+ * - height: the intrinsic height of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+ * - fit: how the image should be resized to fit the aspect ratio (if different from intrinsic ratio): "cover" or "contain"
+ * - isAboveFold: whether the image is above the fold or not, affects what default optimization settings are used
+ * - placeholder: base64 encoded string of a low quality image to use as a placeholder until the full image loads
+ */
 export type ImageProps = Omit<
   React.ImgHTMLAttributes<HTMLImageElement>,
   "width" | "height"
@@ -93,17 +111,18 @@ export type ImageProps = Omit<
   height: number | string;
   fit?: Fit;
   isAboveFold?: boolean;
+  placeholder?: string;
 };
 
 /**
  * Image component
- * @param {string} src - The URL of the image to display
- * @param {number | string} width - The max width of the image in pixels
- * @param {number | string} height - The max height of the image in pixels
- * @param {Fit} fit - How the image should be resized to fit the dimensions: "cover" or "contain"
- * @param {boolean} isAboveFold - Whether the image is above the fold or not, affects what default optimization settings are used
- * @param {React.ImgHTMLAttributes<HTMLImageElement>} imgProps - Additional props to pass to the img element
- * @returns
+ * @param {ImageProps} props - The props for the image, including HTMLImageElement attributes
+ * @param {string} props.src - The URL of the image to display
+ * @param {number|string} props.width - The intrinsic width of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+ * @param {number|string} props.height - The intrinsic height of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+ * @param {Fit} [props.fit] - How the image should be resized to fit the aspect ratio (if different from intrinsic ratio): "cover" or "contain"
+ * @param {boolean} [props.isAboveFold] - Whether the image is above the fold or not, affects what default optimization settings are used
+ * @param {string} [props.placeholder] - Base64 encoded string of a low quality image to use as a placeholder until the full image loads
  */
 export function Image({
   src,
@@ -111,6 +130,7 @@ export function Image({
   height,
   fit,
   isAboveFold,
+  placeholder,
   ...imgProps
 }: ImageProps) {
   if (!src || !width || !height) {
@@ -121,48 +141,70 @@ export function Image({
   }
   let widthNum = typeof width === "string" ? parseInt(width) : width;
   let heightNum = typeof height === "string" ? parseInt(height) : height;
+  const ratio = widthNum / heightNum;
 
-  const { getBreakpoints, getSrc, targetFormats, optimizerEndpoint } =
+  const { breakpoints, getSrc, targetFormats, optimizerEndpoint } =
     useContext(OpenImgContext);
-  // Sorted from largest to smallest width
-  const breakpoints = getBreakpoints(widthNum, heightNum).sort(
-    ([w1], [w2]) => w1 - w2,
-  );
+  const filteredBreakpoints = breakpoints.filter((bp) => bp <= widthNum);
 
   return (
     <picture>
       {targetFormats.map((format) => (
         <source
           key={format}
-          src={getSrc({
-            src,
-            width: widthNum,
-            height: heightNum,
-            fit,
-            format,
-            optimizerEndpoint,
-          })}
-          srcSet={breakpoints
-            .map(
-              ([w, h]) =>
-                getSrc({
+          width={width}
+          height={height}
+          srcSet={
+            filteredBreakpoints.length
+              ? [...filteredBreakpoints, widthNum]
+                  .map(
+                    (w) =>
+                      getSrc({
+                        src,
+                        width: w,
+                        height: w / ratio,
+                        fit,
+                        format,
+                        optimizerEndpoint,
+                      }) + ` ${w}w`,
+                  )
+                  .join(", ")
+              : getSrc({
                   src,
-                  width: w,
-                  height: h,
+                  width: widthNum,
+                  height: heightNum,
                   fit,
                   format,
                   optimizerEndpoint,
-                }) + ` ${w}w`,
-            )
-            .join(", ")}
+                })
+          }
           sizes={
-            breakpoints.map(([w]) => `(max-width: ${w}px) ${w}px`).join(", ") +
-            `, ${widthNum}px`
+            filteredBreakpoints.length
+              ? filteredBreakpoints
+                  .map((w) => `(max-width: ${w}px) ${w}px`)
+                  .join(", ") + `, ${widthNum}px`
+              : `${widthNum}px`
           }
           type={`image/${format}`}
         />
       ))}
       <img
+        width={width}
+        height={height}
+        role={imgProps.alt ? undefined : "presentation"}
+        loading={isAboveFold ? "eager" : "lazy"}
+        decoding={isAboveFold ? "auto" : "async"}
+        fetchPriority={isAboveFold ? "high" : "low"}
+        style={{
+          backgroundImage: placeholder ? `url(${placeholder})` : undefined,
+          backgroundSize: placeholder ? "cover" : undefined,
+        }}
+        ref={(element) => {
+          if (element?.complete && placeholder) {
+            element.style.backgroundImage = "";
+            element.style.backgroundSize = "";
+          }
+        }}
         src={getSrc({
           src,
           width: widthNum,
@@ -170,28 +212,29 @@ export function Image({
           fit,
           optimizerEndpoint,
         })}
-        srcSet={breakpoints
-          .map(
-            ([w, h]) =>
-              getSrc({
-                src,
-                width: w,
-                height: h,
-                fit,
-                optimizerEndpoint,
-              }) + ` ${w}w`,
-          )
-          .join(", ")}
-        sizes={
-          breakpoints.map(([w]) => `(max-width: ${w}px) ${w}px`).join(", ") +
-          `, ${widthNum}px`
+        srcSet={
+          filteredBreakpoints.length
+            ? [...filteredBreakpoints, widthNum]
+                .map(
+                  (w) =>
+                    getSrc({
+                      src,
+                      width: w,
+                      height: w / ratio,
+                      fit,
+                      optimizerEndpoint,
+                    }) + ` ${w}w`,
+                )
+                .join(", ")
+            : undefined
         }
-        width={width}
-        height={height}
-        role={imgProps.alt ? undefined : "presentation"}
-        loading={isAboveFold ? "eager" : "lazy"}
-        decoding={isAboveFold ? "auto" : "async"}
-        fetchPriority={isAboveFold ? "high" : "low"}
+        sizes={
+          filteredBreakpoints.length
+            ? filteredBreakpoints
+                .map((w) => `(max-width: ${w}px) ${w}px`)
+                .join(", ") + `, ${widthNum}px`
+            : undefined
+        }
         {...imgProps}
       />
     </picture>

@@ -2,16 +2,29 @@
 
 openimg-react (Open Image React) provides an Image component (aliased as Img) for querying optimized images from an image optimization endpoint (e.g., openimg-node). The component uses standard HTML img element attributes to generate a picture element with sources for avif and webp images in different sizes.
 
+## Features
+
+- `Image`/`Img` component to query for optimized images
+  - Support for local and remote images
+  - Support for placeholder images
+- `OpenImgContextProvider` to configure the Img component
+
 ## Installation
 
 ```bash
 npm i openimg-react
 ```
 
-## Usage
+If used in combination with `openimg-node` or `openimg-bun`, you call also install `openimg` to get all in one:
+
+```bash
+npm i openimg@latest sharp
+```
+
+## API
 
 ```tsx
-import { Img } from "openimg-react";
+import { Img } from "openimg-react"; // or "openimg/react"
 
 export default function App() {
   return (
@@ -20,56 +33,27 @@ export default function App() {
 }
 ```
 
-Under the hood, `Img` will render an HTML picture element and render:
+Under the hood, `Img` will render an HTML picture element with source elements for webp and avif and different sizes and srcset attributes to query for the smallest image and optimal format given the viewport width and browser capabilities. It will further set the `loading`, `decoding`, and `fetchpriority` attributes. The image can be prioritized by setting `isAboveFold` to true.
 
-```html
-<picture>
-  <source
-    srcset="/img?src=/cat.png&w=300&h=300&format=avif"
-    media="(min-width: 300px)"
-    type="image/avif"
-  />
-  <source
-    srcset="/img?src=/cat.png&w=225&h=225&format=avif"
-    media="(min-width: 225px)"
-    type="image/avif"
-  />
-  <source
-    srcset="/img?src=/cat.png&w=200&h=200&format=avif"
-    media="(min-width: 200px)"
-    type="image/avif"
-  />
-  <source
-    srcset="/img?src=/cat.png&w=300&h=300&format=webp"
-    media="(min-width: 300px)"
-    type="image/webp"
-  />
-  <source
-    srcset="/img?src=/cat.png&w=225&h=225&format=webp"
-    media="(min-width: 225px)"
-    type="image/webp"
-  />
-  <source
-    srcset="/img?src=/cat.png&w=200&h=200&format=webp"
-    media="(min-width: 200px)"
-    type="image/webp"
-  />
-  <img
-    width="300"
-    height="300"
-    alt="A small cat"
-    src="/img?src=/cat.png&w=300&h=300"
-  />
-</picture>
-```
+### Img Props
 
-## Configuration
+You can pass in all standard HTML img element attributes to the Img component. They will override the defaults set by the Img component. Further, the following props are available:
+
+- width (required): the intrinsic width of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+- height (required): the intrinsic height of the image in pixels; used to calculate the aspect ratio. Provide alternate width and height to change the aspect ratio.
+- fit (optional): how the image should be resized to fit the aspect ratio (if different from intrinsic ratio): "cover" or "contain".
+- isAboveFold (defaults to `false`): whether the image is above the fold or not, affects what default optimization settings are used.
+- placeholder (optional): base64 encoded string of a low quality image to use as a placeholder until the full image loads.
+
+Note, if not `alt` is provided, the Img component will set the role to "presentation".
+
+### OpenImgContextProvider
 
 You can configure the output of the Img component with the `OpenImgContextProvider`. This allows you to set:
 
 - Breakpoints for responsive images.
-- Image optimizer URL (`optimizerSrc`).
-- Target formats (avif, webp, etc.).
+- Image optimizer URL (`optimizerEndpoint`).
+- Target formats (avif, webp).
 - Custom logic for generating image URLs.
 
 ```tsx
@@ -77,7 +61,7 @@ import { OpenImgContextProvider, Img } from "openimg-react";
 
 export default function App() {
   return (
-    <OpenImgContextProvider optimizerSrc="https://my-optimizer.com">
+    <OpenImgContextProvider optimizerEndpoint="https://my-optimizer.com">
       <Img
         src="https://example.com/image.jpg"
         width={1200}
@@ -90,38 +74,19 @@ export default function App() {
 }
 ```
 
-### Provider Props
+#### OpenImgContextProvider Props
 
-- `getBreakpoints`:Function to define custom breakpoints for responsive sources. Array of [width, height] tuples. Should start at the img's height/width and go down.
-- `getSrc`: Function to create a custom src string for the source and img elements.
-- `targetFormats`: An array of supported optimized formats: ["avif"] | ["avif", "webp"] | ["webp"].
-- `optimizerSrc`: The image optimization endpoint (path or URL). Defaults to "/img".
+- breakpoints: width[] breakpoints for the picture's "sizes" attribute. Must be in ascending order. Defaults to Tailwind's breakpoints (sm, md, lg, xl, 2xl): [640, 768, 1024, 1280, 1536].
+- getSrc: fn to return custom src string given the src, width, height, fit, format, and optimizerEndpoint. Defaults to function returning `{optimizerEndpoint}?src={src}&w={width}&h={height}&fit={fit}&format={format}`.
+- targetFormats: string[] formats that are supported. Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified).
+- optimizerEndpoint: The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint. Defaults to "/img".
 
-#### getBreakpoints
-
-Default looks like this:
-
-```ts
-function getBreakpoints(width, height) {
-  const breakpoints: [number, number][] = [];
-  let currentWidth = width;
-  let currentHeight = height;
-  while (currentWidth > 200 && currentHeight > 200) {
-    breakpoints.push([currentWidth, currentHeight]);
-    currentWidth = Math.floor(currentWidth * 0.75);
-    currentHeight = Math.floor(currentHeight * 0.75);
-  }
-  breakpoints.push([200, 200]);
-  return breakpoints;
-}
-```
-
-#### getSrc
+**getSrc:**
 
 Default looks like this:
 
 ```ts
-function getSrc({ src, width, height, fit, format, optimizerSrc }) {
+function getSrc({ src, width, height, fit, format, optimizerEndpoint }) {
   const params = new URLSearchParams({
     src,
     w: width.toString(),
@@ -129,6 +94,6 @@ function getSrc({ src, width, height, fit, format, optimizerSrc }) {
   });
   if (fit) params.append("fit", fit);
   if (format) params.append("format", format);
-  return optimizerSrc + "?" + params.toString();
+  return optimizerEndpoint + "?" + params.toString();
 }
 ```

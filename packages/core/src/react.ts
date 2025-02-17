@@ -1,6 +1,5 @@
 export {
   Fit,
-  Format,
   Image,
   ImageProps,
   Img,
