@@ -178,18 +178,37 @@ export function getImgSource(params: ImgParams): ImgSource {
 
 Note that the result from `getImgSource` will further be validated against the `allowlistedOrigins` config option.
 
-You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production:
+You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production.
+
+Example for a custom `getImgSource` function that always returns a file from the file system, but with different folders for dev and production:
 
 ```typescript
 export function getImgSource(params: ImgParams): ImgSource {
   const src = params.src;
-  const srcUrl = parseUrl(src);
-
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";
   return {
     type: "fs",
     path: folder + src,
+  };
+}
+```
+
+Example for a custom `getImgSource` function that always uses fetch calls, even for local images:
+
+```typescript
+export function getImgSource(params: ImgParams): ImgSource {
+  const src = params.src;
+  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns null
+  if (srcUrl) {
+    return {
+      type: "fetch",
+      url: src,
+    };
+  }
+  return {
+    type: "fetch",
+    path: process.env.origin + src,
   };
 }
 ```
