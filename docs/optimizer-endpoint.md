@@ -121,6 +121,15 @@ First, you have to decide where to retrieve images from. By default, `getImgResp
 The default implementation looks as follows:
 
 ```typescript
+// Checks if the src is a valid URL, otherwise returns null
+export function parseUrl(src: string) {
+  try {
+    return new URL(src);
+  } catch {
+    return false;
+  }
+}
+
 export function getImgSource(params: ImgParams): ImgSource {
   const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
   const srcUrl = parseUrl(src);
