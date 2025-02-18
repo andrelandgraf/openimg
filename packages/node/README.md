@@ -1,4 +1,4 @@
-# openimg-node
+# openimg-node (openimg/node)
 
 openimg-node (Open Image Node) provides an HTTP request handler function to optimize images using sharp. It also provides a request handler for generating low quality image placeholders.
 
@@ -128,7 +128,9 @@ type ImgParams = {
   format?: Format | undefined;
 };
 
-type GetImgParams = (request: Request) => ImgParams | Response;
+type GetImgParamsArgs = { request: Request };
+
+type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
 ```
 
 A function that takes the `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response is returned as-is. Otherwise, the returned image parameters is used to optimize the image.
@@ -148,10 +150,9 @@ type ImgSource =
       url: string;
     };
 
-type GetImgSource = (
-  request: Request,
-  params: ImgParams,
-) => ImgSource | Response;
+type GetImgSourceArgs = { request: Request; params: ImgParams };
+
+type GetImgSource = (args: GetImgSourceArgs) => ImgSource | Response;
 ```
 
 A function that takes the `Request` object and the `ImgParams` object (returned from `getImgParams`) and returns an `ImgSources` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image sources will be used to retrieve the source image.
@@ -159,9 +160,9 @@ A function that takes the `Request` object and the `ImgParams` object (returned 
 The default implementation looks as follows:
 
 ```typescript
-export function getImgSource(params: ImgParams): ImgSource {
+export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
-  const srcUrl = parseUrl(src);
+  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns false
 
   if (srcUrl) {
     return {
@@ -183,7 +184,9 @@ You may have to override the default `getImgSource` function if you want to prev
 Example for a custom `getImgSource` function that always returns a file from the file system, but with different folders for dev and production:
 
 ```typescript
-export function getImgSource(params: ImgParams): ImgSource {
+import { GetImgSourceArgs, ImgSource } from "openimg/node";
+
+export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";
@@ -197,7 +200,9 @@ export function getImgSource(params: ImgParams): ImgSource {
 Example for a custom `getImgSource` function that always uses fetch calls, even for local images:
 
 ```typescript
-export function getImgSource(params: ImgParams): ImgSource {
+import { GetImgSourceArgs, ImgSource } from "openimg/node";
+
+export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
   const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns false
   if (srcUrl) {

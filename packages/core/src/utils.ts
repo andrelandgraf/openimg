@@ -21,11 +21,13 @@ export type ImgParams = {
   format?: Format | undefined;
 };
 
+export type GetImgParamsArgs = { request: Request };
+
 /**
  * Called to get the target image parameters for a given request.
  * The default implementation reads the parameters src, w (width), h (height), fit, and format from the search parameters.
  */
-export type GetImgParams = (request: Request) => ImgParams | Response;
+export type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
 
 /**
  * ImgSource describes where and how to retrieve the original image.
@@ -43,6 +45,8 @@ export type ImgSource =
       url: string;
     };
 
+export type GetImgSourceArgs = { request: Request; params: ImgParams };
+
 /**
  * Called to get the source of the original image for a given request.
  * The default implementation uses the src search parameter src
@@ -50,10 +54,7 @@ export type ImgSource =
  * - If the src is a relative path, it is assumed to be a local file path and concatenated with './public'.
  * - If the src is an absolute URL, it is assumed to be a remote image.
  */
-export type GetImgSource = (
-  request: Request,
-  params: ImgParams,
-) => ImgSource | Response;
+export type GetImgSource = (args: GetImgSourceArgs) => ImgSource | Response;
 
 /**
  * Configuration values for the getImgResponse function.
@@ -89,7 +90,9 @@ function isFormatValue(
   return (FORMATS as any as string[]).includes(format);
 }
 
-export function getImgParams(request: Request): ImgParams | Response {
+export function getImgParams({
+  request,
+}: GetImgParamsArgs): ImgParams | Response {
   const url = new URL(request.url);
   const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
   if (!src) {

@@ -15,7 +15,7 @@ openimg is meant to be highly configurable. It can:
 
 ## Limitations
 
-The `openimg/bun` and `openimg/node` request handlers utilize the Web Fetch API's `Request` and `Response` objects. This works great in frameworks and environments such as Bun, Cloudflare Workers, Deno, Hono, and React Router/Remix that also operate on web standards. However, if you are using Express or another framework that operates on Node's `IncomingMessage` and `ServerResponse` objects or similar, you may not be able to easily use openimg. In this case, you could instead use openimg [as a standalone server](./optimizer-server.md)`.
+The `openimg/bun` and `openimg/node` request handlers utilize the Web Fetch API's `Request` and `Response` objects. This works great in frameworks and environments such as Bun, Cloudflare Workers, Deno, Hono, and React Router/Remix that also operate on web standards. However, if you are using Express or another framework that operates on Node's `IncomingMessage` and `ServerResponse` objects or similar, you may not be able to easily use openimg. In this case, you could instead use openimg [as a standalone server](./optimizer-server.md).
 
 ## Get started
 
@@ -130,7 +130,7 @@ export function parseUrl(src: string) {
   }
 }
 
-export function getImgSource(params: ImgParams): ImgSource {
+export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
   const srcUrl = parseUrl(src);
 
@@ -152,7 +152,9 @@ Note that the result from `getImgSource` will further be validated against the `
 You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production:
 
 ```typescript
-export function getImgSource(params: ImgParams): ImgSource {
+import { GetImgSourceArgs, ImgSource } from "openimg/node";
+
+export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
   const srcUrl = parseUrl(src);
 
@@ -214,24 +216,4 @@ export default function MyComponent() {
 }
 ```
 
-By default, the `Img` component will query the `/img` endpoint for optimized images, but this can be configured via the `OpenImgContextProvider`.
-
-`/img?src=https://example.com/cat.png&w=300&h=300&format=webp`.
-
-#### Example for serverless functions
-
-By default, optimized images are cached to `./data/img`. You can configure the cache location via the `cacheFolder` option. In case you don't have access to a filesystem, make sure to set `cacheFolder` to `no_cache`. You can rely utilize HTTP caching & CDNs instead for caching the optimized images.
-
-In the example below, we set a cache control header to cache the optimized images for 1 year and disable the local caching:
-
-```typescript
-import { getImgResponse } from "openimg/node";
-
-export function loader({ request }: Route.LoaderArgs) {
-  const headers = new Headers();
-  headers.set("Cache-Control", "public, max-age=31536000, immutable");
-  return getImgResponse(request, { headers, cacheFolder: "no_cache" });
-}
-```
-
-You can read about the full API reference for `openimg/react` [here](../packages/react/README.md).
+By default, the `Img` component will query the `/img` endpoint for optimized images, but this can be configured via the `OpenImgContextProvider`. You can read about the full API reference for `openimg/react` [here](../packages/react/README.md).

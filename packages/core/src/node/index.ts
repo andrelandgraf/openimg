@@ -63,8 +63,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   // Get image parameters (src, width, height, fit, format) from the request
   const paramsRes = config.getImgParams
-    ? config.getImgParams(request)
-    : getImgParams(request);
+    ? config.getImgParams({ request })
+    : getImgParams({ request });
   if (paramsRes instanceof Response) {
     return paramsRes;
   }
@@ -72,7 +72,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   // Map src to location of the original image (fs or fetch)
   const sourceRes = config.getImgSource
-    ? config.getImgSource(request, params)
+    ? config.getImgSource({ request, params })
     : getImgSource(params);
   if (sourceRes instanceof Response) {
     return sourceRes;

@@ -2,8 +2,10 @@ export {
   Config,
   Fit,
   Format,
+  GetImgParamsArgs,
   GetImgParams,
-  getImgSource,
+  GetImgSourceArgs,
+  GetImgSource,
   ImgParams,
   ImgSource,
 } from "./utils";
