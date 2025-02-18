@@ -199,7 +199,7 @@ Example for a custom `getImgSource` function that always uses fetch calls, even 
 ```typescript
 export function getImgSource(params: ImgParams): ImgSource {
   const src = params.src;
-  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns null
+  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns false
   if (srcUrl) {
     return {
       type: "fetch",

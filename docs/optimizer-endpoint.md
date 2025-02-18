@@ -121,7 +121,7 @@ First, you have to decide where to retrieve images from. By default, `getImgResp
 The default implementation looks as follows:
 
 ```typescript
-// Checks if the src is a valid URL, otherwise returns null
+// Checks if the src is a valid URL, otherwise returns false
 export function parseUrl(src: string) {
   try {
     return new URL(src);
