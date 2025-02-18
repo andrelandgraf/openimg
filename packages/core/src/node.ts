@@ -3,13 +3,10 @@ export {
   Fit,
   Format,
   GetImgParams,
-  GetImgSources,
+  getImgSource,
   ImgParams,
-  ImgSources,
+  ImgSource,
 } from "./utils";
 
 export { getImgResponse } from "./node/index";
-export {
-  getImgPlaceholderResponse,
-  getImgPlaceholderFromStream,
-} from "./node/placeholder";
+export { getImgPlaceholderFromStream } from "./placeholder";

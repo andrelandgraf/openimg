@@ -3,13 +3,10 @@ export {
   Fit,
   Format,
   GetImgParams,
-  GetImgSources,
+  getImgSource,
   ImgParams,
-  ImgSources,
+  ImgSource,
 } from "./utils";
 
 export { getImgResponse } from "./bun/index";
-export {
-  getImgPlaceholderResponse,
-  getImgPlaceholderFromStream,
-} from "./bun/placeholder";
+export { getImgPlaceholderFromStream } from "./placeholder";

@@ -6,7 +6,7 @@
     },
     "packages/bun": {
       "name": "openimg-bun",
-      "version": "0.0.12",
+      "version": "0.0.13",
       "dependencies": {
         "thumbhash": "^0.1.1",
       },
@@ -20,17 +20,17 @@
     },
     "packages/core": {
       "name": "openimg",
-      "version": "0.0.16",
-      "dependencies": {
-        "sharp": "^0.33.5",
-      },
+      "version": "0.0.17",
       "devDependencies": {
         "@types/bun": "latest",
+      },
+      "optionalDependencies": {
+        "sharp": "^0.33.5",
       },
     },
     "packages/node": {
       "name": "openimg-node",
-      "version": "0.0.15",
+      "version": "0.0.16",
       "dependencies": {
         "thumbhash": "^0.1.1",
       },

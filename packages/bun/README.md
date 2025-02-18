@@ -1,26 +1,33 @@
 # openimg-bun
 
-openimg-bun (Open Image Bun) provides an HTTP request handler function to optimize images using sharp, using Bun APIs where possible.
+openimg-bun (Open Image Bun) provides an HTTP request handler function to optimize images using sharp, using Bun APIs where possible. It also provides a request handler for generating low quality image placeholders.
 
 ## Features
 
 - `getImgResponse` request handler function to optimize images using sharp
-  - Support for local and remote images
-  - Support caching optimized images to disk
-- `getImgPlaceholderResponse` request handler for placeholder generation for low quality image placeholders
-  - Also exposes `getImgPlaceholderFromStream` for generating low quality image placeholders from a ReadableStream (useful for scripts and other use cases outside of REST APIs)
+- `getImgPlaceholderFromStream` for generating low quality image placeholders from a Readable stream
+
+You can find the API reference for each function below.
 
 ## Installation
+
+The code is available via `openimg/bun` and `openimg-bun`. If you want to use solely the server code:
 
 ```bash
 npm i sharp openimg-bun
 ```
 
-openimg-bun uses [sharp](https://sharp.pixelplumbing.com) and can only be used in environments that can run sharp (and [libvips](https://github.com/libvips/libvips)).
+If you want to use the full package:
 
-## API reference
+```bash
+npm i sharp openimg
+```
 
-### getImgResponse
+This package uses [sharp](https://sharp.pixelplumbing.com) and can only be used in environments that can run sharp (and [libvips](https://github.com/libvips/libvips)).
+
+## getImgResponse
+
+`getImgResponse` accepts two arguments, a `Request` object and a configuration object, and it returns a promise that resolves to a `Response` object.
 
 Import `getImgResponse` from `openimg-bun` and pass in the HTTP `Request` object. The function will return an HTTP `Response` object with the optimized image.
 
@@ -28,7 +35,7 @@ Simple example using Hono:
 
 ```typescript
 import { Hono } from "hono";
-import { getImgResponse } from "openimg-bun";
+import { getImgResponse } from "openimg-bun"; // or openimg/bun
 
 const app = new Hono();
 
@@ -39,141 +46,163 @@ app.get("/img", (c) => {
   return getImgResponse(c.req.raw, config);
 });
 
-export default app;
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
 ```
 
-By default, `getImgResponse` will source images from the `./public` directory and cache files to `./data/img`. You can change this via the config options, including allowlisting remote origins. Add a `public` folder to the root folder with an image (png, jpg), e.g., `cat.png` and visit `http://localhost:3000?src=cat.png&w=300&h=300&format=avif&fit=cover` to see the optimized image. Only the `src` parameter is required. All other parameters are optional.
+By default, `getImgResponse` sources images from the `./public` directory and cache files to `./data/img`. You can change this via the config options, including allowlisting remote origins.
+
+### Query images
+
+Add a `public` folder to the root folder with an image (png, jpg), e.g., `cat.png` and visit `http://localhost:3000/img?src=/cat.png&w=300&h=300&format=avif&fit=cover` to see the optimized image. Only the `src` parameter is required. All other parameters are optional.
 
 The following search parameters are supported by default:
 
-- `src`: The source image. This can be a local file path (relative to the `publicFolder`) or a full URL. If it is a full URL, the image will be fetched from the origin. If it is a local file path, the image will be read from the file system.
-- `w` (optional, defaults to src image width): The width of the image.
-- `h` (optional, defaults to src image height): The height of the image.
-- `fit` (optional, defaults to 'cover'): The fit mode of the image.
-- `format` (optional, defaults to src image format): The target format of the image.
+- `src`: The source image. This can be a local file path or a full URL. By default, if it is a full URL, the image will be fetched from the origin. If it is a local file path, the image will be read from the file system: `"./public" + src`.
+- `w` (optional, defaults to original image width): The target width of the image.
+- `h` (optional, defaults to original image height): The target height of the image.
+- `fit` (optional, defaults to 'cover'): The fit mode of the image if the image is resized.
+- `format` (optional, defaults to original image format): The target format of the image.
 
-#### Config options
+### Config options
 
-**headers**
+The configuration object accepts the following optional options:
+
+- `headers`: HTTP headers to be added to the HTTP response.
+- `cacheFolder`: The location to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
+- `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
+- `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
+- `getImgSource`: Provide a function to map the `src` image parameter to a image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
+
+**headers: Headers**
 
 Headers to be added to the HTTP response.
 
 ```typescript
 const headers = new Headers();
 headers.set("Cache-Control", "public, max-age=31536000, immutable");
-return getImgResponse(c.req.raw, { headers });
+return getImgResponse(request, { headers });
 ```
 
 Note, that `getImgResponse` will only set the `Content-Type` header for avif and webp images. All other headers (e.g., `Cache-Control`) must be set manually. This is to allow for more flexibility in how you want to handle caching. In most cases, you probably want to enforce unique file names and set an aggressive cache policy. It is also recommended to use a CDN in front of your image server.
 
-**cacheFolder**
+**cacheFolder: string | 'no_cache'**
 
-Default: `./data/img`. The folder to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
+Defaults to `./data/img`. The folder to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 
 ```typescript
 const headers = new Headers();
 headers.set("Cache-Control", "public, max-age=31536000, immutable");
-return getImgResponse(c.req.raw, { headers, cacheFolder: "no_cache" });
+return getImgResponse(request, { headers, cacheFolder: "no_cache" });
 ```
 
 If you set `cacheFolder` to `no_cache`, the optimized image will not be cached to disk. This is useful for serverless environments or when you want to cache the image only via a CDN.
 
-Note, `getImgSources` can be used to implement custom path logic based on the `Request` object. If `getImgSources` is set, then setting `cacheFolder` will have no effect, as `getImgSources` will return the `cacheSrc` and `originSrc` values.
+**allowlistedOrigins: string[] | ['*']**
 
-**publicFolder**
-
-Default: `./public`. The folder to source images from. Can be set to either a string path or `no_public` to not permit relative src paths.
+List of allowed remote origins. Defaults to `[]`, which means no remote origins are allowed and images will not be fetched from remote locations. Any attempt to query via absolute URLs will return a 403 response. Instead, only relative pathnames are allowed (e.g., `/cat.png`) for local images hosted on the server.
 
 ```typescript
-getImgResponse(c.req.raw, {
-  cacheFolder: "./cache",
-  publicFolder: "./dist/public",
-});
-```
-
-Note, `getImgSources` can be used to implement custom path logic based on the `Request` object. If `getImgSources` is set, then setting `cacheFolder` will have no effect, as `getImgSources` will return the `cacheSrc` and `originSrc` values.
-
-**allowlistedOrigins**
-
-Default: `[]`. List of allowed origins. If empty, only relative pathnames are allowed (e.g., `/cat.png`) for local images hosted on the server. If set, `getImgResponse` will fetch the image from the origin when `src` is a full URL. Relative URLs are still resolved relative to the `publicFolder`.
-
-```typescript
-getImgResponse(c.req.raw, {
+getImgResponse(request, {
   allowlistedOrigins: ["https://example.com", "http://localhost:3000"],
 });
 ```
 
-Unset `allowlistedOrigins` or pass `[]` to prevent fetching images from remote origins. Set `allowlistedOrigins` to `['*']` to allow all remote origins. You should probably only do this if your image service is within a private network. Otherwise, everyone can utilize your server to optimize any images.
+Set `allowlistedOrigins` to `['*']` to allow all remote origins. You should probably only do this if your image service is within a private network. Otherwise, everyone can utilize your server to optimize any images.
 
-Note, if `getImgSources` is set, `allowlistedOrigins` has no effect. Instead, you have to enforce the allowlist yourself (e.g., return a `Response` with a 403 status code if the origin is not allowed).
-
-**getImgParams**
-
-Default: `undefined`. A function that takes a `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image parameters will be used to optimize the image. This is useful if you want to implement custom logic based on the `Request` object.
-
-`ImgParams` type:
+**getImgParams: Function**
 
 ```typescript
 type ImgParams = {
+  src: string;
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
-  targetFormat?: Format | undefined;
+  format?: Format | undefined;
 };
+
+type GetImgParams = (request: Request) => ImgParams | Response;
 ```
 
-By default, `getImgParams` will use the search parameters of the request to determine the image parameters. However, for more flexibility, you can implement your own logic to determine the image parameters.
+A function that takes the `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response is returned as-is. Otherwise, the returned image parameters is used to optimize the image.
 
-**getImgSources**
+The default implementation retrieves the src, w (width), h (height), fit, format values from the search parameters of the request and you probably don't need to override the default `getImgParams` function used if no `getImgParams` function is provided. However, for more flexibility, you can implement your own logic to determine the image parameters.
 
-Default: `undefined`. A function that takes a `Request` object and an `ImgParams` object and returns an `ImgSources` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image sources will be used to retrieve the source image and to store/cache the optimized image. If `cacheSrc` is set to `no_cache`, the source image will not be cached on the server. This is useful for serverless environments or when you want to cache the image only via a CDN.
-
-`ImgSources` type:
+**getImgSource: Function**
 
 ```typescript
-type ImgSources = {
-  cacheSrc: string | null;
-  originSrc: string;
-};
-```
-
-By default, `getImgSources` will resolve the `src` search parameter relative to the `publicFolder` and cache the optimized image to `./data/img`.
-
-### getImgPlaceholderResponse
-
-Import `getImgPlaceholderResponse` from `openimg-bun` and pass in the HTTP `Request` object. The function will return an HTTP `Response` object with the low quality image placeholder.
-
-```typescript
-import { getImgResponse, getImgPlaceholderResponse } from "openimg/bun";
-
-Bun.serve({
-  port: 3000,
-  async fetch(req) {
-    const url = new URL(req.url);
-    if (url.pathname === "/placeholder") {
-      return getImgPlaceholderResponse(req);
+type ImgSource =
+  | {
+      type: "fs";
+      path: string;
     }
-    return new Response("Not found", { status: 404 });
-  },
-});
+  | {
+      type: "fetch";
+      url: string;
+    };
+
+type GetImgSource = (
+  request: Request,
+  params: ImgParams,
+) => ImgSource | Response;
 ```
 
-#### Config options
+A function that takes the `Request` object and the `ImgParams` object (returned from `getImgParams`) and returns an `ImgSources` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image sources will be used to retrieve the source image.
 
-Similar, to `getImgResponse`, `getImgPlaceholderResponse` accepts the following config options:
+The default implementation looks as follows:
 
-- publicFolder: string | "no_public". Defaults to "./public"
-- allowlistedOrigins: string[]. Defaults to an empty array. Setting to `['*']` allows all origins.
+```typescript
+export function getImgSource(params: ImgParams): ImgSource {
+  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
+  const srcUrl = parseUrl(src);
 
-### getImgPlaceholderFromStream
+  if (srcUrl) {
+    return {
+      type: "fetch",
+      url: src,
+    };
+  }
+  return {
+    type: "fs",
+    path: "./public" + src,
+  };
+}
+```
 
-Import `getImgPlaceholderFromStream` from `openimg-bun` and pass in a ReadableStream. The function will return a low quality image placeholder as a string. This is useful for scripts and other use cases outside of REST APIs.
+Note that the result from `getImgSource` will further be validated against the `allowlistedOrigins` config option.
+
+You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production:
+
+```typescript
+export function getImgSource(params: ImgParams): ImgSource {
+  const src = params.src;
+  const srcUrl = parseUrl(src);
+
+  const isDev = process.env.NODE_ENV === "development";
+  const folder = isDev ? "./public" : "./build/client/assets";
+  return {
+    type: "fs",
+    path: folder + src,
+  };
+}
+```
+
+You then pass the custom `getImgSource` function to `getImgResponse`:
+
+```typescript
+getImgResponse(request, { getImgSource });
+```
+
+## getImgPlaceholderFromStream
+
+Import `getImgPlaceholderFromStream` from `openimg-bun` and pass in a Readable stream (like `ReadStream`). The function will return a low quality image placeholder as a base64-encoded string. The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
 
 ```typescript
 import { getImgPlaceholderFromStream } from "openimg-bun";
 import { createReadStream } from "fs";
 
-// Retrieve file from ./public/cat.png
 const stream = createReadStream("./public/cat.png");
 const placeholder = await getImgPlaceholderFromStream(stream);
 console.log(placeholder); // data:image/png;base64,...

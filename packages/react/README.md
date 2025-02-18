@@ -15,11 +15,13 @@ openimg-react (Open Image React) provides an Image component (aliased as Img) fo
 npm i openimg-react
 ```
 
-If used in combination with `openimg-node` or `openimg-bun`, you call also install `openimg` to get all in one:
+If used in combination with `openimg/node` or `openimg/bun`, you call also install `openimg` to get all in one:
 
 ```bash
 npm i openimg@latest sharp
 ```
+
+Note, `sharp` is only needed if you want to use the server-side functionality.
 
 ## API
 

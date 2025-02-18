@@ -4,14 +4,15 @@ import fsp from "node:fs/promises";
 import { createReadStream, ReadStream } from "fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
-import {
+import invariant, {
   Config,
+  getCachePath,
   getImgParams,
-  getImgSources,
+  getImgSource,
   ImgParams,
-  ImgSources,
-  parseUrl,
+  ImgSource,
   PipelineLock,
+  validateImgSource,
 } from "../utils";
 import { exists } from "./utils";
 
@@ -50,80 +51,78 @@ function streamFromCache(path: string, headers: Headers) {
 }
 
 /**
- * @param request - the incoming HTTP request
- * @param config - the config object
- * @returns - a Response object
+ * getImgResponse retrieves an image, optimizes it, and returns a HTTP response
+ * getImgResponse returns failure responses for 404, 401 and similar cases
+ * but may also throw errors if the image is not found or cannot be processed.
+ * @param {Request} request - the incoming HTTP request, using the Web Fetch API's Request object
+ * @param {Config} config - the config object
+ * @returns {Promise<Response>} - a promise resolving to a Response object
  */
 export async function getImgResponse(request: Request, config: Config = {}) {
   const headers = config.headers || new Headers();
 
-  let params: ImgParams;
-  if (config.getImgParams) {
-    const res = config.getImgParams(request);
-    if (res instanceof Response) {
-      return res;
-    }
-    params = res;
-  } else {
-    // Use default getImgParams
-    const res = getImgParams(request);
-    if (res instanceof Response) {
-      return res;
-    }
-    params = res;
+  // Get image parameters (src, width, height, fit, format) from the request
+  const paramsRes = config.getImgParams
+    ? config.getImgParams(request)
+    : getImgParams(request);
+  if (paramsRes instanceof Response) {
+    return paramsRes;
+  }
+  const params: ImgParams = paramsRes;
+
+  // Map src to location of the original image (fs or fetch)
+  const sourceRes = config.getImgSource
+    ? config.getImgSource(request, params)
+    : getImgSource(params);
+  if (sourceRes instanceof Response) {
+    return sourceRes;
+  }
+  const source: ImgSource = sourceRes;
+
+  // Validate the image source against the allowlisted origins
+  const res = validateImgSource(source, config.allowlistedOrigins);
+  if (res instanceof Response) {
+    return res;
   }
 
-  let sources: ImgSources;
-  if ("getImgSources" in config && config.getImgSources) {
-    const res = config.getImgSources(request, params);
-    if (res instanceof Response) {
-      return res;
-    }
-    sources = res;
-  } else {
-    // Use default getImgSources
-    const res = getImgSources(request, params, {
-      allowlistedOrigins: config.allowlistedOrigins,
-      cacheFolder: config.cacheFolder,
-      publicFolder: config.publicFolder,
-    });
-    if (res instanceof Response) {
-      return res;
-    }
-    sources = res;
-  }
-
+  const cachePath =
+    config.cacheFolder !== "no_cache"
+      ? getCachePath(params, config.cacheFolder)
+      : null;
   try {
-    if (sources.cacheSrc !== "no_cache") {
-      const lock = pipelineLock.get(sources.cacheSrc);
+    if (config.cacheFolder !== "no_cache") {
+      invariant(cachePath, "Cache path is required");
+      const lock = pipelineLock.get(cachePath);
       if (lock) {
+        // Wait for ongoing pipeline to finish that writes to the same cache file
         await lock;
       }
 
-      const fileInCache = await exists(sources.cacheSrc);
+      const fileInCache = await exists(cachePath);
       if (fileInCache) {
-        return streamFromCache(sources.cacheSrc, headers);
+        return streamFromCache(cachePath, headers);
       }
 
-      pipelineLock.add(sources.cacheSrc);
+      // Register ongoing write to the cache file
+      pipelineLock.add(cachePath);
     }
 
     let nodeStream: Readable;
-    if (parseUrl(sources.originalSrc)) {
-      const fetchRes = await fetch(sources.originalSrc);
+    if (source.type === "fetch") {
+      const fetchRes = await fetch(source.url);
       if (!fetchRes.ok || !fetchRes.body) {
-        pipelineLock.resolve(sources.cacheSrc);
+        pipelineLock.resolve(cachePath);
         return new Response(fetchRes.statusText || "Image not found", {
           status: fetchRes.status || 404,
         });
       }
       nodeStream = Readable.fromWeb(fetchRes.body as any);
     } else {
-      if (!(await exists(sources.originalSrc))) {
-        pipelineLock.resolve(sources.cacheSrc);
+      if (!(await exists(source.path))) {
+        pipelineLock.resolve(cachePath);
         return new Response("Image not found", { status: 404 });
       }
-      nodeStream = createReadStream(sources.originalSrc);
+      nodeStream = createReadStream(source.path);
     }
 
     const pipeline = sharp();
@@ -139,13 +138,14 @@ export async function getImgResponse(request: Request, config: Config = {}) {
       pipeline.resize(params.width, params.height, { fit: params.fit });
     }
 
-    if (sources.cacheSrc !== "no_cache") {
+    if (config.cacheFolder !== "no_cache") {
+      invariant(cachePath, "Cache path is required");
       await fsp
-        .mkdir(path.dirname(sources.cacheSrc), { recursive: true })
+        .mkdir(path.dirname(cachePath), { recursive: true })
         .catch(() => {});
 
       await new Promise<void>((resolve, reject) => {
-        const writeStream = fs.createWriteStream(sources.cacheSrc!);
+        const writeStream = fs.createWriteStream(cachePath);
         nodeStream
           .pipe(pipeline)
           .on("error", reject)
@@ -154,15 +154,15 @@ export async function getImgResponse(request: Request, config: Config = {}) {
           .on("finish", resolve);
       });
 
-      pipelineLock.resolve(sources.originalSrc);
-
-      return streamFromCache(sources.cacheSrc, headers);
+      pipelineLock.resolve(cachePath);
+      return streamFromCache(cachePath, headers);
     }
+
     return new Response(toWebStreamFromReadable(nodeStream.pipe(pipeline)), {
       headers,
     });
   } catch (e: unknown) {
-    pipelineLock.resolve(sources.cacheSrc);
+    pipelineLock.resolve(cachePath);
     throw new Error(`Error while processing the image request`, {
       cause: e,
     });

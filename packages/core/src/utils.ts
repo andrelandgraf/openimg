@@ -7,13 +7,14 @@ const FITS = ["cover", "contain"] as const;
 export type Fit = (typeof FITS)[number];
 
 /**
- * ImgParams specifies the parameters for image processing.
+ * ImgParams holds the parameters for image processing.
  * - width: The target width of the image. If not set, the original image's width will be used.
  * - height: The target height of the image. If not set, the original image's height will be used.
  * - fit: The fit mode for resizing the image: "cover" or "contain". Defaults to sharp's default "cover".
  * - format: The target format of the image: "webp", "avif", "png", "jpeg", or "jpg". If not specified, the format will be inferred from the source.
  */
 export type ImgParams = {
+  src: string;
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
@@ -21,59 +22,56 @@ export type ImgParams = {
 };
 
 /**
- * ImgSources specifies the original and cache sources
- * If the image is found in the cacheSrc, it will be streamed from there.
- * If the image is not found in the cacheSrc, it will be fetched from the originalSrc,
- * processed, and then stored in the cacheSrc, and then streamed from there.
- *
- * If cacheSrc is set to "no_cache, the image will not be cached. This is useful for serverless
- * environments that can't access the filesystem. In this case, you most likely want a CDN
- * in front of your server to cache the images.
- */
-export type ImgSources = {
-  originalSrc: string;
-  cacheSrc: string | "no_cache";
-};
-
-/**
  * Called to get the target image parameters for a given request.
- * The default implementation reads the parameters w (width), h (height), fit, and format from the search parameters.
+ * The default implementation reads the parameters src, w (width), h (height), fit, and format from the search parameters.
  */
 export type GetImgParams = (request: Request) => ImgParams | Response;
 
 /**
- * Called to get the sources for a given request.
- * The default implementation reads the parameters src (source) from the search parameters
- * to determine the originalSrc and cacheSrc. The default origin is mapped to "./public"
- * and the default cache to "./data/images".
+ * ImgSource describes where and how to retrieve the original image.
+ * - type: The type of the source, either "fs" for local file system or "fetch" for remote URL.
+ * - path: The path to the image if type is "fs".
+ * - url: The URL to fetch the image from if type is "fetch", can be a relative path or an absolute URL.
  */
-export type GetImgSources = (
+export type ImgSource =
+  | {
+      type: "fs";
+      path: string;
+    }
+  | {
+      type: "fetch";
+      url: string;
+    };
+
+/**
+ * Called to get the source of the original image for a given request.
+ * The default implementation uses the src search parameter src
+ * to determine the source:
+ * - If the src is a relative path, it is assumed to be a local file path and concatenated with './public'.
+ * - If the src is an absolute URL, it is assumed to be a remote image.
+ */
+export type GetImgSource = (
   request: Request,
   params: ImgParams,
-) => ImgSources | Response;
-
-type ImgSourcesConfig = {
-  cacheFolder?: string | "no_cache"; // default: "./data/images"
-  publicFolder?: string | "no_public"; // default: "./public".
-  allowlistedOrigins?: string[]; // default: []
-};
+) => ImgSource | Response;
 
 /**
  * Configuration values for the getImgResponse function.
  * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
- * - cacheFolder: Default: ".data/images". Set to "no_cache" for no caching. Each request will fetch the original image and process it again.
- * - publicFolder: Default: "./public". Set to "no_public" for remote only origins. Use getImgSources if you need more control.
+ * - cacheFolder: Default: ".data/images". Set to "no_cache" for no caching.
  * - allowlistedOrigins: Default: []. List of allowed origins. If empty, no remote origins will be allowed and only relative pathnames are permitted (e.g., /cat.png).
  *   Example allowlist: ['https://example.com', 'http://localhost:3000']
  *   Adding an '*' entry, ['*'], allows all remote origins.
+ * - getImgSource: Provide a custom getImgSource function to map the request to a source path or url to the retrieve the original image.
  * - getImgParams: Provide a custom getImgParams function for more control over where to retrieve the image parameters from the request.
- * - getImgSources: Provide a custom getImgSources function for more control over allow list and mapping the request to the original and cache sources
  */
 export type Config = {
   headers?: Headers;
+  allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
-  getImgSources?: GetImgSources;
-} & ImgSourcesConfig;
+  getImgSource?: GetImgSource;
+  cacheFolder?: string | "no_cache"; // default: "./data/images"
+};
 
 function isFitValue(fit: string | undefined): fit is Fit | undefined {
   if (fit === undefined) {
@@ -93,6 +91,14 @@ function isFormatValue(
 
 export function getImgParams(request: Request): ImgParams | Response {
   const url = new URL(request.url);
+  const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+
   const w = url.searchParams.get("w") || undefined;
   if (w && Number.isNaN(w)) {
     return new Response(null, {
@@ -128,6 +134,7 @@ export function getImgParams(request: Request): ImgParams | Response {
   }
 
   return {
+    src,
     width,
     height,
     format,
@@ -135,55 +142,12 @@ export function getImgParams(request: Request): ImgParams | Response {
   };
 }
 
-export function getImgSources(
-  request: Request,
+export function getCachePath(
   params: ImgParams,
-  config: ImgSourcesConfig,
-): ImgSources | Response {
-  const allowlistedOrigins = config.allowlistedOrigins || [];
-  const publicFolder = config.publicFolder || "./public";
-  const cacheFolder = config.cacheFolder || "./data/images";
-  if (publicFolder === "no_public" && !allowlistedOrigins.length) {
-    return new Response(null, {
-      status: 500,
-      statusText:
-        'At least one remote origin must be allowlisted if "no_public" is set',
-    });
-  }
-
-  const url = new URL(request.url);
-  const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
-  if (!src) {
-    return new Response(null, {
-      status: 400,
-      statusText: 'Search param "src" must be set',
-    });
-  }
-
+  cacheFolder = "./data/images",
+): string {
+  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
   const srcUrl = parseUrl(src);
-  if (!srcUrl && publicFolder === "no_public") {
-    return new Response(null, {
-      status: 403,
-      statusText: "Relative src not allowed",
-    });
-  }
-
-  const allAllowed = allowlistedOrigins.includes("*");
-  if (!allAllowed && srcUrl && !allowlistedOrigins.includes(srcUrl.origin)) {
-    return new Response(null, {
-      status: 403,
-      statusText: `Origin ${srcUrl.origin} not in allowlist`,
-    });
-  }
-
-  const originalSrc = srcUrl ? src : publicFolder + src;
-  if (cacheFolder === "no_cache") {
-    return {
-      originalSrc,
-      cacheSrc: "no_cache",
-    };
-  }
-
   const srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
   const originExtension = path.extname(srcPath); // ".png"
   const extension = params.format ? "." + params.format : originExtension;
@@ -193,16 +157,54 @@ export function getImgSources(
   slug = slug.startsWith("/") ? slug : "/" + slug; // "/example.com/folder/cat.png", "/cat.png"
   slug = slug.replaceAll(".", "-");
   slug = slug.replaceAll(":", "-");
-  const cacheSrc =
+  return (
     cacheFolder +
     slug +
     `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` +
-    extension;
+    extension
+  );
+}
 
+export function getImgSource(params: ImgParams): ImgSource {
+  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
+  const srcUrl = parseUrl(src);
+
+  if (srcUrl) {
+    return {
+      type: "fetch",
+      url: src,
+    };
+  }
   return {
-    originalSrc,
-    cacheSrc,
+    type: "fs",
+    path: "./public" + src,
   };
+}
+
+export function validateImgSource(
+  source: ImgSource,
+  allowlistedOrigins: string[] = [],
+): Response | null {
+  if (source.type === "fs") {
+    // file system always allowed
+    return null;
+  }
+  const allAllowed = allowlistedOrigins.includes("*");
+  if (allAllowed) {
+    return null;
+  }
+  const srcUrl = parseUrl(source.url);
+  if (!srcUrl) {
+    // relative path (e.g., /cat.png) always allowed
+    return null;
+  }
+  if (!allowlistedOrigins.includes(srcUrl.origin)) {
+    return new Response(null, {
+      status: 403,
+      statusText: `Origin ${srcUrl.origin} not in allowlist`,
+    });
+  }
+  return null;
 }
 
 export function parseUrl(src: string) {
@@ -238,11 +240,65 @@ export class PipelineLock {
     this.pipelines.set(cacheSrc, { p, resolve: resolve! });
   }
 
-  resolve(cacheSrc: string) {
+  resolve(cacheSrc: string | null) {
+    if (!cacheSrc) {
+      return;
+    }
     const pipeline = this.pipelines.get(cacheSrc);
     if (pipeline) {
       pipeline.resolve();
       this.pipelines.delete(cacheSrc);
     }
   }
+}
+
+// invariant copied from https://github.com/alexreardon/tiny-invariant
+/**
+ * `invariant` is used to [assert](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions) that the `condition` is [truthy](https://github.com/getify/You-Dont-Know-JS/blob/bdbe570600d4e1107d0b131787903ca1c9ec8140/up%20%26%20going/ch2.md#truthy--falsy).
+ *
+ * 💥 `invariant` will `throw` an `Error` if the `condition` is [falsey](https://github.com/getify/You-Dont-Know-JS/blob/bdbe570600d4e1107d0b131787903ca1c9ec8140/up%20%26%20going/ch2.md#truthy--falsy)
+ *
+ * 🤏 `message`s are not displayed in production environments to help keep bundles small
+ *
+ * @example
+ *
+ * ```ts
+ * const value: Person | null = { name: 'Alex' };
+ * invariant(value, 'Expected value to be a person');
+ * // type of `value`` has been narrowed to `Person`
+ * ```
+ */
+export default function invariant(
+  condition: any,
+  // Not providing an inline default argument for message as the result is smaller
+  /**
+   * Can provide a string, or a function that returns a string for cases where
+   * the message takes a fair amount of effort to compute
+   */
+  message?: string | (() => string),
+): asserts condition {
+  const isProduction: boolean = process.env.NODE_ENV === "production";
+  const prefix: string = "Invariant failed";
+
+  if (condition) {
+    return;
+  }
+  // Condition not passed
+
+  // In production we strip the message but still throw
+  if (isProduction) {
+    throw new Error(prefix);
+  }
+
+  // When not in production we allow the message to pass through
+  // *This block will be removed in production builds*
+
+  const provided: string | undefined =
+    typeof message === "function" ? message() : message;
+
+  // Options:
+  // 1. message provided: `${prefix}: ${provided}`
+  // 2. message not provided: prefix
+  const value: string = provided ? `${prefix}: ${provided}` : prefix;
+  throw new Error(value);
 }
