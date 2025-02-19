@@ -1,6 +1,6 @@
 {
   "name": "openimg-react",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -37,7 +37,7 @@
     "react-dom": ">=18.0.0"
   },
   "files": [
-    "src",
+    "README.md",
     "dist"
   ]
 }

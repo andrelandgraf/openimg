@@ -1,6 +1,6 @@
 {
   "name": "openimg",
-  "version": "0.0.26",
+  "version": "0.0.28",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -32,7 +32,8 @@
     }
   },
   "scripts": {
-    "build": "./scripts/build.sh"
+    "build": "./scripts/build.sh",
+    "release": "./scripts/release.sh"
   },
   "devDependencies": {
     "@types/bun": "latest"
