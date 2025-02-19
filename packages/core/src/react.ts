@@ -1,9 +1,9 @@
 export {
-  Fit,
+  type Fit,
   Image,
-  ImageProps,
+  type ImageProps,
   Img,
-  ImgProps,
+  type ImgProps,
   OpenImgContextProvider,
-  OpenImgContextProviderProps,
+  type OpenImgContextProviderProps,
 } from "./react/index";

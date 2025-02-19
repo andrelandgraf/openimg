@@ -1,6 +1,6 @@
 {
   "name": "openimg",
-  "version": "0.0.20",
+  "version": "0.0.26",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -28,13 +28,11 @@
       "types": "./dist/types/vite.d.ts"
     },
     "./client": {
-      "types": "./client.d.ts"
+      "types": "./dist/client.d.ts"
     }
   },
   "scripts": {
-    "build": "bun ./scripts/build.ts && bun run build:ts && bun run build:vite-types",
-    "build:ts": "tsc",
-    "build:vite-types": "cp ./src/vite/client.d.ts ./dist/"
+    "build": "./scripts/build.sh"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -46,6 +44,8 @@
     "vite": "^6.1.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ]
 }

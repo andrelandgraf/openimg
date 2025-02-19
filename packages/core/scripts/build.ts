@@ -1,9 +1,5 @@
 import fs from "node:fs";
 
-try {
-  fs.rmdirSync("./dist", { recursive: true });
-} catch {}
-
 await Bun.build({
   entrypoints: ["./src/bun.ts"],
   outdir: "./dist",
@@ -35,5 +31,5 @@ await Bun.build({
   outdir: "./dist",
   target: "node",
   format: "esm",
-  external: ["vite", "openimg"],
+  external: ["vite", "sharp"],
 });

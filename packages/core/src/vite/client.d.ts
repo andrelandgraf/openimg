@@ -2,7 +2,7 @@ declare module "*.png?react" {
   import * as React from "react";
   import * as OpenImg from "openimg/react";
 
-  const ReactComponent: (props: OpenImg.ImgProps) => React.ReactNode;
+  const ReactComponent: (props: Partial<OpenImg.ImgProps>) => React.ReactNode;
 
   export const metadata: {
     placeholder: string;
@@ -31,7 +31,7 @@ declare module "*.jpg?react" {
   import * as React from "react";
   import * as OpenImg from "openimg/react";
 
-  const ReactComponent: (props: OpenImg.ImgProps) => React.ReactNode;
+  const ReactComponent: (props: Partial<OpenImg.ImgProps>) => React.ReactNode;
 
   export const metadata: {
     placeholder: string;
@@ -60,7 +60,7 @@ declare module "*.jpeg?react" {
   import * as React from "react";
   import * as OpenImg from "openimg/react";
 
-  const ReactComponent: (props: OpenImg.ImgProps) => React.ReactNode;
+  const ReactComponent: (props: Partial<OpenImg.ImgProps>) => React.ReactNode;
 
   export const metadata: {
     placeholder: string;
@@ -89,7 +89,7 @@ declare module "*.webp?react" {
   import * as React from "react";
   import * as OpenImg from "openimg/react";
 
-  const ReactComponent: (props: OpenImg.ImgProps) => React.ReactNode;
+  const ReactComponent: (props: Partial<OpenImg.ImgProps>) => React.ReactNode;
 
   export const metadata: {
     placeholder: string;
@@ -118,7 +118,7 @@ declare module "*.avif?react" {
   import * as React from "react";
   import * as OpenImg from "openimg/react";
 
-  const ReactComponent: (props: OpenImg.ImgProps) => React.ReactNode;
+  const ReactComponent: (props: Partial<OpenImg.ImgProps>) => React.ReactNode;
 
   export const metadata: {
     placeholder: string;
