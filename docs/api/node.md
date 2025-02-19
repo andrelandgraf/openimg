@@ -1,6 +1,6 @@
 # openimg/node
 
-openimg/node (Open Image Node) provides a HTTP request handler function to optimize images using sharp, using Node-compatible APIs for Bun, Deno, and Node.js. It also provides utilities for generating low quality image placeholders and retrieving image metadata. 
+openimg/node (Open Image Node) provides a HTTP request handler function to optimize images using sharp, using Node-compatible APIs for Bun, Deno, and Node.js. It also provides utilities for generating low quality image placeholders and retrieving image metadata.
 
 ## Features
 

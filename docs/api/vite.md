@@ -19,9 +19,7 @@ import { defineConfig } from "vite";
 import { openimg } from "openimg/vite";
 
 export default defineConfig(() => ({
-  plugins: [
-    openimg(),
-  ],
+  plugins: [openimg()],
 }));
 ```
 
@@ -47,9 +45,7 @@ Add an image file to your source directly (e.g., `src/assets/cat.png`) and impor
 import CatImg from "./assets/cat.png?react";
 
 export default function App() {
-  return (
-    <CatImg  alt="A cute cat" />
-  );
+  return <CatImg alt="A cute cat" />;
 }
 ```
 
@@ -66,7 +62,12 @@ console.log(metadata); // { width: 800, height: 600, format: "png", src: "/asset
 
 export default function App() {
   return (
-    <img src={metadata.src} width={metadata.width} height={metadata.height} alt="A cute cat" />
+    <img
+      src={metadata.src}
+      width={metadata.width}
+      height={metadata.height}
+      alt="A cute cat"
+    />
   );
 }
 ```

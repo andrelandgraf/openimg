@@ -1,6 +1,6 @@
 # openimg/bun
 
-openimg/bun (Open Image Bun) provides an HTTP request handler function to optimize images using sharp, using Bun APIs where possible. It also provides utilities for generating low quality image placeholders and retrieving image metadata. 
+openimg/bun (Open Image Bun) provides an HTTP request handler function to optimize images using sharp, using Bun APIs where possible. It also provides utilities for generating low quality image placeholders and retrieving image metadata.
 
 ## Features
 
