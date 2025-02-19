@@ -4,8 +4,8 @@ openimg (Open Image) is a collection of JavaScript packages for working with ima
 
 ## Packages
 
-- [openimg-bun](./packages/bun/): Image optimization request handler optimized for Bun
-- [openimg-node](./packages/node/): Node-compatible image optimization request handler for Bun, Deno, and Node
+- [openimg-bun](./packages/bun/): Image optimization request handler and other utilities optimized for Bun
+- [openimg-node](./packages/node/): Node-compatible image optimization request handler and other utilities for Bun, Deno, and Node
 - [openimg-react](./packages/react/): Image React component to query for optimized images
 - [openimg](./packages/core/): All-in-one package bundling `openimg/bun`, `openimg/node`, `openimg/react`
 

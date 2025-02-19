@@ -1,6 +1,6 @@
 {
   "name": "openimg",
-  "version": "0.0.18",
+  "version": "0.0.20",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -22,17 +22,28 @@
     "./react": {
       "import": "./dist/react.js",
       "types": "./dist/types/react.d.ts"
+    },
+    "./vite": {
+      "import": "./dist/vite.js",
+      "types": "./dist/types/vite.d.ts"
+    },
+    "./client": {
+      "types": "./client.d.ts"
     }
   },
   "scripts": {
-    "build": "bun ./scripts/build.ts && bun run build:ts",
-    "build:ts": "tsc"
+    "build": "bun ./scripts/build.ts && bun run build:ts && bun run build:vite-types",
+    "build:ts": "tsc",
+    "build:vite-types": "cp ./src/vite/client.d.ts ./dist/"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "optionalDependencies": {
-    "sharp": "^0.33.5"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "sharp": "^0.33.5",
+    "vite": "^6.1.0"
   },
   "files": [
     "dist"

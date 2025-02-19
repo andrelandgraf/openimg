@@ -12,6 +12,7 @@ export type TargetFormat = "webp" | "avif";
  *   Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified)
  * - optimizerEndpoint: The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint
  *   Defaults to "/img"
+ * - __react18FetchPriority: boolean to use React 18's fetchpriority prop on the img element instead of React 19's FetchPriority
  */
 type OpenImgContextProps = {
   breakpoints: number[];
@@ -149,6 +150,15 @@ export function Image({
 
   // Note fetchPriority is not supported in React 18, only in React 19
   // So it's lowercased here to avoid React warnings in React 18
+  // Unfortunately, React 19 complains about fetchpriority being lowercase
+  // https://github.com/pinterest/gestalt/pull/3976 but hopefully it will be fixed
+  const fetchPriorityKey = React.version.startsWith("18")
+    ? "fetchpriority"
+    : "fetchPriority";
+  const fetchPriorityProp = {
+    [fetchPriorityKey]: isAboveFold ? "high" : "low",
+  };
+
   return (
     <picture>
       {targetFormats.map((format) => (
@@ -196,7 +206,7 @@ export function Image({
         role={imgProps.alt ? undefined : "presentation"}
         loading={isAboveFold ? "eager" : "lazy"}
         decoding={isAboveFold ? "auto" : "async"}
-        fetchpriority={isAboveFold ? "high" : "low"}
+        {...fetchPriorityProp}
         style={{
           backgroundImage: placeholder ? `url(${placeholder})` : undefined,
           backgroundSize: placeholder ? "cover" : undefined,

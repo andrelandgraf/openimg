@@ -24,7 +24,9 @@
     // Some stricter flags
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+
+    "rootDir": "src"
   },
-  "include": ["src"]
+  "include": ["src/*"]
 }

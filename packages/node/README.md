@@ -5,7 +5,8 @@ openimg-node (Open Image Node) provides an HTTP request handler function to opti
 ## Features
 
 - `getImgResponse` request handler function to optimize images using sharp
-- `getImgPlaceholderFromStream` for generating low quality image placeholders from a Readable stream
+- `getImgPlaceholder` for generating low quality image placeholders from a Readable stream or image Buffer
+- `getImgMetadata` for retrieving the width, height, and format of an image from a Readable stream or image Buffer
 
 You can find the API reference for each function below.
 
@@ -33,14 +34,14 @@ This package uses [sharp](https://sharp.pixelplumbing.com) and can only be used 
 
 `getImgResponse` accepts two arguments, a `Request` object and a configuration object, and it returns a promise that resolves to a `Response` object.
 
-Import `getImgResponse` from `openimg-node` and pass in the HTTP `Request` object. The function will return an HTTP `Response` object with the optimized image.
+Import `getImgResponse` from `openimg/node` and pass in the HTTP `Request` object. The function will return an HTTP `Response` object with the optimized image.
 
 Simple example using Hono:
 
 ```typescript
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { getImgResponse } from "openimg-node"; // or openimg/node
+import { getImgResponse } from "openimg/node"; // or openimg-node
 
 const app = new Hono();
 
@@ -224,15 +225,54 @@ You then pass the custom `getImgSource` function to `getImgResponse`:
 getImgResponse(request, { getImgSource });
 ```
 
-## getImgPlaceholderFromStream
+## getImgPlaceholder
 
-Import `getImgPlaceholderFromStream` from `openimg-bun` and pass in a Readable stream (like `ReadStream`). The function will return a low quality image placeholder as a base64-encoded string. The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
+Import `getImgPlaceholder` from `openimg/node` and pass in a Readable stream (like `ReadStream`) or image Buffer. The function will return a low quality image placeholder as a base64-encoded string using [thumbhash](https://github.com/evanw/thumbhash). The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
+
+Example using a Readable stream:
 
 ```typescript
-import { getImgPlaceholderFromStream } from "openimg-node";
-import { createReadStream } from "fs";
+import { getImgPlaceholder } from "openimg/node";
+import { createReadStream } from "node:fs";
 
 const stream = createReadStream("./public/cat.png");
-const placeholder = await getImgPlaceholderFromStream(stream);
+const placeholder = await getImgPlaceholder(stream);
 console.log(placeholder); // data:image/png;base64,...
+```
+
+Example using an image Buffer:
+
+```typescript
+import { getImgPlaceholder } from "openimg/node";
+import { readFileSync } from "node:fs";
+
+const buffer = createReadStream("./public/cat.png");
+const placeholder = await readFileSync(buffer);
+console.log(placeholder); // data:image/png;base64,...
+```
+
+## getImgMetadata
+
+Import `getImgMetadata` from `openimg/node` and pass in a Readable stream (like `ReadStream`) or image Buffer. The function will return the width, height, and format of the image.
+
+Example using a Readable stream:
+
+```typescript
+import { getImgMetadata } from "openimg/node";
+import { createReadStream } from "node:fs";
+
+const stream = createReadStream("./public/cat.png");
+const placeholder = await getImgMetadata(stream);
+console.log(placeholder); // { width: 300, height: 300, format: "png" }
+```
+
+Example using an image Buffer:
+
+```typescript
+import { getImgMetadata } from "openimg/node";
+import { readFileSync } from "node:fs";
+
+const buffer = getImgMetadata("./public/cat.png");
+const placeholder = await readFileSync(buffer);
+console.log(placeholder); // { width: 300, height: 300, format: "png" }
 ```

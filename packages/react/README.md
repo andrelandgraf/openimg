@@ -1,6 +1,6 @@
-# openimg-react
+# openimg-react (openimg/react)
 
-openimg-react (Open Image React) provides an Image component (aliased as Img) for querying optimized images from an image optimization endpoint (e.g., openimg-node). The component uses standard HTML img element attributes to generate a picture element with sources for avif and webp images in different sizes.
+openimg-react (Open Image React) provides an Image component (aliased as Img) for querying optimized images from an image optimization endpoint (e.g., openimg/node). The component uses standard HTML img element attributes to generate a picture element with sources for avif and webp images in different sizes.
 
 ## Features
 
@@ -26,7 +26,7 @@ Note, `sharp` is only needed if you want to use the server-side functionality.
 ## API
 
 ```tsx
-import { Img } from "openimg-react"; // or "openimg/react"
+import { Img } from "openimg/react"; // or "openimg-react"
 
 export default function App() {
   return (
@@ -59,7 +59,7 @@ You can configure the output of the Img component with the `OpenImgContextProvid
 - Custom logic for generating image URLs.
 
 ```tsx
-import { OpenImgContextProvider, Img } from "openimg-react";
+import { OpenImgContextProvider, Img } from "openimg/react";
 
 export default function App() {
   return (
