@@ -12,6 +12,7 @@ openimg is meant to be highly configurable. It can:
 - Cache optimized images to disk
 - Utilize HTTP caching and CDNs for caching optimized images
 - Query for optimized images using the openimg React component
+- Integrate with Vite to create React components for local image assets
 
 ## Limitations
 
@@ -107,7 +108,7 @@ The following search parameters are supported by default:
 - `cacheFolder`: The location to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 - `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
-- `getImgSource`: Provide a function to map the `src` image parameter to a image source image. This is useful if you have several locations for hosted images and want provide a custom mapper.
+- `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper.
 
 The most common use cases are documented in this doc. However, you can also read the full API reference for `openimg/bun` and `openimg/node` here:
 

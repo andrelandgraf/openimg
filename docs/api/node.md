@@ -12,7 +12,7 @@ You can find the API reference for each function below.
 
 ## Limitations
 
-The `openimg/bun` and `openimg/node` request handlers utilize the Web Fetch API's `Request` and `Response` objects. This works great in frameworks and environments such as Bun, Cloudflare Workers, Deno, Hono, and React Router/Remix that also operate on web standards. However, if you are using Express or another framework that operates on Node's `IncomingMessage` and `ServerResponse` objects or similar, you may not be able to easily use openimg. In this case, you could instead use openimg [as a standalone server](../use-cases/optimizer-server.md).
+The `openimg/bun` and `openimg/node` request handlers utilize the Web Fetch API's `Request` and `Response` objects. This works great in frameworks and environments such as Bun, Cloudflare Workers, Deno, Hono, and React Router/Remix that also operate on web standards. However, if you are using Express or another framework that operates on Node's `IncomingMessage` and `ServerResponse` objects or similar, you may not be able to easily use openimg. In this case, you could instead use openimg [as a standalone server](../guides/optimizer-server.md).
 
 ## Installation
 
@@ -79,7 +79,7 @@ The configuration object accepts the following optional options:
 - `cacheFolder`: The location to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 - `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
-- `getImgSource`: Provide a function to map the `src` image parameter to a image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
+- `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
 
 **headers: Headers**
 

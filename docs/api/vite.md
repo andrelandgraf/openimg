@@ -1,6 +1,11 @@
 # openimg-vite
 
-openimg-vite (Open Image Vite) provides an Vite plugin to transform local image asset imports with `?react` and `?meta` queries into a React component and metadata object, respectively.
+openimg-vite (Open Image Vite) provides an Vite plugin to transform local image asset imports with the `?react` and `?meta` query parameters.
+
+## Features
+
+- Transform local image asset imports with the `?react` query into React components that render the `Img` component from openimg/react, setting the `src`, `width`, `height`, and `placeholder` attributes based on the image metadata.
+- Add the `?meta` query to import the metadata of an image, including the width, height, format, src and a base64-encoded preview image.
 
 ## Installation
 
@@ -51,6 +56,8 @@ export default function App() {
 
 The `?react` query will transform the image import into a React component that renders the `Img` component from openimg/react under the hood. You can read more about the `Img` component in the [openimg/react documentation](./react.md).
 
+The width, height, and src attributes of the `Img` component are set based on the image metadata. Further, the `placeholder` prop is set to a base64-encoded preview image that was inlined during the build process. You can override these attributes by passing them as props to the imported component. For instance, you may want to set the placeholder to `undefined` for transparent images.
+
 ## Usage ?meta
 
 You can also import the metadata of an image with the `?meta` query:
@@ -72,4 +79,8 @@ export default function App() {
 }
 ```
 
-Note the metadata object is also available via `?react`.
+Note the metadata object is also available via `?react`:
+
+```tsx
+import CatImg, { metadata } from "./assets/cat.png?react";
+```

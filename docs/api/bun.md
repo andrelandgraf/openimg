@@ -75,7 +75,7 @@ The configuration object accepts the following optional options:
 - `cacheFolder`: The location to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 - `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
-- `getImgSource`: Provide a function to map the `src` image parameter to a image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
+- `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
 
 **headers: Headers**
 
