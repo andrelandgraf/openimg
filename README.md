@@ -17,3 +17,12 @@ The easiest way to get started is to integrate openimg as an image optimization 
 - [openimg/node](./docs/api/node.md): Node-compatible image optimization request handler and other utilities for Bun, Deno, and Node
 - [openimg/react](./docs/api/react.md): Image React component to query for optimized images
 - [openimg/vite](./docs/api/vite.md): Vite plugin for integrating local image assets from your Vite project
+
+## Changelogs
+
+Find the changelogs for each npm package here:
+
+- [openimg](./packages/core/CHANGELOG.md)
+- [openimg-bun](./packages/bun/CHANGELOG.md)
+- [openimg-node](./packages/node/CHANGELOG.md)
+- [openimg-react](./packages/react/CHANGELOG.md)

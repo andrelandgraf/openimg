@@ -7,7 +7,8 @@ const FITS = ["cover", "contain"] as const;
 export type Fit = (typeof FITS)[number];
 
 /**
- * ImgParams holds the parameters for image processing.
+ * ImgParams are the image optimization parameters from the incoming request
+ * - src: The source of the image, either a local path or a remote URL. Can further be manipulated in `getImgSource`.
  * - width: The target width of the image. If not set, the original image's width will be used.
  * - height: The target height of the image. If not set, the original image's height will be used.
  * - fit: The fit mode for resizing the image: "cover" or "contain". Defaults to sharp's default "cover".
@@ -24,7 +25,7 @@ export type ImgParams = {
 export type GetImgParamsArgs = { request: Request };
 
 /**
- * Called to get the target image parameters for a given request.
+ * Called to get the image parameters for an incoming HTTP request.
  * The default implementation reads the parameters src, w (width), h (height), fit, and format from the search parameters.
  */
 export type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
@@ -34,6 +35,7 @@ export type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
  * - type: The type of the source, either "fs" for local file system or "fetch" for remote URL.
  * - path: The path to the image if type is "fs".
  * - url: The URL to fetch the image from if type is "fetch", can be a relative path or an absolute URL.
+ * - headers: Optional headers to be sent with the fetch request if type is "fetch".
  */
 export type ImgSource =
   | {
@@ -43,18 +45,21 @@ export type ImgSource =
   | {
       type: "fetch";
       url: string;
+      headers?: Headers;
     };
 
 export type GetImgSourceArgs = { request: Request; params: ImgParams };
 
 /**
  * Called to get the source of the original image for a given request.
- * The default implementation uses the src search parameter src
- * to determine the source:
+ * The default implementation uses the src ImgParams value to determine the source:
  * - If the src is a relative path, it is assumed to be a local file path and concatenated with './public'.
  * - If the src is an absolute URL, it is assumed to be a remote image.
+ * Implement this function to customize the source retrieval logic.
  */
-export type GetImgSource = (args: GetImgSourceArgs) => ImgSource | Response;
+export type GetImgSource = (
+  args: GetImgSourceArgs,
+) => Promise<ImgSource | Response> | ImgSource | Response;
 
 /**
  * Configuration values for the getImgResponse function.

@@ -152,7 +152,9 @@ type ImgSource =
 
 type GetImgSourceArgs = { request: Request; params: ImgParams };
 
-type GetImgSource = (args: GetImgSourceArgs) => ImgSource | Response;
+type GetImgSource = (
+  args: GetImgSourceArgs,
+) => Promise<ImgSource | Response> | ImgSource | Response;
 ```
 
 A function that takes the `Request` object and the `ImgParams` object (returned from `getImgParams`) and returns an `ImgSources` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image sources will be used to retrieve the source image.
@@ -162,14 +164,15 @@ The default implementation looks as follows:
 ```typescript
 export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
-  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns false
 
-  if (srcUrl) {
+  if (URL.canParse(src)) {
+    // If the src is a valid URL, return it as a fetch source
     return {
       type: "fetch",
       url: src,
     };
   }
+  // If the src is a relative path, return it as a file system source
   return {
     type: "fs",
     path: "./public" + src,
@@ -188,6 +191,10 @@ import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
 export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
+  if (URL.canParse(src)) {
+    // Do not allow remote URLs
+    return new Response(null, { status: 400, statusText: "Bad Request" });
+  }
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";
   return {
@@ -197,23 +204,26 @@ export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
 }
 ```
 
-Example for a custom `getImgSource` function that always uses fetch calls, even for local images:
+Example for a custom async `getImgSource` function that adds an authorization header to the request for remote images:
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
-export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
+export async function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
-  const srcUrl = parseUrl(src); // Checks if the src is a valid URL, otherwise returns false
-  if (srcUrl) {
+  if (URL.canParse(src)) {
+    const headers = new Headers();
+    const key = await getKey();
+    headers.set("Authorization", `Bearer ${key}`);
     return {
       type: "fetch",
       url: src,
+      headers,
     };
   }
   return {
-    type: "fetch",
-    path: process.env.origin + src,
+    type: "fs",
+    path: "./public" + src,
   };
 }
 ```

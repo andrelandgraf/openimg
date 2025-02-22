@@ -72,7 +72,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   // Map src to location of the original image (fs or fetch)
   const sourceRes = config.getImgSource
-    ? config.getImgSource({ request, params })
+    ? await config.getImgSource({ request, params })
     : getImgSource(params);
   if (sourceRes instanceof Response) {
     return sourceRes;
@@ -109,7 +109,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
     let nodeStream: Readable;
     if (source.type === "fetch") {
-      const fetchRes = await fetch(source.url);
+      const fetchRes = await fetch(source.url, { headers: source.headers });
       if (!fetchRes.ok || !fetchRes.body) {
         pipelineLock.resolve(cachePath);
         return new Response(fetchRes.statusText || "Image not found", {

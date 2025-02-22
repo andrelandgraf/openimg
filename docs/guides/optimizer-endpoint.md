@@ -112,8 +112,8 @@ The following search parameters are supported by default:
 
 The most common use cases are documented in this doc. However, you can also read the full API reference for `openimg/bun` and `openimg/node` here:
 
-- [openimg-bun](../packages/bun/README.md)
-- [openimg-node](../packages/node/README.md)
+- [openimg/bun](../api/bun.md)
+- [openimg/node](../api/node.md)
 
 #### Configure where to retrieve images from
 
@@ -122,20 +122,9 @@ First, you have to decide where to retrieve images from. By default, `getImgResp
 The default implementation looks as follows:
 
 ```typescript
-// Checks if the src is a valid URL, otherwise returns false
-export function parseUrl(src: string) {
-  try {
-    return new URL(src);
-  } catch {
-    return false;
-  }
-}
-
 export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
-  const srcUrl = parseUrl(src);
-
-  if (srcUrl) {
+  if (URL.canParse(src)) {
     return {
       type: "fetch",
       url: src,
@@ -150,15 +139,32 @@ export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
 
 Note that the result from `getImgSource` will further be validated against the `allowlistedOrigins` config option.
 
-You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production:
+You may have to override the default `getImgSource` function if you have different locations for hosted images, e.g., dev vs. production, or if you need to sign the URL for a remote S3 bucket.
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
-export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
+export async function getImgSource({ params }: GetImgSourceArgs): ImgSource {
   const src = params.src;
-  const srcUrl = parseUrl(src);
-
+  if (URL.canParse(src)) {
+    if (src.startsWith(process.env.S3_URL)) {
+      // Sign the URL for S3
+      const url = new URL(src);
+      const signedUrl = await signUrl(url);
+      return {
+        type: "fetch",
+        url: signedUrl,
+      };
+    }
+    // You can also add custom headers to the request
+    const headers = new Headers();
+    headers.set("x-api-key", process.env.API_KEY);
+    return {
+      type: "fetch",
+      url: src,
+      headers,
+    };
+  }
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";
   return {

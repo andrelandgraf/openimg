@@ -1,6 +1,6 @@
 // import { getImgResponse } from "openimg-node";
 // import { getImgResponse } from "openimg-bun";
-import { getImgResponse } from "openimg/bun";
+import { getImgResponse } from "openimg/node";
 
 Bun.serve({
   port: 3000,

@@ -1,5 +1,5 @@
-// import { getImgResponse } from "openimg-node";
-import { getImgResponse } from "openimg-bun";
+import { getImgResponse } from "openimg/node";
+//import { getImgResponse } from "openimg-bun";
 // import { getImgResponse } from "openimg/bun";
 
 Bun.serve({
