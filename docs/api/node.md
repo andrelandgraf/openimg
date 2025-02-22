@@ -81,7 +81,7 @@ The configuration object accepts the following optional options:
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
 - `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
 
-**headers: Headers**
+**headers: HeadersInit**
 
 Headers to be added to the HTTP response.
 
@@ -148,6 +148,7 @@ type ImgSource =
   | {
       type: "fetch";
       url: string;
+      headers?: HeadersInit | undefined;
     };
 
 type GetImgSourceArgs = { request: Request; params: ImgParams };

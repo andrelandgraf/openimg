@@ -87,3 +87,9 @@ test("it caches and returns original format", async () => {
   const cachedFile = Bun.file("./data/images/cat-png-w-100-h-100-fit-base.png");
   expect(await cachedFile.exists()).toBe(true);
 });
+
+test("it returns custom headers", async () => {
+  const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=webp");
+  expect(res.status).toBe(200);
+  expect(res.headers.get("x-openimg-test")).toBe("true");
+});

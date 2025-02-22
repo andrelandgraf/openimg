@@ -5,7 +5,9 @@ import { getImgResponse } from "openimg/node";
 Bun.serve({
   port: 3000,
   async fetch(req) {
-    const url = new URL(req.url);
-    return getImgResponse(req);
+    const headers = {
+      "x-openimg-test": "true",
+    };
+    return getImgResponse(req, { headers });
   },
 });

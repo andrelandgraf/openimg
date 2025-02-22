@@ -45,7 +45,7 @@ export type ImgSource =
   | {
       type: "fetch";
       url: string;
-      headers?: Headers;
+      headers?: HeadersInit | undefined;
     };
 
 export type GetImgSourceArgs = { request: Request; params: ImgParams };
@@ -72,7 +72,7 @@ export type GetImgSource = (
  * - getImgParams: Provide a custom getImgParams function for more control over where to retrieve the image parameters from the request.
  */
 export type Config = {
-  headers?: Headers;
+  headers?: HeadersInit;
   allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
   getImgSource?: GetImgSource;

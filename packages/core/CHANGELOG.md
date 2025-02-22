@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.2.1
+
+- Change `headers` type in `getImgSource` from `Headers` to `HeadersInit`.
+- Change `headers` type in `getImgResponse` from `Headers` to `HeadersInit`.
+
 # 0.2.0
 
 ## openimg/node & openimg/bun

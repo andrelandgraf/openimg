@@ -59,7 +59,7 @@ function streamFromCache(path: string, headers: Headers) {
  * @returns {Promise<Response>} - a promise resolving to a Response object
  */
 export async function getImgResponse(request: Request, config: Config = {}) {
-  const headers = config.headers || new Headers();
+  const headers = new Headers(config.headers);
 
   // Get image parameters (src, width, height, fit, format) from the request
   const paramsRes = config.getImgParams
