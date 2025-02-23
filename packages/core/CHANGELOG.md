@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.4.0
+
+## openimg/node & openimg/bun
+
+- Use `application/octet-stream` as fallback content-type in `getImgResponse` if format not specified
+
 # 0.3.0
 
 ## openimg/node & openimg/bun

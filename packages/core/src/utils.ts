@@ -312,3 +312,20 @@ export default function invariant(
   const value: string = provided ? `${prefix}: ${provided}` : prefix;
   throw new Error(value);
 }
+
+export function getContentType(format: Format | undefined): string {
+  if (!format) {
+    return "application/octet-stream";
+  }
+  switch (format) {
+    case "webp":
+      return "image/webp";
+    case "avif":
+      return "image/avif";
+    case "png":
+      return "image/png";
+    case "jpeg":
+    case "jpg":
+      return "image/jpeg";
+  }
+}

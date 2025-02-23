@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.0
+
+- Use `application/octet-stream` as fallback content-type in `getImgResponse` if format not specified
+
 # 0.3.0
 
 - `getImgParams` can now be async and return a promise.

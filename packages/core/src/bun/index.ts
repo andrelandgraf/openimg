@@ -8,6 +8,7 @@ import { exists } from "./utils";
 import invariant, {
   Config,
   getCachePath,
+  getContentType,
   getImgParams,
   getImgSource,
   ImgParams,
@@ -55,6 +56,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     return paramsRes;
   }
   const params: ImgParams = paramsRes;
+
+  headers.set("Content-Type", getContentType(params.format));
 
   // Map src to location of the original image (fs or fetch)
   const sourceRes = config.getImgSource
@@ -114,10 +117,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     const pipeline = sharp();
     if (params.format === "avif") {
       pipeline.avif();
-      headers.set("content-type", "image/avif");
     } else if (params.format === "webp") {
       pipeline.webp();
-      headers.set("content-type", "image/webp");
     }
 
     if (params.width && params.height) {
