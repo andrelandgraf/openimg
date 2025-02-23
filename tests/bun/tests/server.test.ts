@@ -83,7 +83,7 @@ test("it caches and returns avif", async () => {
 test("it caches and returns original format", async () => {
   const res = await fetch(origin + "?src=/cat.png&w=100&h=100");
   expect(res.status).toBe(200);
-  expect(res.headers.get("Content-Type")).toBe("application/octet-stream");
+  expect(res.headers.get("Content-Type")).toBe("image/jpeg");
 
   const cachedFile = Bun.file("./data/images/cat-png-w-100-h-100-fit-base.png");
   expect(await cachedFile.exists()).toBe(true);

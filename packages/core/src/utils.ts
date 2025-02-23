@@ -314,9 +314,6 @@ export default function invariant(
 }
 
 export function getContentType(format: Format | undefined): string {
-  if (!format) {
-    return "application/octet-stream";
-  }
   switch (format) {
     case "webp":
       return "image/webp";
@@ -326,6 +323,7 @@ export function getContentType(format: Format | undefined): string {
       return "image/png";
     case "jpeg":
     case "jpg":
+    default:
       return "image/jpeg";
   }
 }

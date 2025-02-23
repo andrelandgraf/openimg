@@ -1,8 +1,8 @@
 # Changelog
 
-# 0.4.0
+# 0.4.1
 
-- Use `application/octet-stream` as fallback content-type in `getImgResponse` if format not specified
+- Use `image/jpeg` as fallback content-type in `getImgResponse` if format not specified
 
 # 0.3.0
 
