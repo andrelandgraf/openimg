@@ -121,7 +121,6 @@ Set `allowlistedOrigins` to `['*']` to allow all remote origins. You should prob
 
 ```typescript
 type ImgParams = {
-  src: string;
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
@@ -137,7 +136,7 @@ type GetImgParams = (
 
 A function that takes the `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response is returned as-is. Otherwise, the returned image parameters is used to optimize the image.
 
-The default implementation retrieves the src, w (width), h (height), fit, format values from the search parameters of the request and you probably don't need to override the default `getImgParams` function used if no `getImgParams` function is provided. However, for more flexibility, you can implement your own logic to determine the image parameters.
+The default implementation retrieves the w (width), h (height), fit, format values from the search parameters of the request and you probably don't need to override the default `getImgParams` function used if no `getImgParams` function is provided. However, for more flexibility, you can implement your own logic to determine the image parameters.
 
 **getImgSource: Function**
 
@@ -162,11 +161,17 @@ type GetImgSource = (
 
 A function that takes the `Request` object and the `ImgParams` object (returned from `getImgParams`) and returns an `ImgSources` object or a `Response` object. If it returns a `Response` object, the response will be returned as-is. Otherwise, the returned image sources will be used to retrieve the source image.
 
-The default implementation looks as follows:
+The default implementation looks something like this:
 
 ```typescript
-export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
-  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
+export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
+  const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
 
   if (URL.canParse(src)) {
     // If the src is a valid URL, return it as a fetch source
@@ -192,8 +197,15 @@ Example for a custom `getImgSource` function that always returns a file from the
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
-export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
-  const src = params.src;
+export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
+  const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+
   if (URL.canParse(src)) {
     // Do not allow remote URLs
     return new Response(null, { status: 400, statusText: "Bad Request" });
@@ -213,7 +225,14 @@ Example for a custom async `getImgSource` function that adds an authorization he
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
 export async function getImgSource({ params }: GetImgSourceArgs): ImgSource {
-  const src = params.src;
+  const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+
   if (URL.canParse(src)) {
     const headers = new Headers();
     const key = await getKey();

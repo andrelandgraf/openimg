@@ -58,11 +58,11 @@ beforeAll(async () => {
 afterAll(async () => {
   console.log("shutting down server...");
 
-  const txt1 = await $`kill -9 $(lsof -ti:${port})`.text();
-  console.log(txt1);
-
   const txt2 = await $`kill -9 $(lsof -ti:${portRemote})`.text();
   console.log(txt2);
+
+  const txt1 = await $`kill -9 $(lsof -ti:${port})`.text();
+  console.log(txt1);
 });
 
 afterEach(() => {
@@ -78,7 +78,7 @@ test("it caches and returns webp", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/webp");
 
   const cachedFile = Bun.file(
-    "./data/images/cat-png-w-100-h-100-fit-base.webp",
+    "./data/images/localhost-w-100-h-100-fit-base.webp",
   );
   expect(await cachedFile.exists()).toBe(true);
 });

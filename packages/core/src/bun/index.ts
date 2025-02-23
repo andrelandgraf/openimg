@@ -62,7 +62,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
   // Map src to location of the original image (fs or fetch)
   const sourceRes = config.getImgSource
     ? await config.getImgSource({ request, params })
-    : getImgSource(params);
+    : getImgSource({ request, params });
   if (sourceRes instanceof Response) {
     return sourceRes;
   }
@@ -76,7 +76,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   const cachePath =
     config.cacheFolder !== "no_cache"
-      ? getCachePath(params, config.cacheFolder)
+      ? getCachePath({ params, source, cacheFolder: config.cacheFolder })
       : null;
   try {
     if (config.cacheFolder !== "no_cache") {

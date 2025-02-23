@@ -14,8 +14,11 @@ Bun.serve({
     console.log("GET", req.url);
     return getImgResponse(req, {
       allowlistedOrigins: [remote],
-      getImgSource: async ({ params }) => {
-        const src = params.src;
+      getImgSource: async ({ request }) => {
+        const src = new URL(request.url).searchParams.get("src");
+        if (!src) {
+          return new Response("src is required", { status: 400 });
+        }
         const headers = new Headers();
         const key = await computeKey();
         headers.set("api-key", key);

@@ -64,7 +64,7 @@ test("it caches and returns webp", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/webp");
 
   const cachedFile = Bun.file(
-    "./data/images/cat-png-w-100-h-100-fit-base.webp",
+    "./data/images/public/cat-png-w-100-h-100-fit-base.webp",
   );
   expect(await cachedFile.exists()).toBe(true);
 });
@@ -75,7 +75,7 @@ test("it caches and returns avif", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/avif");
 
   const cachedFile = Bun.file(
-    "./data/images/cat-png-w-100-h-100-fit-base.avif",
+    "./data/images/public/cat-png-w-100-h-100-fit-base.avif",
   );
   expect(await cachedFile.exists()).toBe(true);
 });
@@ -85,7 +85,9 @@ test("it caches and returns original format", async () => {
   expect(res.status).toBe(200);
   expect(res.headers.get("Content-Type")).toBe("image/jpeg");
 
-  const cachedFile = Bun.file("./data/images/cat-png-w-100-h-100-fit-base.png");
+  const cachedFile = Bun.file(
+    "./data/images/public/cat-png-w-100-h-100-fit-base.png",
+  );
   expect(await cachedFile.exists()).toBe(true);
 });
 

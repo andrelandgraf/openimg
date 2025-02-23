@@ -1,10 +1,17 @@
 # Changelog
 
+# 0.5.0
+
+## openimg/node & openimg/bun
+
+- `src` removed from `ImgParams`. `GetImgSource` is now responsible for parsing the `src` string from the request.
+- Use `ImgSource` instead of raw `src` for cache folder path.
+
 # 0.4.1
 
 ## openimg/node & openimg/bun
 
-- Use `image/jpeg` as fallback content-type in `getImgResponse` if format not specified
+- Use `image/jpeg` as fallback content-type in `getImgResponse` if format not specified.
 
 # 0.3.0
 

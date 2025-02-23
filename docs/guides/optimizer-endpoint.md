@@ -119,11 +119,18 @@ The most common use cases are documented in this doc. However, you can also read
 
 First, you have to decide where to retrieve images from. By default, `getImgResponse` will take the `src` search parameter and map it to either a absolute URL or relative file system path. However, you can provide your own `getImgSource` implementation to change the default behavior and map `src` to a different location.
 
-The default implementation looks as follows:
+The default implementation looks something like this:
 
 ```typescript
-export function getImgSource({ params }: GetImgSourceArgs): ImgSource {
-  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
+export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
+  const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+
   if (URL.canParse(src)) {
     return {
       type: "fetch",
@@ -144,8 +151,15 @@ You may have to override the default `getImgSource` function if you have differe
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
 
-export async function getImgSource({ params }: GetImgSourceArgs): ImgSource {
-  const src = params.src;
+export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
+  const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+
   if (URL.canParse(src)) {
     if (src.startsWith(process.env.S3_URL)) {
       // Sign the URL for S3

@@ -1,8 +1,13 @@
 # Changelog
 
+# 0.5.0
+
+- `src` removed from `ImgParams`. `GetImgSource` is now responsible for parsing the `src` string from the request.
+- Use `ImgSource` instead of raw `src` for cache folder path.
+
 # 0.4.1
 
-- Use `image/jpeg` as fallback content-type in `getImgResponse` if format not specified
+- Use `image/jpeg` as fallback content-type in `getImgResponse` if format not specified.
 
 # 0.3.0
 

@@ -8,14 +8,12 @@ export type Fit = (typeof FITS)[number];
 
 /**
  * ImgParams are the image optimization parameters from the incoming request
- * - src: The source of the image, either a local path or a remote URL. Can further be manipulated in `getImgSource`.
  * - width: The target width of the image. If not set, the original image's width will be used.
  * - height: The target height of the image. If not set, the original image's height will be used.
  * - fit: The fit mode for resizing the image: "cover" or "contain". Defaults to sharp's default "cover".
  * - format: The target format of the image: "webp", "avif", "png", "jpeg", or "jpg". If not specified, the format will be inferred from the source.
  */
 export type ImgParams = {
-  src: string;
   width?: number | undefined;
   height?: number | undefined;
   fit?: Fit | undefined;
@@ -101,13 +99,6 @@ export function getImgParams({
   request,
 }: GetImgParamsArgs): ImgParams | Response {
   const url = new URL(request.url);
-  const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
-  if (!src) {
-    return new Response(null, {
-      status: 400,
-      statusText: 'Search param "src" must be set',
-    });
-  }
 
   const w = url.searchParams.get("w") || undefined;
   if (w && Number.isNaN(w)) {
@@ -144,7 +135,6 @@ export function getImgParams({
   }
 
   return {
-    src,
     width,
     height,
     format,
@@ -152,21 +142,31 @@ export function getImgParams({
   };
 }
 
-export function getCachePath(
-  params: ImgParams,
+type GetCachePathArgs = {
+  params: ImgParams;
+  source: ImgSource;
+  cacheFolder?: string | undefined | null;
+};
+
+export function getCachePath({
+  params,
+  source,
   cacheFolder = "./data/images",
-): string {
-  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
-  const srcUrl = parseUrl(src);
-  const srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
+}: GetCachePathArgs): string {
+  const src = source.type === "fetch" ? source.url : source.path; // "https://example.com/folder/cat.png", "/cat.png"
+  const srcUrl = source.type === "fetch" ? new URL(src) : null;
+  let srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
   const originExtension = path.extname(srcPath); // ".png"
   const extension = params.format ? "." + params.format : originExtension;
 
   const host = srcUrl ? srcUrl.hostname : ""; // "example.com", ""
   let slug = host + srcPath; // "example.com/folder/cat.png", "/cat.png"
   slug = slug.startsWith("/") ? slug : "/" + slug; // "/example.com/folder/cat.png", "/cat.png"
+  slug = slug.endsWith("/") ? slug.slice(0, -1) : slug;
   slug = slug.replaceAll(".", "-");
   slug = slug.replaceAll(":", "-");
+  slug = slug.replaceAll("//", "/");
+  slug = slug.replaceAll("/-/", "/");
   return (
     cacheFolder +
     slug +
@@ -175,11 +175,18 @@ export function getCachePath(
   );
 }
 
-export function getImgSource(params: ImgParams): ImgSource {
-  const src = params.src; // "https://example.com/folder/cat.png", "/cat.png"
-  const srcUrl = parseUrl(src);
-
-  if (srcUrl) {
+export function getImgSource({
+  request,
+}: GetImgSourceArgs): ImgSource | Response {
+  const url = new URL(request.url);
+  const src = url.searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+  if (URL.canParse(src)) {
     return {
       type: "fetch",
       url: src,
@@ -218,11 +225,10 @@ export function validateImgSource(
 }
 
 export function parseUrl(src: string) {
-  try {
-    return new URL(src);
-  } catch {
+  if (!URL.canParse(src)) {
     return false;
   }
+  return new URL(src);
 }
 
 export class PipelineLock {
