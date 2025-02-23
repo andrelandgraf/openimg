@@ -50,7 +50,14 @@ type OpenImgContextProps = {
  * It takes an img src, width, height, fit, format, and optimizerEndpoint
  * and returns: `${optimizerEndpoint}?src=${src}&w=${width}&h=${height}&fit=${fit}&format=${format}`
  */
-export const defaultGetSrc: GetSrc = ({ src, width, height, fit, format, optimizerEndpoint }) => {
+export const defaultGetSrc: GetSrc = ({
+  src,
+  width,
+  height,
+  fit,
+  format,
+  optimizerEndpoint,
+}) => {
   const params = new URLSearchParams({
     src,
     w: width.toString(),
@@ -59,7 +66,7 @@ export const defaultGetSrc: GetSrc = ({ src, width, height, fit, format, optimiz
   if (fit) params.append("fit", fit);
   if (format) params.append("format", format);
   return optimizerEndpoint + "?" + params.toString();
-}
+};
 
 const defaultContext: OpenImgContextProps = {
   breakpoints: [640, 768, 1024, 1280, 1536],
