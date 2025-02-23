@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.0
+
+## openimg/node & openimg/bun
+
+- `getImgParams` can now be async and return a promise.
+
 # 0.2.2
 
 ## openimg/react

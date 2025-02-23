@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.0
+
+- `getImgParams` can now be async and return a promise.
+
 # 0.2.1
 
 - Change `headers` type in `getImgSource` from `Headers` to `HeadersInit`.

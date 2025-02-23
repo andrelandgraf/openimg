@@ -130,7 +130,9 @@ type ImgParams = {
 
 type GetImgParamsArgs = { request: Request };
 
-type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
+type GetImgParams = (
+  args: GetImgParamsArgs,
+) => Promise<ImgParams | Response> | ImgParams | Response;
 ```
 
 A function that takes the `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response is returned as-is. Otherwise, the returned image parameters is used to optimize the image.

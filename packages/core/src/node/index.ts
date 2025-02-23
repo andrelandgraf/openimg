@@ -63,7 +63,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   // Get image parameters (src, width, height, fit, format) from the request
   const paramsRes = config.getImgParams
-    ? config.getImgParams({ request })
+    ? await config.getImgParams({ request })
     : getImgParams({ request });
   if (paramsRes instanceof Response) {
     return paramsRes;

@@ -28,7 +28,9 @@ export type GetImgParamsArgs = { request: Request };
  * Called to get the image parameters for an incoming HTTP request.
  * The default implementation reads the parameters src, w (width), h (height), fit, and format from the search parameters.
  */
-export type GetImgParams = (args: GetImgParamsArgs) => ImgParams | Response;
+export type GetImgParams = (
+  args: GetImgParamsArgs,
+) => Promise<ImgParams | Response> | ImgParams | Response;
 
 /**
  * ImgSource describes where and how to retrieve the original image.
