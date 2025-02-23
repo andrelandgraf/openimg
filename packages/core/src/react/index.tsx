@@ -4,9 +4,31 @@ export type Fit = "cover" | "contain";
 export type TargetFormat = "webp" | "avif";
 
 /**
+ * - src: the src prop passed to the Image component
+ * - width: the width prop passed to the Image component
+ * - height: the height prop passed to the Image component
+ * - fit: the fit prop passed to the Image component
+ * - format: the format prop passed to the Image component
+ * - optimizerEndpoint: the OpenImgContext optimizerEndpoint value
+ */
+export type GetSrcArgs = {
+  src: string;
+  width: number;
+  height: number;
+  fit?: Fit;
+  format?: TargetFormat;
+  optimizerEndpoint: string;
+};
+
+/**
+ * Function to return a custom src string given the src, width, height, fit, format, and optimizerEndpoint
+ */
+export type GetSrc = (args: GetSrcArgs) => string;
+
+/**
  * - breakpoints: width[] breakpoints for the picture's "sizes" attribute. Must be in ascending order.
  *   Defaults to Tailwind's breakpoints (sm, md, lg, xl, 2xl): [640, 768, 1024, 1280, 1536]
- * - getSrc: fn to return custom src string given the src, width, height, fit, format, and optimizerEndpoint
+ * - getSrc: Function to return a custom src string given the src, width, height, fit, format, and optimizerEndpoint
  *   Defaults to function returning `{optimizerEndpoint}?src={src}&w={width}&h={height}&fit={fit}&format={format}`
  * - targetFormats: string[] formats that are supported
  *   Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified)
@@ -16,30 +38,32 @@ export type TargetFormat = "webp" | "avif";
  */
 type OpenImgContextProps = {
   breakpoints: number[];
-  getSrc: (args: {
-    src: string;
-    width: number;
-    height: number;
-    fit?: Fit;
-    format?: TargetFormat;
-    optimizerEndpoint: string;
-  }) => string;
+  getSrc: GetSrc;
   targetFormats: TargetFormat[];
   optimizerEndpoint: string;
 };
 
+/**
+ * @param {GetSrcArgs} args
+ * @returns {string} The src string for the picture element's img and sources
+ * @description The default getSrc function for the OpenImgContext
+ * It takes an img src, width, height, fit, format, and optimizerEndpoint
+ * and returns: `${optimizerEndpoint}?src=${src}&w=${width}&h=${height}&fit=${fit}&format=${format}`
+ */
+export const defaultGetSrc: GetSrc = ({ src, width, height, fit, format, optimizerEndpoint }) => {
+  const params = new URLSearchParams({
+    src,
+    w: width.toString(),
+    h: height.toString(),
+  });
+  if (fit) params.append("fit", fit);
+  if (format) params.append("format", format);
+  return optimizerEndpoint + "?" + params.toString();
+}
+
 const defaultContext: OpenImgContextProps = {
   breakpoints: [640, 768, 1024, 1280, 1536],
-  getSrc: ({ src, width, height, fit, format, optimizerEndpoint }) => {
-    const params = new URLSearchParams({
-      src,
-      w: width.toString(),
-      h: height.toString(),
-    });
-    if (fit) params.append("fit", fit);
-    if (format) params.append("format", format);
-    return optimizerEndpoint + "?" + params.toString();
-  },
+  getSrc: defaultGetSrc,
   targetFormats: ["avif", "webp"],
   optimizerEndpoint: "/img",
 };

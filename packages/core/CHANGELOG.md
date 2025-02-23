@@ -1,6 +1,15 @@
 # Changelog
 
+# 0.2.2
+
+## openimg/react
+
+- Expose `defaultGetSrc` function.
+- Expose `GetSrc` and `GetSrcArgs` types.
+
 # 0.2.1
+
+## openimg/node & openimg/bun
 
 - Change `headers` type in `getImgSource` from `Headers` to `HeadersInit`.
 - Change `headers` type in `getImgResponse` from `Headers` to `HeadersInit`.

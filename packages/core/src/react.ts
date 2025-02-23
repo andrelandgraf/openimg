@@ -1,5 +1,8 @@
 export {
   type Fit,
+  type GetSrc,
+  type GetSrcArgs,
+  defaultGetSrc,
   Image,
   type ImageProps,
   Img,
