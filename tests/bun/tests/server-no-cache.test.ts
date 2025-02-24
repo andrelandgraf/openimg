@@ -46,7 +46,7 @@ test("it returns 404 if the img path maps to not image in the public folder", as
 
 test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
   const res = await fetch(
-    origin + "?src=https://example.com/cat2.png&w=100&h=100&format=avif",
+    origin + "?src=https://example.com/cat2.png&w=100&h=100&format=avif"
   );
   expect(res.status).toBe(403);
 });
@@ -57,7 +57,7 @@ test("it does not cache and returns webp", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/webp");
 
   const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.webp",
+    "./data/images/public/cat-png-w-100-h-100-fit-base.webp"
   );
   expect(await cachedFile.exists()).toBe(false);
 });
@@ -68,7 +68,7 @@ test("it does not cache and returns avif", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/avif");
 
   const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.avif",
+    "./data/images/public/cat-png-w-100-h-100-fit-base.avif"
   );
   expect(await cachedFile.exists()).toBe(false);
 });
@@ -78,7 +78,7 @@ test("it does not cache and returns original format", async () => {
   expect(res.status).toBe(200);
 
   const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.png",
+    "./data/images/public/cat-png-w-100-h-100-fit-base.png"
   );
   expect(await cachedFile.exists()).toBe(false);
 });

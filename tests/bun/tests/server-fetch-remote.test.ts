@@ -78,7 +78,7 @@ test("it caches and returns webp", async () => {
   expect(res.headers.get("Content-Type")).toBe("image/webp");
 
   const cachedFile = Bun.file(
-    "./data/images/localhost-w-100-h-100-fit-base.webp",
+    "./data/images/localhost-w-100-h-100-fit-base.webp"
   );
   expect(await cachedFile.exists()).toBe(true);
 });

@@ -19,7 +19,7 @@ test("applies additional attributes to the <img> tag", () => {
       alt="A cute cat"
       className="test-class"
       data-testid="test-image"
-    />,
+    />
   );
   const imgElement = screen.getByTestId("test-image");
   expect(imgElement).toHaveClass("test-class");
@@ -33,7 +33,7 @@ test("applies default attributes for better web performance", () => {
       height={800}
       alt="A cute cat"
       data-testid="test-image"
-    />,
+    />
   );
   const imgElement = screen.getByTestId("test-image");
   expect(imgElement).toHaveAttribute("loading", "lazy");
@@ -50,7 +50,7 @@ test("applies priority attributes if isAboveFold specified", () => {
       height={800}
       alt="A cute cat"
       data-testid="test-image"
-    />,
+    />
   );
   const imgElement = screen.getByTestId("test-image");
   expect(imgElement).toHaveAttribute("loading", "eager");
@@ -60,7 +60,7 @@ test("applies priority attributes if isAboveFold specified", () => {
 
 test("applies role presentation if not alt text supplied", () => {
   render(
-    <Img src="/cat.png" width={800} height={800} data-testid="test-image" />,
+    <Img src="/cat.png" width={800} height={800} data-testid="test-image" />
   );
   const imgElement = screen.getByTestId("test-image");
   expect(imgElement).toHaveAttribute("role", "presentation");
@@ -68,7 +68,7 @@ test("applies role presentation if not alt text supplied", () => {
 
 test("generates <source> elements for each format", () => {
   const { container } = render(
-    <Img src="/cat.png" width={800} height={800} alt="A cute cat" />,
+    <Img src="/cat.png" width={800} height={800} alt="A cute cat" />
   );
   const sourceElements = container.querySelectorAll("source");
   expect(sourceElements.length).toEqual(2);
@@ -79,7 +79,7 @@ test("generates only specified <source> element when custom formats are provided
   const { container } = render(
     <OpenImgContextProvider targetFormats={customFormats}>
       <Img src="/cat.png" width={800} height={800} alt="A cute cat" />
-    </OpenImgContextProvider>,
+    </OpenImgContextProvider>
   );
 
   const sourceElements = container.querySelectorAll("source");
@@ -92,7 +92,7 @@ test("generates only specified <source> element when custom formats are provided
 
 test("sizes, srcset and src strings for /cat.png with 1200w 1200h", () => {
   const { container } = render(
-    <Img src="/cat.png" width={1200} height={1200} alt="A small cat" />,
+    <Img src="/cat.png" width={1200} height={1200} alt="A small cat" />
   );
 
   const expectedSrcSets = [640, 768, 1024, 1200];
@@ -108,24 +108,30 @@ test("sizes, srcset and src strings for /cat.png with 1200w 1200h", () => {
     const source = sourceElements[i];
     expect(source.getAttribute("sizes")).toBe(sizesStr);
     expectedSrcSets.forEach((widthHeight) => {
-      const expectedSrcset = `/img?src=${encodeURIComponent("/cat.png")}&w=${widthHeight}&h=${widthHeight}&format=${format}`;
+      const expectedSrcset = `/img?src=${encodeURIComponent(
+        "/cat.png"
+      )}&w=${widthHeight}&h=${widthHeight}&format=${format}`;
       expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
   });
 
   // Verify the fallback img tag src, srcset and sizes
-  const expectedImgSrc = `/img?src=${encodeURIComponent("/cat.png")}&w=1200&h=1200`;
+  const expectedImgSrc = `/img?src=${encodeURIComponent(
+    "/cat.png"
+  )}&w=1200&h=1200`;
   expect(imgElement?.getAttribute("src")).toBe(expectedImgSrc);
   expect(imgElement?.getAttribute("sizes")).toBe(sizesStr);
   expectedSrcSets.forEach((widthHeight) => {
-    const expectedSrcset = `/img?src=${encodeURIComponent("/cat.png")}&w=${widthHeight}&h=${widthHeight}`;
+    const expectedSrcset = `/img?src=${encodeURIComponent(
+      "/cat.png"
+    )}&w=${widthHeight}&h=${widthHeight}`;
     expect(imgElement?.getAttribute("srcset")).toInclude(expectedSrcset);
   });
 });
 
 test("sizes, srcset and src strings for /cat.png with 80w 80h", () => {
   const { container } = render(
-    <Img src="/cat.png" width={80} height={80} alt="A small cat" />,
+    <Img src="/cat.png" width={80} height={80} alt="A small cat" />
   );
 
   const sourceElements = container.querySelectorAll("source");
@@ -138,7 +144,7 @@ test("sizes, srcset and src strings for /cat.png with 80w 80h", () => {
     const source = sourceElements[i];
     expect(source.getAttribute("sizes")).toBe("80px");
     expect(source.getAttribute("srcset")).toBe(
-      `/img?src=${encodeURIComponent("/cat.png")}&w=80&h=80&format=${format}`,
+      `/img?src=${encodeURIComponent("/cat.png")}&w=80&h=80&format=${format}`
     );
   });
 
@@ -153,7 +159,7 @@ test("sizes, srcset and src strings for /cat.png with 800w 400h and optimizerEnd
   const { container } = render(
     <OpenImgContextProvider optimizerEndpoint="https://standalone.com/optimize">
       <Img src="/cat.png" width={800} height={400} alt="A cute cat" />
-    </OpenImgContextProvider>,
+    </OpenImgContextProvider>
   );
 
   const expectedBreakpoints = [640, 768, 800];
@@ -169,17 +175,23 @@ test("sizes, srcset and src strings for /cat.png with 800w 400h and optimizerEnd
     const source = sourceElements[i];
     expect(source.getAttribute("sizes")).toBe(expectedSizes);
     expectedBreakpoints.forEach((w) => {
-      const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=${w}&h=${w / 2}&format=${format}`;
+      const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent(
+        "/cat.png"
+      )}&w=${w}&h=${w / 2}&format=${format}`;
       expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
     });
   });
 
   // Verify the fallback img tag src
-  const expectedImgSrc = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=800&h=400`;
+  const expectedImgSrc = `https://standalone.com/optimize?src=${encodeURIComponent(
+    "/cat.png"
+  )}&w=800&h=400`;
   expect(imgElement?.getAttribute("src")).toBe(expectedImgSrc);
   expect(imgElement?.getAttribute("sizes")).toBe(expectedSizes);
   expectedBreakpoints.forEach((w) => {
-    const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent("/cat.png")}&w=${w}&h=${w / 2}`;
+    const expectedSrcset = `https://standalone.com/optimize?src=${encodeURIComponent(
+      "/cat.png"
+    )}&w=${w}&h=${w / 2}`;
     expect(imgElement?.getAttribute("srcset")).toInclude(expectedSrcset);
   });
 });

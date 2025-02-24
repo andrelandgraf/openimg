@@ -126,7 +126,7 @@ type ImgParams = {
 type GetImgParamsArgs = { request: Request };
 
 type GetImgParams = (
-  args: GetImgParamsArgs,
+  args: GetImgParamsArgs
 ) => Promise<ImgParams | Response> | ImgParams | Response;
 ```
 
@@ -151,7 +151,7 @@ type ImgSource =
 type GetImgSourceArgs = { request: Request; params: ImgParams };
 
 type GetImgSource = (
-  args: GetImgSourceArgs,
+  args: GetImgSourceArgs
 ) => Promise<ImgSource | Response> | ImgSource | Response;
 ```
 

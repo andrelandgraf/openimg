@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.5.1
+
+## openimg/react
+
+- Fix remove `background` styles once image is loaded.
+
 # 0.5.0
 
 ## openimg/node & openimg/bun

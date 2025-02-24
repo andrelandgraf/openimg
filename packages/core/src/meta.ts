@@ -15,7 +15,7 @@ export type Metadata = {
  * @returns {Promise<Metadata>} object containing the width, height, and format of the image.
  */
 export async function getImgMetadata(
-  input: Readable | Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>,
+  input: Readable | Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>
 ): Promise<Metadata> {
   const pipeline =
     input instanceof Buffer || input instanceof Uint8Array

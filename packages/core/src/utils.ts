@@ -27,7 +27,7 @@ export type GetImgParamsArgs = { request: Request };
  * The default implementation reads the parameters src, w (width), h (height), fit, and format from the search parameters.
  */
 export type GetImgParams = (
-  args: GetImgParamsArgs,
+  args: GetImgParamsArgs
 ) => Promise<ImgParams | Response> | ImgParams | Response;
 
 /**
@@ -58,7 +58,7 @@ export type GetImgSourceArgs = { request: Request; params: ImgParams };
  * Implement this function to customize the source retrieval logic.
  */
 export type GetImgSource = (
-  args: GetImgSourceArgs,
+  args: GetImgSourceArgs
 ) => Promise<ImgSource | Response> | ImgSource | Response;
 
 /**
@@ -87,7 +87,7 @@ function isFitValue(fit: string | undefined): fit is Fit | undefined {
 }
 
 function isFormatValue(
-  format: string | undefined,
+  format: string | undefined
 ): format is Format | undefined {
   if (format === undefined) {
     return true;
@@ -122,7 +122,9 @@ export function getImgParams({
   if (!isFitValue(fit)) {
     return new Response(null, {
       status: 400,
-      statusText: `Search param "fit" must be one of ${FITS.join(", ")} or unset`,
+      statusText: `Search param "fit" must be one of ${FITS.join(
+        ", "
+      )} or unset`,
     });
   }
 
@@ -130,7 +132,9 @@ export function getImgParams({
   if (!isFormatValue(format)) {
     return new Response(null, {
       status: 400,
-      statusText: `Search param "format" must be one of ${FORMATS.join(", ")} or unset`,
+      statusText: `Search param "format" must be one of ${FORMATS.join(
+        ", "
+      )} or unset`,
     });
   }
 
@@ -170,7 +174,9 @@ export function getCachePath({
   return (
     cacheFolder +
     slug +
-    `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${params.fit || "base"}` +
+    `-w-${params.width || "base"}-h-${params.height || "base"}-fit-${
+      params.fit || "base"
+    }` +
     extension
   );
 }
@@ -200,7 +206,7 @@ export function getImgSource({
 
 export function validateImgSource(
   source: ImgSource,
-  allowlistedOrigins: string[] = [],
+  allowlistedOrigins: string[] = []
 ): Response | null {
   if (source.type === "fs") {
     // file system always allowed
@@ -291,7 +297,7 @@ export default function invariant(
    * Can provide a string, or a function that returns a string for cases where
    * the message takes a fair amount of effort to compute
    */
-  message?: string | (() => string),
+  message?: string | (() => string)
 ): asserts condition {
   const isProduction: boolean = process.env.NODE_ENV === "production";
   const prefix: string = "Invariant failed";

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 
 export type Fit = "cover" | "contain";
 export type TargetFormat = "webp" | "avif";
@@ -165,9 +165,28 @@ export function Image({
   placeholder,
   ...imgProps
 }: ImageProps) {
+  const ref = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !placeholder) {
+      return;
+    }
+    function clearStyles(element: HTMLImageElement) {
+      element.style.backgroundImage = "";
+      element.style.backgroundSize = "";
+      element.style.backgroundRepeat = "";
+    }
+    if (element.complete) {
+      clearStyles(element);
+    }
+    element.addEventListener("load", () => {
+      clearStyles(element);
+    });
+  }, [placeholder]);
+
   if (!src || !width || !height) {
     console.error(
-      "The `src`, `width`, and `height` props are required for the Image component.",
+      "openimg: The `src`, `width`, and `height` props are required for the Image/Img component."
     );
     return null;
   }
@@ -209,7 +228,7 @@ export function Image({
                         fit,
                         format,
                         optimizerEndpoint,
-                      }) + ` ${w}w`,
+                      }) + ` ${w}w`
                   )
                   .join(", ")
               : getSrc({
@@ -232,22 +251,13 @@ export function Image({
         />
       ))}
       <img
+        ref={ref}
         width={width}
         height={height}
         role={imgProps.alt ? undefined : "presentation"}
         loading={isAboveFold ? "eager" : "lazy"}
         decoding={isAboveFold ? "auto" : "async"}
         {...fetchPriorityProp}
-        style={{
-          backgroundImage: placeholder ? `url(${placeholder})` : undefined,
-          backgroundSize: placeholder ? "cover" : undefined,
-        }}
-        ref={(element) => {
-          if (element?.complete && placeholder) {
-            element.style.backgroundImage = "";
-            element.style.backgroundSize = "";
-          }
-        }}
         src={getSrc({
           src,
           width: widthNum,
@@ -266,7 +276,7 @@ export function Image({
                       height: w / ratio,
                       fit,
                       optimizerEndpoint,
-                    }) + ` ${w}w`,
+                    }) + ` ${w}w`
                 )
                 .join(", ")
             : undefined
@@ -279,6 +289,12 @@ export function Image({
             : undefined
         }
         {...imgProps}
+        style={{
+          backgroundImage: placeholder ? `url(${placeholder})` : undefined,
+          backgroundSize: placeholder ? "cover" : undefined,
+          backgroundRepeat: "no-repeat",
+          ...imgProps.style,
+        }}
       />
     </picture>
   );

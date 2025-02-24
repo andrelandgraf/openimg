@@ -9,7 +9,7 @@ import { rgbaToThumbHash, thumbHashToDataURL } from "thumbhash";
  * @returns {Promise<string>} string containing the data URL placeholder image.
  */
 export async function getImgPlaceholder(
-  input: Readable | Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>,
+  input: Readable | Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>
 ) {
   const pipeline =
     input instanceof Buffer || input instanceof Uint8Array

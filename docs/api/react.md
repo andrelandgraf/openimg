@@ -54,7 +54,15 @@ You can pass in all standard HTML img element attributes to the Img component. T
 - isAboveFold (defaults to `false`): whether the image is above the fold or not, affects what default optimization settings are used.
 - placeholder (optional): base64 encoded string of a low quality image to use as a placeholder until the full image loads.
 
-Note, if not `alt` is provided, the Img component will set the role to "presentation".
+**placeholder: string | undefined**
+
+The placeholder prop is optional, but a great way to improve the user experience. It allows you to provide a low-quality image that will be displayed while the full image is loading. Make sure to pass the `Image` component the placeholder image as soon as possible. For instance, during server-side rendering or the initial render of the image component. This ensures that the placeholder is displayed immediately. You can use the `getImgPlaceholder` function from `openimg/node` or `openimg/bun` to generate the placeholder.
+
+Transparent images and no JavaScript: This package utilizes the CSS `background-image` property to display the placeholder. Once the image is fully loaded, client-side JavaScript is used to remove the `background-image` styling. Note that if JS is disabled and a transparent image (e.g., PNG with transparency) is loaded with a placeholder, the placeholder will still be visible in the back. In this case, it may be better to avoid using placeholders.
+
+### Alt text
+
+Alt text is important for accessibility and SEO. It is recommended to always provide alt text for images. If no `alt` text is provided, the Img component will instead set the role attribute to "presentation". This ensures that the image is ignored by screen readers and search engines.
 
 ### OpenImgContextProvider
 
