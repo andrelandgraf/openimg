@@ -26,3 +26,11 @@ Find the changelogs for each npm package here:
 - [openimg-bun](./packages/bun/CHANGELOG.md)
 - [openimg-node](./packages/node/CHANGELOG.md)
 - [openimg-react](./packages/react/CHANGELOG.md)
+
+## Motivation & references
+
+Why another image optimization package? I wanted a full-stack solution that works out of the box with minimal setup. This could have been a small wrapper around `unjs/ipx` and `unpic/image`, but I first wanted to build something from scratch and minimize dependencies (other than sharp).
+
+The HTTP request handler is inspired by [this Gist by Jacob Ebey](https://gist.github.com/jacob-ebey/3a37a86307de9ef22f47aae2e593b56f) that showcases how to use sharp with stream processing.
+
+
