@@ -1,12 +1,15 @@
-import { $ } from "bun";
 import fs from "node:fs";
 import { expect, test, afterEach, beforeAll, afterAll } from "bun:test";
+import { type Subprocess } from "bun";
 
 const port = 3002;
 const origin = `http://localhost:${port}/`;
 
 const portRemote = 3003;
 const remote = `http://localhost:${portRemote}`;
+
+let serverProcess: Subprocess | undefined;
+let remoteServerProcess: Subprocess | undefined;
 
 beforeAll(async () => {
   try {
@@ -16,7 +19,11 @@ beforeAll(async () => {
 
   console.log("starting server...");
 
-  $`bun run server-fetch-remote.ts`.text();
+  // Start the server as a subprocess and store the reference
+  serverProcess = Bun.spawn(["bun", "run", "server-fetch-remote.ts"], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
 
   let waiting = true;
   const timeout = setTimeout(() => {
@@ -36,7 +43,11 @@ beforeAll(async () => {
 
   console.log("starting remote server...");
 
-  $`bun run remote.ts`.text();
+  // Start the remote server as a subprocess and store the reference
+  remoteServerProcess = Bun.spawn(["bun", "run", "remote.ts"], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
 
   waiting = true;
   const timeoutRemote = setTimeout(() => {
@@ -56,13 +67,19 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  console.log("shutting down server...");
+  console.log("shutting down servers...");
 
-  const txt2 = await $`kill -9 $(lsof -ti:${portRemote})`.text();
-  console.log(txt2);
+  if (remoteServerProcess) {
+    // Kill the remote server process
+    remoteServerProcess.kill();
+    console.log("Remote server process terminated");
+  }
 
-  const txt1 = await $`kill -9 $(lsof -ti:${port})`.text();
-  console.log(txt1);
+  if (serverProcess) {
+    // Kill the main server process
+    serverProcess.kill();
+    console.log("Server process terminated");
+  }
 });
 
 afterEach(() => {

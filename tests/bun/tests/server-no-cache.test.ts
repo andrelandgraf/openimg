@@ -1,9 +1,10 @@
-import { $ } from "bun";
 import fs from "node:fs";
 import { expect, test, beforeAll, afterAll } from "bun:test";
+import { type Subprocess } from "bun";
 
 const port = 3001;
 const origin = `http://localhost:${port}/`;
+let serverProcess: Subprocess | undefined;
 
 beforeAll(async () => {
   try {
@@ -13,7 +14,11 @@ beforeAll(async () => {
 
   console.log("starting server...");
 
-  $`bun run server-no-cache.ts`.text();
+  // Start the server as a subprocess and store the reference
+  serverProcess = Bun.spawn(["bun", "run", "server-no-cache.ts"], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
 
   let waiting = true;
   const timeout = setTimeout(() => {
@@ -34,9 +39,12 @@ beforeAll(async () => {
 
 afterAll(async () => {
   console.log("shutting down server...");
-
-  const txt = await $`kill -9 $(lsof -ti:${port})`.text();
-  console.log(txt);
+  
+  if (serverProcess) {
+    // Kill only the server process we started
+    serverProcess.kill();
+    console.log("Server process terminated");
+  }
 });
 
 test("it returns 404 if the img path maps to not image in the public folder", async () => {
