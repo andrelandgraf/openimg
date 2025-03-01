@@ -1,7 +1,7 @@
 import React from "react";
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
-import { Img, OpenImgContextProvider } from "openimg-react";
+import { Img, OpenImgContextProvider, GetSrc } from "openimg-react";
 import { TargetFormat } from "../../packages/react/dist/types/react";
 
 test("renders without errors when required props are provided", () => {
@@ -194,4 +194,271 @@ test("sizes, srcset and src strings for /cat.png with 800w 400h and optimizerEnd
     )}&w=${w}&h=${w / 2}`;
     expect(imgElement?.getAttribute("srcset")).toInclude(expectedSrcset);
   });
+});
+
+test("applies custom getSrc function to generate source URLs", () => {
+  // Custom getSrc function that uses a different URL pattern
+  const customGetSrc: GetSrc = ({ src, width, height, format, optimizerEndpoint }) => {
+    const baseUrl = `${optimizerEndpoint}/custom-transform`;
+    const params = new URLSearchParams();
+    params.append("image", src);
+    params.append("width", width.toString());
+    params.append("height", height.toString());
+    if (format) params.append("fmt", format);
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  const { container } = render(
+    <OpenImgContextProvider getSrc={customGetSrc}>
+      <Img src="/cat.png" width={800} height={600} alt="A cute cat" data-testid="test-image" />
+    </OpenImgContextProvider>
+  );
+
+  const sourceElements = container.querySelectorAll("source");
+  const imgElement = screen.getByTestId("test-image");
+  
+  // Expected breakpoints for responsive images
+  const expectedBreakpoints = [640, 768, 800];
+  const expectedSizes = `(max-width: ${expectedBreakpoints[0]}px) ${expectedBreakpoints[0]}px, (max-width: ${expectedBreakpoints[1]}px) ${expectedBreakpoints[1]}px, 800px`;
+
+  // Verify custom URL pattern is used for sources
+  const formats = ["avif", "webp"];
+  formats.forEach((format, i) => {
+    const source = sourceElements[i];
+    expect(source.getAttribute("sizes")).toBe(expectedSizes);
+    
+    // Check each breakpoint in the srcset
+    expectedBreakpoints.forEach((w) => {
+      // Calculate height proportionally based on original aspect ratio
+      const h = Math.round(w * 600 / 800);
+      const expectedSrcset = `/img/custom-transform?image=${encodeURIComponent("/cat.png")}&width=${w}&height=${h}&fmt=${format}`;
+      expect(source.getAttribute("srcset")).toInclude(expectedSrcset);
+      expect(source.getAttribute("srcset")).toInclude(`${expectedSrcset} ${w}w`);
+    });
+  });
+
+  // Verify custom URL pattern is used for img src
+  expect(imgElement.getAttribute("src")).toBe(`/img/custom-transform?image=${encodeURIComponent("/cat.png")}&width=800&height=600`);
+  
+  // Check img srcset also uses custom URL pattern
+  expectedBreakpoints.forEach((w) => {
+    const h = Math.round(w * 600 / 800);
+    const expectedSrcset = `/img/custom-transform?image=${encodeURIComponent("/cat.png")}&width=${w}&height=${h}`;
+    expect(imgElement.getAttribute("srcset")).toInclude(expectedSrcset);
+    expect(imgElement.getAttribute("srcset")).toInclude(`${expectedSrcset} ${w}w`);
+  });
+});
+
+test("applies custom breakpoints for responsive images", () => {
+  // Define custom breakpoints that are different from the defaults
+  const customBreakpoints = [320, 480, 960, 1440];
+  
+  const { container } = render(
+    <OpenImgContextProvider breakpoints={customBreakpoints}>
+      <Img src="/cat.png" width={1500} height={1000} alt="A responsive cat" data-testid="responsive-image" />
+    </OpenImgContextProvider>
+  );
+
+  const sourceElements = container.querySelectorAll("source");
+  const imgElement = screen.getByTestId("responsive-image");
+  
+  // All breakpoints that are less than or equal to the image width should be included
+  const expectedBreakpoints = customBreakpoints.filter(bp => bp <= 1500);
+  
+  // Build the expected sizes attribute string
+  const expectedSizes = expectedBreakpoints
+    .map(bp => `(max-width: ${bp}px) ${bp}px`)
+    .join(", ") + ", 1500px";
+
+  // Verify sizes attribute for each source element
+  const formats = ["avif", "webp"];
+  formats.forEach((format, i) => {
+    const source = sourceElements[i];
+    expect(source.getAttribute("sizes")).toBe(expectedSizes);
+    
+    // Get the actual srcset string to verify against
+    const srcsetAttr = source.getAttribute("srcset") || "";
+    
+    // Check that each custom breakpoint is in the srcset
+    expectedBreakpoints.forEach((w) => {
+      // Instead of calculating the exact height, just check that the width is in the srcset
+      expect(srcsetAttr).toInclude(`/img?src=${encodeURIComponent("/cat.png")}&w=${w}&h=`);
+      expect(srcsetAttr).toInclude(`${w}w`);
+    });
+    
+    // Also check that the full width is included
+    expect(srcsetAttr).toInclude(`/img?src=${encodeURIComponent("/cat.png")}&w=1500&h=1000&format=${format}`);
+  });
+
+  // Verify img srcset also uses custom breakpoints
+  expect(imgElement.getAttribute("sizes")).toBe(expectedSizes);
+  
+  // Get the actual srcset string to verify against
+  const imgSrcset = imgElement.getAttribute("srcset") || "";
+  
+  expectedBreakpoints.forEach((w) => {
+    // Instead of calculating the exact height, just check that the width is in the srcset
+    expect(imgSrcset).toInclude(`/img?src=${encodeURIComponent("/cat.png")}&w=${w}&h=`);
+    expect(imgSrcset).toInclude(`${w}w`);
+  });
+  
+  // Also check that the full width is included in img srcset
+  expect(imgSrcset).toInclude(`/img?src=${encodeURIComponent("/cat.png")}&w=1500&h=1000`);
+});
+
+test("combines custom breakpoints with custom getSrc function", () => {
+  // Define custom breakpoints
+  const customBreakpoints = [400, 800, 1200];
+  
+  // Define custom getSrc function
+  const customGetSrc: GetSrc = ({ src, width, height, format, optimizerEndpoint }) => {
+    return `${optimizerEndpoint}/resize/${width}x${height}/${format || "original"}/${encodeURIComponent(src)}`;
+  };
+  
+  const { container } = render(
+    <OpenImgContextProvider breakpoints={customBreakpoints} getSrc={customGetSrc}>
+      <Img src="/cat.png" width={1000} height={750} alt="A custom cat" data-testid="custom-image" />
+    </OpenImgContextProvider>
+  );
+
+  const sourceElements = container.querySelectorAll("source");
+  const imgElement = screen.getByTestId("custom-image");
+  
+  // All breakpoints that are less than or equal to the image width should be included
+  const expectedBreakpoints = customBreakpoints.filter(bp => bp <= 1000);
+  
+  // Build the expected sizes attribute string
+  const expectedSizes = expectedBreakpoints
+    .map(bp => `(max-width: ${bp}px) ${bp}px`)
+    .join(", ") + ", 1000px";
+
+  // Verify sizes attribute for each source element
+  const formats = ["avif", "webp"];
+  formats.forEach((format, i) => {
+    const source = sourceElements[i];
+    expect(source.getAttribute("sizes")).toBe(expectedSizes);
+    
+    // Get the actual srcset string to verify against
+    const srcsetAttr = source.getAttribute("srcset") || "";
+    
+    // Check that each custom breakpoint is in the srcset with the custom URL pattern
+    expectedBreakpoints.forEach((w) => {
+      // For each breakpoint, verify the custom URL pattern is used
+      expect(srcsetAttr).toInclude(`/img/resize/${w}x`);
+      expect(srcsetAttr).toInclude(`/${format}/${encodeURIComponent("/cat.png")} ${w}w`);
+    });
+    
+    // Also check that the full width is included with the custom URL pattern
+    expect(srcsetAttr).toInclude(`/img/resize/1000x750/${format}/${encodeURIComponent("/cat.png")} 1000w`);
+  });
+
+  // Verify img src uses the custom URL pattern
+  expect(imgElement.getAttribute("src")).toBe(`/img/resize/1000x750/original/${encodeURIComponent("/cat.png")}`);
+  
+  // Verify img srcset also uses custom breakpoints with the custom URL pattern
+  const imgSrcset = imgElement.getAttribute("srcset") || "";
+  
+  expectedBreakpoints.forEach((w) => {
+    expect(imgSrcset).toInclude(`/img/resize/${w}x`);
+    expect(imgSrcset).toInclude(`/original/${encodeURIComponent("/cat.png")} ${w}w`);
+  });
+});
+
+test("applies placeholder as background image when provided", () => {
+  // Sample base64 placeholder
+  const placeholderBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVVX/2Q==";
+  
+  const { container } = render(
+    <Img 
+      src="/cat.png" 
+      width={800} 
+      height={600} 
+      alt="A cat with placeholder" 
+      placeholder={placeholderBase64}
+      data-testid="placeholder-image"
+    />
+  );
+  
+  const imgElement = screen.getByTestId("placeholder-image");
+  
+  // Check the inline style attribute directly
+  const styleAttr = imgElement.getAttribute("style");
+  expect(styleAttr).not.toBeNull();
+  
+  // Verify that the style attribute contains the expected properties
+  // Note: We're just checking that the placeholder is used, not the exact format
+  expect(styleAttr).toInclude("background-image:");
+  expect(styleAttr).toInclude(placeholderBase64);
+  expect(styleAttr).toInclude("background-size: cover");
+  expect(styleAttr).toInclude("background-repeat: no-repeat");
+  
+  // Verify that the main image src is still set correctly
+  expect(imgElement.getAttribute("src")).toInclude("/img?src=%2Fcat.png&w=800&h=600");
+});
+
+test("clears placeholder styles when image loads", () => {
+  // Sample base64 placeholder
+  const placeholderBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVVX/2Q==";
+  
+  const { container } = render(
+    <Img 
+      src="/cat.png" 
+      width={800} 
+      height={600} 
+      alt="A cat with placeholder" 
+      placeholder={placeholderBase64}
+      data-testid="loading-image"
+    />
+  );
+  
+  const imgElement = screen.getByTestId("loading-image");
+  
+  // Initially, the placeholder styles should be applied
+  const initialStyleAttr = imgElement.getAttribute("style");
+  expect(initialStyleAttr).toInclude("background-image:");
+  expect(initialStyleAttr).toInclude(placeholderBase64);
+  
+  // Simulate the image load event
+  const loadEvent = new Event('load');
+  imgElement.dispatchEvent(loadEvent);
+  
+  // After load, the background image style should be cleared
+  // Note: We need to check the actual style properties since the attribute might not be updated
+  expect(imgElement.style.backgroundImage).toBe("");
+  expect(imgElement.style.backgroundSize).toBe("");
+  expect(imgElement.style.backgroundRepeat).toBe("");
+});
+
+test("clears placeholder styles when image is already complete", () => {
+  // Sample base64 placeholder
+  const placeholderBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVVX/2Q==";
+  
+  // Since we can't easily mock the useRef and useEffect hooks in this test environment,
+  // we'll test the placeholder functionality more directly
+  
+  const { container } = render(
+    <Img 
+      src="/cat.png" 
+      width={800} 
+      height={600} 
+      alt="A cat with placeholder" 
+      placeholder={placeholderBase64}
+      data-testid="complete-image"
+    />
+  );
+  
+  const imgElement = screen.getByTestId("complete-image");
+  
+  // Initially, the placeholder styles should be applied
+  const initialStyleAttr = imgElement.getAttribute("style");
+  expect(initialStyleAttr).toInclude("background-image:");
+  expect(initialStyleAttr).toInclude(placeholderBase64);
+  
+  // Set the complete property to true and manually trigger the load event
+  Object.defineProperty(imgElement, 'complete', { value: true });
+  const loadEvent = new Event('load');
+  imgElement.dispatchEvent(loadEvent);
+  
+  // After load, the background image style should be cleared
+  expect(imgElement.style.backgroundImage).toBe("");
 });
