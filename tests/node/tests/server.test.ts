@@ -3,7 +3,7 @@ import { runTests } from "../../shared/test-runner.ts";
 
 // Configure the Bun-specific server setup
 runTests({
-  type: "bun",
+  type: "node",
   port: 3000,
   startServer: async () => {
     // Start the server as a subprocess and store the reference

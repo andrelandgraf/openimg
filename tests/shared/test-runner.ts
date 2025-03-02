@@ -36,6 +36,10 @@ export function runTests(config: ServerConfig) {
 
   afterEach(() => {
     try {
+      // print list of files in data folder
+      console.log(
+        fs.readdirSync("./data", { withFileTypes: true, recursive: true })
+      );
       // reset cache folder
       fs.rmdirSync("./data", { recursive: true });
     } catch {}
@@ -62,6 +66,10 @@ export function runTests(config: ServerConfig) {
 
     const exists = await Promise.resolve(fileExists(expectedCachePath));
     expect(exists).toBe(true);
+
+    const resFromCache = await fetch(origin + url);
+    expect(resFromCache.status).toBe(expectedStatus);
+    expect(resFromCache.headers.get("Content-Type")).toBe(expectedContentType);
   });
 
   test(`${type}: it caches and returns avif`, async () => {
@@ -73,6 +81,10 @@ export function runTests(config: ServerConfig) {
 
     const exists = await Promise.resolve(fileExists(expectedCachePath));
     expect(exists).toBe(true);
+
+    const resFromCache = await fetch(origin + url);
+    expect(resFromCache.status).toBe(expectedStatus);
+    expect(resFromCache.headers.get("Content-Type")).toBe(expectedContentType);
   });
 
   test(`${type}: it caches and returns original format`, async () => {
@@ -84,6 +96,10 @@ export function runTests(config: ServerConfig) {
 
     const exists = await Promise.resolve(fileExists(expectedCachePath));
     expect(exists).toBe(true);
+
+    const resFromCache = await fetch(origin + url);
+    expect(resFromCache.status).toBe(expectedStatus);
+    expect(resFromCache.headers.get("Content-Type")).toBe(expectedContentType);
   });
 
   test(`${type}: it returns custom headers`, async () => {

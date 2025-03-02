@@ -1,55 +1,22 @@
-import path from "node:path";
-import fs from "node:fs";
-import fsp from "node:fs/promises";
-import { createReadStream, ReadStream } from "fs";
-import { Readable } from "node:stream";
+import { createReadStream } from "fs";
+import { PassThrough, Readable } from "node:stream";
 import sharp from "sharp";
 import invariant, {
   Config,
   getCachePath,
-  getContentType,
   getImgParams,
   getImgSource,
   ImgParams,
   ImgSource,
   PipelineLock,
   validateImgSource,
+  DEFAULT_CACHE_FOLDER,
+  getContentType,
 } from "../utils";
-import { exists } from "./utils";
+import { exists, FileCache, toWebStreamFromReadable } from "./utils";
 
 const pipelineLock = new PipelineLock();
-
-function toWebStream(nodeStream: ReadStream) {
-  return new ReadableStream({
-    start(controller) {
-      nodeStream.on("data", (chunk) => controller.enqueue(chunk));
-      nodeStream.on("end", () => controller.close());
-      nodeStream.on("error", (error) => controller.error(error));
-    },
-    cancel() {
-      nodeStream.destroy();
-    },
-  });
-}
-
-function toWebStreamFromReadable(readable: Readable) {
-  return new ReadableStream({
-    start(controller) {
-      readable.on("data", (chunk) => controller.enqueue(chunk));
-      readable.on("end", () => controller.close());
-      readable.on("error", (error) => controller.error(error));
-    },
-    cancel() {
-      readable.destroy();
-    },
-  });
-}
-
-function streamFromCache(path: string, headers: Headers) {
-  const nodeStream = createReadStream(path);
-  const webStream = toWebStream(nodeStream);
-  return new Response(webStream, { headers });
-}
+const caches = new Map<string, FileCache>();
 
 /**
  * getImgResponse retrieves an image, optimizes it, and returns a HTTP response
@@ -71,8 +38,6 @@ export async function getImgResponse(request: Request, config: Config = {}) {
   }
   const params: ImgParams = paramsRes;
 
-  headers.set("Content-Type", getContentType(params.format));
-
   // Map src to location of the original image (fs or fetch)
   const sourceRes = config.getImgSource
     ? await config.getImgSource({ request, params })
@@ -88,6 +53,14 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     return res;
   }
 
+  if (config.cacheFolder !== "no_cache") {
+    const cacheFolder = config.cacheFolder || DEFAULT_CACHE_FOLDER;
+    let cache = caches.get(cacheFolder);
+    if (!cache) {
+      caches.set(cacheFolder, new FileCache(cacheFolder));
+    }
+  }
+
   const cachePath =
     config.cacheFolder !== "no_cache"
       ? getCachePath({ params, source, cacheFolder: config.cacheFolder })
@@ -101,31 +74,36 @@ export async function getImgResponse(request: Request, config: Config = {}) {
         await lock;
       }
 
-      const fileInCache = await exists(cachePath);
-      if (fileInCache) {
-        return streamFromCache(cachePath, headers);
+      const cache = caches.get(config.cacheFolder || DEFAULT_CACHE_FOLDER);
+      invariant(cache, "Cache is required");
+      if (cache.hasFile(cachePath)) {
+        return cache.streamFromCache(cachePath, headers);
       }
 
       // Register ongoing write to the cache file
       pipelineLock.add(cachePath);
     }
 
-    let nodeStream: Readable;
+    let readStream: Readable;
     if (source.type === "fetch") {
       const fetchRes = await fetch(source.url, { headers: source.headers });
       if (!fetchRes.ok || !fetchRes.body) {
         pipelineLock.resolve(cachePath);
-        return new Response(fetchRes.statusText || "Image not found", {
+        return new Response(null, {
           status: fetchRes.status || 404,
+          statusText: fetchRes.statusText || "Image not found",
         });
       }
-      nodeStream = Readable.fromWeb(fetchRes.body as any);
+      readStream = Readable.fromWeb(fetchRes.body as any);
     } else {
-      if (!(await exists(source.path))) {
+      if (!exists(source.path)) {
         pipelineLock.resolve(cachePath);
-        return new Response("Image not found", { status: 404 });
+        return new Response(null, {
+          status: 404,
+          statusText: "Image not found",
+        });
       }
-      nodeStream = createReadStream(source.path);
+      readStream = createReadStream(source.path);
     }
 
     const pipeline = sharp();
@@ -139,27 +117,35 @@ export async function getImgResponse(request: Request, config: Config = {}) {
       pipeline.resize(params.width, params.height, { fit: params.fit });
     }
 
+    const infoPromise = new Promise<sharp.OutputInfo>((resolve) => {
+      pipeline.on("info", (info) => {
+        resolve(info);
+      });
+    });
+
+    const transformed = readStream.pipe(pipeline);
+    const outputStream = new PassThrough();
+    transformed.pipe(outputStream);
+
+    const outputImgInfo = await infoPromise;
+
     if (config.cacheFolder !== "no_cache") {
       invariant(cachePath, "Cache path is required");
-      await fsp
-        .mkdir(path.dirname(cachePath), { recursive: true })
-        .catch(() => {});
 
-      await new Promise<void>((resolve, reject) => {
-        const writeStream = fs.createWriteStream(cachePath);
-        nodeStream
-          .pipe(pipeline)
-          .on("error", reject)
-          .pipe(writeStream)
-          .on("error", reject)
-          .on("finish", resolve);
+      const cache = caches.get(config.cacheFolder || DEFAULT_CACHE_FOLDER);
+      invariant(cache, "Cache is required");
+      await cache.streamToCache(cachePath, outputStream, {
+        size: outputImgInfo.size,
+        contentType: getContentType(outputImgInfo.format),
       });
 
       pipelineLock.resolve(cachePath);
-      return streamFromCache(cachePath, headers);
+      return cache.streamFromCache(cachePath, headers);
     }
 
-    return new Response(toWebStreamFromReadable(nodeStream.pipe(pipeline)), {
+    headers.set("Content-Type", getContentType(outputImgInfo.format));
+    headers.set("Content-Length", outputImgInfo.size.toString());
+    return new Response(toWebStreamFromReadable(outputStream), {
       headers,
     });
   } catch (e: unknown) {

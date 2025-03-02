@@ -23,7 +23,7 @@ export const testCases = {
   originalFormat: {
     url: "?src=/cat.png&w=100&h=100",
     expectedStatus: 200,
-    expectedContentType: "image/jpeg",
+    expectedContentType: "image/png",
     expectedCachePath: "./data/images/public/cat-png-w-100-h-100-fit-base.png",
   },
   customHeaders: {

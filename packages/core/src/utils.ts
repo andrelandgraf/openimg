@@ -6,6 +6,8 @@ export type Format = (typeof FORMATS)[number];
 const FITS = ["cover", "contain"] as const;
 export type Fit = (typeof FITS)[number];
 
+export const DEFAULT_CACHE_FOLDER = "./data/images";
+
 /**
  * ImgParams are the image optimization parameters from the incoming request
  * - width: The target width of the image. If not set, the original image's width will be used.
@@ -155,7 +157,7 @@ type GetCachePathArgs = {
 export function getCachePath({
   params,
   source,
-  cacheFolder = "./data/images",
+  cacheFolder = DEFAULT_CACHE_FOLDER,
 }: GetCachePathArgs): string {
   const src = source.type === "fetch" ? source.url : source.path; // "https://example.com/folder/cat.png", "/cat.png"
   const srcUrl = source.type === "fetch" ? new URL(src) : null;
@@ -325,11 +327,12 @@ export default function invariant(
   throw new Error(value);
 }
 
-export function getContentType(format: Format | undefined): string {
+export function getContentType(format: Format | undefined | string): string {
   switch (format) {
     case "webp":
       return "image/webp";
     case "avif":
+    case "heif":
       return "image/avif";
     case "png":
       return "image/png";
