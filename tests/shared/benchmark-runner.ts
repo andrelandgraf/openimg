@@ -200,52 +200,11 @@ export function runSingleImageBenchmark(config: BenchmarkServerConfig) {
 
       // Run the single image benchmark multiple times to get an average
       const iterations = 5;
-      const singleResults = [];
-
-      for (let i = 0; i < iterations; i++) {
-        // Run the benchmark and collect the result
-        const result = await runBenchmark(singleImageConfig);
-        singleResults.push(result);
-
-        // Small delay between runs
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+      const result = await runBenchmark(singleImageConfig);
 
       // Record overall memory usage
       const finalMemory = process.memoryUsage();
       const finalMemoryMB = convertToMB(finalMemory);
-
-      // Calculate average durations and memory usage
-      const avgResult = {
-        config: singleImageConfig,
-        serverDuration:
-          singleResults.reduce((sum, r) => sum + (r.serverDuration || 0), 0) /
-          iterations,
-        clientDuration:
-          singleResults.reduce((sum, r) => sum + (r.clientDuration || 0), 0) /
-          iterations,
-        memoryDiffMB: {
-          rss:
-            singleResults.reduce((sum, r) => sum + r.memoryDiffMB.rss, 0) /
-            iterations,
-          heapUsed:
-            singleResults.reduce((sum, r) => sum + r.memoryDiffMB.heapUsed, 0) /
-            iterations,
-          heapTotal:
-            singleResults.reduce(
-              (sum, r) => sum + r.memoryDiffMB.heapTotal,
-              0
-            ) / iterations,
-          external:
-            singleResults.reduce((sum, r) => sum + r.memoryDiffMB.external, 0) /
-            iterations,
-          arrayBuffers:
-            singleResults.reduce(
-              (sum, r) => sum + r.memoryDiffMB.arrayBuffers,
-              0
-            ) / iterations,
-        },
-      };
 
       // Save the benchmark results
       const timestamp = new Date().toISOString();
@@ -260,8 +219,7 @@ export function runSingleImageBenchmark(config: BenchmarkServerConfig) {
         version: type === "bun" ? Bun.version : process.version,
         iterations,
         finalMemoryMB: finalMemoryMB,
-        result: avgResult,
-        allResults: singleResults,
+        result,
       };
 
       fs.writeFileSync(resultsPath, JSON.stringify(benchmarkResults, null, 2));
