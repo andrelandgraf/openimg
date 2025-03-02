@@ -1,118 +1,268 @@
 {
-  "timestamp": "2025-03-02T02:27:06.623Z",
+  "timestamp": "2025-03-02T02:32:42.256Z",
   "platform": "node",
   "version": "v22.6.0",
   "finalMemoryMB": {
-    "rss": 428.609375,
-    "heapTotal": 5.7431640625,
-    "heapUsed": 98.66736888885498,
-    "external": 96.1258773803711,
-    "arrayBuffers": 48.97196865081787
+    "rss": 401.34375,
+    "heapTotal": 5.732421875,
+    "heapUsed": 98.99727630615234,
+    "external": 96.4471788406372,
+    "arrayBuffers": 49.284926414489746
   },
   "results": [
     {
       "config": {
         "width": 100,
         "height": 100,
+        "format": "avif"
+      },
+      "clientDuration": 2.0914580000003298,
+      "memoryDiffMB": {
+        "rss": 0.203125,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.056713104248046875,
+        "arrayBuffers": 0.001922607421875
+      }
+    },
+    {
+      "config": {
+        "width": 200,
+        "height": 200,
+        "format": "avif"
+      },
+      "clientDuration": 2.0755420000000413,
+      "memoryDiffMB": {
+        "rss": 0.203125,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.05324268341064453,
+        "arrayBuffers": 0.0018310546875
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "avif"
+      },
+      "clientDuration": 2.0533329999998386,
+      "memoryDiffMB": {
+        "rss": 0.171875,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.04977226257324219,
+        "arrayBuffers": 0.001739501953125
+      }
+    },
+    {
+      "config": {
+        "width": 400,
+        "height": 400,
+        "format": "avif"
+      },
+      "clientDuration": 2.038082999999915,
+      "memoryDiffMB": {
+        "rss": 0.15625,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.046301841735839844,
+        "arrayBuffers": 0.00164794921875
+      }
+    },
+    {
+      "config": {
+        "width": 500,
+        "height": 500,
+        "format": "avif"
+      },
+      "clientDuration": 2.0197500000003856,
+      "memoryDiffMB": {
+        "rss": 0.15625,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.0428314208984375,
+        "arrayBuffers": 0.001556396484375
+      }
+    },
+    {
+      "config": {
+        "width": 100,
+        "height": 100,
+        "format": "jpeg"
+      },
+      "clientDuration": 2.6873340000001917,
+      "memoryDiffMB": {
+        "rss": 0.359375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.02785015106201172,
+        "arrayBuffers": 0.00347900390625
+      }
+    },
+    {
+      "config": {
+        "width": 200,
+        "height": 200,
+        "format": "jpeg"
+      },
+      "clientDuration": 2.6745420000002014,
+      "memoryDiffMB": {
+        "rss": 0.359375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.024379730224609375,
+        "arrayBuffers": 0.003387451171875
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "jpeg"
+      },
+      "clientDuration": 2.64837499999976,
+      "memoryDiffMB": {
+        "rss": 0.359375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.02090930938720703,
+        "arrayBuffers": 0.0032958984375
+      }
+    },
+    {
+      "config": {
+        "width": 400,
+        "height": 400,
+        "format": "jpeg"
+      },
+      "clientDuration": 2.632999999999811,
+      "memoryDiffMB": {
+        "rss": 0.34375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.017438888549804688,
+        "arrayBuffers": 0.003204345703125
+      }
+    },
+    {
+      "config": {
+        "width": 500,
+        "height": 500,
+        "format": "jpeg"
+      },
+      "clientDuration": 2.605333999999857,
+      "memoryDiffMB": {
+        "rss": 0.34375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.013968467712402344,
+        "arrayBuffers": 0.00311279296875
+      }
+    },
+    {
+      "config": {
+        "width": 100,
+        "height": 100,
+        "format": "png"
+      },
+      "clientDuration": 2.0048329999999623,
+      "memoryDiffMB": {
+        "rss": 0.15625,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.039361000061035156,
+        "arrayBuffers": 0.00146484375
+      }
+    },
+    {
+      "config": {
+        "width": 200,
+        "height": 200,
+        "format": "png"
+      },
+      "clientDuration": 1.9858329999997295,
+      "memoryDiffMB": {
+        "rss": 0.140625,
+        "heapUsed": 0,
+        "heapTotal": 0.0400390625,
+        "external": 0.03589153289794922,
+        "arrayBuffers": 0.001373291015625
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "png"
+      },
+      "clientDuration": 1.6372499999997672,
+      "memoryDiffMB": {
+        "rss": 0.0625,
+        "heapUsed": 0,
+        "heapTotal": 0.0390625,
+        "external": 0.03009510040283203,
+        "arrayBuffers": 0.000823974609375
+      }
+    },
+    {
+      "config": {
+        "width": 400,
+        "height": 400,
+        "format": "png"
+      },
+      "clientDuration": 2.712166000000252,
+      "memoryDiffMB": {
+        "rss": 0.375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.034789085388183594,
+        "arrayBuffers": 0.003662109375
+      }
+    },
+    {
+      "config": {
+        "width": 500,
+        "height": 500,
+        "format": "png"
+      },
+      "clientDuration": 2.6974589999999807,
+      "memoryDiffMB": {
+        "rss": 0.359375,
+        "heapUsed": 0,
+        "heapTotal": 0.0732421875,
+        "external": 0.031319618225097656,
+        "arrayBuffers": 0.003570556640625
+      }
+    },
+    {
+      "config": {
+        "width": 100,
+        "height": 100,
         "format": "webp"
       },
-      "clientDuration": 1.0377920000000813,
+      "clientDuration": 1.0221670000000813,
       "memoryDiffMB": {
         "rss": 0.109375,
         "heapUsed": 0,
-        "heapTotal": 0.001953125,
+        "heapTotal": 0.0029296875,
         "external": 0.0681295394897461,
         "arrayBuffers": 0.00018310546875
       }
     },
     {
       "config": {
-        "width": 500,
-        "height": 500,
-        "format": "jpeg"
-      },
-      "clientDuration": 1.890625,
-      "memoryDiffMB": {
-        "rss": 0.171875,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.007933616638183594,
-        "arrayBuffers": 0.001190185546875
-      }
-    },
-    {
-      "config": {
-        "width": 400,
-        "height": 400,
-        "format": "jpeg"
-      },
-      "clientDuration": 1.9052919999999176,
-      "memoryDiffMB": {
-        "rss": 0.171875,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.011404037475585938,
-        "arrayBuffers": 0.00128173828125
-      }
-    },
-    {
-      "config": {
-        "width": 300,
-        "height": 300,
-        "format": "jpeg"
-      },
-      "clientDuration": 1.9225839999999152,
-      "memoryDiffMB": {
-        "rss": 0.1875,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.014874458312988281,
-        "arrayBuffers": 0.001373291015625
-      }
-    },
-    {
-      "config": {
         "width": 200,
         "height": 200,
-        "format": "jpeg"
+        "format": "webp"
       },
-      "clientDuration": 1.9409999999998035,
+      "clientDuration": 1.6918339999997443,
       "memoryDiffMB": {
-        "rss": 0.1875,
+        "rss": 0.09375,
         "heapUsed": 0,
         "heapTotal": 0.0390625,
-        "external": 0.018344879150390625,
-        "arrayBuffers": 0.00146484375
-      }
-    },
-    {
-      "config": {
-        "width": 100,
-        "height": 100,
-        "format": "jpeg"
-      },
-      "clientDuration": 1.9547919999999976,
-      "memoryDiffMB": {
-        "rss": 0.1875,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.02181529998779297,
-        "arrayBuffers": 0.001556396484375
-      }
-    },
-    {
-      "config": {
-        "width": 500,
-        "height": 500,
-        "format": "png"
-      },
-      "clientDuration": 1.9678749999998217,
-      "memoryDiffMB": {
-        "rss": 0.1875,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.025284767150878906,
-        "arrayBuffers": 0.00164794921875
+        "external": 0.067169189453125,
+        "arrayBuffers": 0.000732421875
       }
     },
     {
@@ -121,163 +271,28 @@
         "height": 300,
         "format": "webp"
       },
-      "clientDuration": 2.0243329999998423,
+      "clientDuration": 2.7050420000000486,
       "memoryDiffMB": {
-        "rss": 0.203125,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.0651865005493164,
-        "arrayBuffers": 0.001007080078125
-      }
-    },
-    {
-      "config": {
-        "width": 200,
-        "height": 200,
-        "format": "webp"
-      },
-      "clientDuration": 2.05212500000016,
-      "memoryDiffMB": {
-        "rss": 0.203125,
-        "heapUsed": 0,
-        "heapTotal": 0.0390625,
-        "external": 0.06865692138671875,
-        "arrayBuffers": 0.0010986328125
-      }
-    },
-    {
-      "config": {
-        "width": 400,
-        "height": 400,
-        "format": "png"
-      },
-      "clientDuration": 2.78774999999996,
-      "memoryDiffMB": {
-        "rss": 0.4375,
+        "rss": 0.421875,
         "heapUsed": 0,
         "heapTotal": 0.0732421875,
-        "external": 0.033873558044433594,
-        "arrayBuffers": 0.00274658203125
-      }
-    },
-    {
-      "config": {
-        "width": 300,
-        "height": 300,
-        "format": "png"
-      },
-      "clientDuration": 2.8147909999997864,
-      "memoryDiffMB": {
-        "rss": 0.453125,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.03734302520751953,
-        "arrayBuffers": 0.002838134765625
-      }
-    },
-    {
-      "config": {
-        "width": 200,
-        "height": 200,
-        "format": "png"
-      },
-      "clientDuration": 2.8371250000000146,
-      "memoryDiffMB": {
-        "rss": 0.453125,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.04081249237060547,
-        "arrayBuffers": 0.0029296875
-      }
-    },
-    {
-      "config": {
-        "width": 100,
-        "height": 100,
-        "format": "png"
-      },
-      "clientDuration": 2.8515000000002146,
-      "memoryDiffMB": {
-        "rss": 0.453125,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.044281959533691406,
+        "external": 0.07131290435791016,
         "arrayBuffers": 0.003021240234375
       }
     },
     {
       "config": {
-        "width": 500,
-        "height": 500,
-        "format": "avif"
-      },
-      "clientDuration": 2.8675419999999576,
-      "memoryDiffMB": {
-        "rss": 0.453125,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.04775238037109375,
-        "arrayBuffers": 0.00311279296875
-      }
-    },
-    {
-      "config": {
         "width": 400,
         "height": 400,
-        "format": "avif"
+        "format": "webp"
       },
-      "clientDuration": 2.8877919999999904,
+      "clientDuration": 2.684124999999767,
       "memoryDiffMB": {
-        "rss": 0.453125,
+        "rss": 0.40625,
         "heapUsed": 0,
         "heapTotal": 0.0732421875,
-        "external": 0.051222801208496094,
-        "arrayBuffers": 0.003204345703125
-      }
-    },
-    {
-      "config": {
-        "width": 300,
-        "height": 300,
-        "format": "avif"
-      },
-      "clientDuration": 2.910917000000154,
-      "memoryDiffMB": {
-        "rss": 0.46875,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.05469322204589844,
-        "arrayBuffers": 0.0032958984375
-      }
-    },
-    {
-      "config": {
-        "width": 200,
-        "height": 200,
-        "format": "avif"
-      },
-      "clientDuration": 2.9543750000002547,
-      "memoryDiffMB": {
-        "rss": 0.484375,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.05816364288330078,
-        "arrayBuffers": 0.003387451171875
-      }
-    },
-    {
-      "config": {
-        "width": 100,
-        "height": 100,
-        "format": "avif"
-      },
-      "clientDuration": 2.966707999999926,
-      "memoryDiffMB": {
-        "rss": 0.484375,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.061634063720703125,
-        "arrayBuffers": 0.00347900390625
+        "external": 0.06784248352050781,
+        "arrayBuffers": 0.0029296875
       }
     },
     {
@@ -286,28 +301,13 @@
         "height": 500,
         "format": "webp"
       },
-      "clientDuration": 2.977041999999983,
+      "clientDuration": 2.182749999999942,
       "memoryDiffMB": {
-        "rss": 0.484375,
+        "rss": 0.28125,
         "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.06510448455810547,
-        "arrayBuffers": 0.003570556640625
-      }
-    },
-    {
-      "config": {
-        "width": 400,
-        "height": 400,
-        "format": "webp"
-      },
-      "clientDuration": 2.9923330000001442,
-      "memoryDiffMB": {
-        "rss": 0.484375,
-        "heapUsed": 0,
-        "heapTotal": 0.0732421875,
-        "external": 0.06857490539550781,
-        "arrayBuffers": 0.003662109375
+        "heapTotal": 0.0400390625,
+        "external": 0.06018352508544922,
+        "arrayBuffers": 0.00201416015625
       }
     }
   ]

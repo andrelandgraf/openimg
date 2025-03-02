@@ -131,14 +131,18 @@ export function runBenchmark(config: BenchmarkServerConfig) {
       const finalMemory = process.memoryUsage();
       const finalMemoryMB = convertToMB(finalMemory);
 
-      // Sort results by server duration or client duration
+      // Sort results by configuration parameters to ensure consistent ordering across runs
       results.sort((a, b) => {
-        if (a.serverDuration && b.serverDuration) {
-          return a.serverDuration - b.serverDuration;
-        } else if (a.clientDuration && b.clientDuration) {
-          return a.clientDuration - b.clientDuration;
+        // First sort by format
+        if (a.config.format !== b.config.format) {
+          return a.config.format.localeCompare(b.config.format);
         }
-        return 0;
+        // Then by width
+        if (a.config.width !== b.config.width) {
+          return a.config.width - b.config.width;
+        }
+        // Finally by height
+        return a.config.height - b.config.height;
       });
 
       // Save the benchmark results
