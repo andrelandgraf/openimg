@@ -1,67 +1,27 @@
-import { runTests } from "../../shared/test-runner.js";
-import fs from "node:fs";
-import http from "node:http";
-import { getImgResponse } from "openimg/node";
+import { type Subprocess } from "bun";
+import { runTests } from "../../shared/test-runner.ts";
 
-// Configure the Node.js-specific server setup
+// Configure the Bun-specific server setup
 runTests({
-  type: "node",
+  type: "bun",
   port: 3000,
   startServer: async () => {
-    // Create a server directly instead of importing
-    const server = http.createServer(async (req, res) => {
-      const headers = {
-        "x-openimg-test": "true",
-      };
-
-      // getImgResponse expects a Request object, but we have an IncomingMessage
-      // We need to create a proper Request object from the IncomingMessage
-      const url = new URL(
-        req.url || "",
-        `http://${req.headers.host || "localhost"}`
-      );
-      const request = new Request(url.toString(), {
-        method: req.method,
-        headers: req.headers as HeadersInit,
-      });
-
-      const response = await getImgResponse(request, { headers });
-
-      // Copy status
-      res.statusCode = response.status;
-
-      // Copy headers
-      response.headers.forEach((value, key) => {
-        res.setHeader(key, value);
-      });
-
-      // Copy body
-      const buffer = await response.arrayBuffer();
-      res.end(Buffer.from(buffer));
+    // Start the server as a subprocess and store the reference
+    const serverProcess = Bun.spawn(["bunx", "tsx", "server.ts"], {
+      stdout: "inherit",
+      stderr: "inherit",
     });
 
-    // Start listening
-    await new Promise<void>((resolve) => {
-      server.listen(3000, () => {
-        console.log("Server started on port 3000");
-        resolve();
-      });
-    });
-
-    return server;
+    return serverProcess;
   },
-  stopServer: async (server: http.Server) => {
-    if (server) {
-      // Close the server
-      await new Promise<void>((resolve) => {
-        server.close(() => {
-          console.log("Server process terminated");
-          resolve();
-        });
-      });
+  stopServer: async (serverProcess: Subprocess) => {
+    if (serverProcess) {
+      // Kill only the server process we started
+      serverProcess.kill();
+      console.log("Server process terminated");
     }
   },
-  fileExists: (path: string) => {
-    return fs.existsSync(path);
+  fileExists: async (path: string) => {
+    return await Bun.file(path).exists();
   },
 });

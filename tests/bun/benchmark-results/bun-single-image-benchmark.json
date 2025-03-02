@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-03-02T03:07:32.269Z",
+  "timestamp": "2025-03-02T03:52:47.350Z",
   "platform": "bun",
   "version": "1.2.1",
   "result": {
@@ -8,9 +8,9 @@
       "height": 1000,
       "format": "webp"
     },
-    "clientDuration": 405.9675000000001,
+    "clientDuration": 402.58229199999994,
     "memoryDiffMB": {
-      "rss": 0.9375,
+      "rss": 0.84375,
       "heapUsed": 0.026238441467285156,
       "heapTotal": 0.0009765625,
       "external": 0.2061319351196289,

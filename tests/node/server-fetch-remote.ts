@@ -54,12 +54,6 @@ const server = http.createServer(async (req, res) => {
   res.end(Buffer.from(buffer));
 });
 
-// Don't start the server immediately when imported for testing
-if (process.env.NODE_ENV !== "test") {
-  server.listen(3002, () => {
-    console.log("'server' server running on port 3002!");
-  });
-}
-
-// Export the server for testing
-export default server;
+server.listen(3002, () => {
+  console.log("'server' server running on port 3002!");
+});

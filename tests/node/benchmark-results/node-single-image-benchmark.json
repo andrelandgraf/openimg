@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-03-02T03:07:37.781Z",
+  "timestamp": "2025-03-02T03:52:52.865Z",
   "platform": "node",
   "version": "v22.6.0",
   "result": {
@@ -8,9 +8,9 @@
       "height": 1000,
       "format": "webp"
     },
-    "clientDuration": 0.2568750000000364,
+    "clientDuration": 0.23087499999996908,
     "memoryDiffMB": {
-      "rss": 0.046875,
+      "rss": 0.03125,
       "heapUsed": 0,
       "heapTotal": 0.01171875,
       "external": 0.003937721252441406,
