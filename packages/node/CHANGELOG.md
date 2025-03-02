@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.0
+
+- `getImgResponse` now always returns the correct `Content-Type` header and will also set `Content-Length`.
+
 # 0.5.0
 
 - `src` removed from `ImgParams`. `GetImgSource` is now responsible for parsing the `src` string from the request.

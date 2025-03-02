@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.0
+
+## openimg/node & openimg/bun
+
+- `getImgResponse` now always returns the correct `Content-Type` header and will also set `Content-Length`.
+- Introduces `metadata.json` file to the cache (if cache is enabled) to track file sizes and content-types. This will reset your cache and refetch all images.
+
+Note that v0.6.0 will force you to refetch all images. No action is required. Existing files in the cache will be overwritten.
+
 # 0.5.1
 
 ## openimg/react

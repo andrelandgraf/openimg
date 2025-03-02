@@ -91,7 +91,7 @@ headers.set("Cache-Control", "public, max-age=31536000, immutable");
 return getImgResponse(request, { headers });
 ```
 
-Note, that `getImgResponse` will only set the `Content-Type` header for avif and webp images. All other headers (e.g., `Cache-Control`) must be set manually. This is to allow for more flexibility in how you want to handle caching. In most cases, you probably want to enforce unique file names and set an aggressive cache policy. It is also recommended to use a CDN in front of your image server.
+Note, that `getImgResponse` will only set the `Content-Type` & `Content-Length` headers. All other headers (e.g., `Cache-Control`) must be set manually. This is to allow for more flexibility in how you want to handle caching. In most cases, you probably want to enforce unique file names and set an aggressive cache policy. It is also recommended to use a CDN in front of your image server.
 
 **cacheFolder: string | 'no_cache'**
 
