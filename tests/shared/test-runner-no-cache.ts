@@ -37,19 +37,19 @@ export function runNoCacheTests(config: ServerConfig) {
     await stopServer(server);
   });
 
-  test("it returns 404 if the img path maps to not image in the public folder", async () => {
+  test(`${type}: (no cache) it returns 404 if the img path maps to not image in the public folder`, async () => {
     const { url, expectedStatus } = testCases.notFoundImage;
     const res = await fetch(origin + url);
     expect(res.status).toBe(expectedStatus);
   });
 
-  test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
+  test(`${type}: (no cache) it returns 403 if the img path maps to an remote origin not in allowlist`, async () => {
     const { url, expectedStatus } = testCases.forbiddenRemoteOrigin;
     const res = await fetch(origin + url);
     expect(res.status).toBe(expectedStatus);
   });
 
-  test("it does not cache and returns webp", async () => {
+  test(`${type}: (no cache) it does not cache and returns webp`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.webpFormat;
     const res = await fetch(origin + url);
@@ -60,7 +60,7 @@ export function runNoCacheTests(config: ServerConfig) {
     expect(exists).toBe(false);
   });
 
-  test("it does not cache and returns avif", async () => {
+  test(`${type}: (no cache) it does not cache and returns avif`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.avifFormat;
     const res = await fetch(origin + url);
@@ -71,7 +71,7 @@ export function runNoCacheTests(config: ServerConfig) {
     expect(exists).toBe(false);
   });
 
-  test("it does not cache and returns original format", async () => {
+  test(`${type}: (no cache) it does not cache and returns original format`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.originalFormat;
     const res = await fetch(origin + url);

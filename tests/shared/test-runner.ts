@@ -44,19 +44,19 @@ export function runTests(config: ServerConfig) {
     } catch {}
   });
 
-  test("it returns 404 if the img path maps to not image in the public folder", async () => {
+  test(`${type}: it returns 404 if the img path maps to not image in the public folder`, async () => {
     const { url, expectedStatus } = testCases.notFoundImage;
     const res = await fetch(origin + url);
     expect(res.status).toBe(expectedStatus);
   });
 
-  test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
+  test(`${type}: it returns 403 if the img path maps to an remote origin not in allowlist`, async () => {
     const { url, expectedStatus } = testCases.forbiddenRemoteOrigin;
     const res = await fetch(origin + url);
     expect(res.status).toBe(expectedStatus);
   });
 
-  test("it caches and returns webp", async () => {
+  test(`${type}: it caches and returns webp`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.webpFormat;
     const res = await fetch(origin + url);
@@ -67,7 +67,7 @@ export function runTests(config: ServerConfig) {
     expect(exists).toBe(true);
   });
 
-  test("it caches and returns avif", async () => {
+  test(`${type}: it caches and returns avif`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.avifFormat;
     const res = await fetch(origin + url);
@@ -78,7 +78,7 @@ export function runTests(config: ServerConfig) {
     expect(exists).toBe(true);
   });
 
-  test("it caches and returns original format", async () => {
+  test(`${type}: it caches and returns original format`, async () => {
     const { url, expectedStatus, expectedContentType, expectedCachePath } =
       testCases.originalFormat;
     const res = await fetch(origin + url);
@@ -89,7 +89,7 @@ export function runTests(config: ServerConfig) {
     expect(exists).toBe(true);
   });
 
-  test("it returns custom headers", async () => {
+  test(`${type}: it returns custom headers`, async () => {
     const { url, expectedStatus, expectedHeaders } = testCases.customHeaders;
     const res = await fetch(origin + url);
     expect(res.status).toBe(expectedStatus);

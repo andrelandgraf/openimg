@@ -70,7 +70,7 @@ export function runFetchRemoteTests(config: ServerConfig) {
     } catch {}
   });
 
-  test("it caches and returns webp", async () => {
+  test(`${type}: (fetch remote) it caches and returns webp`, async () => {
     const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=webp");
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("image/webp");
