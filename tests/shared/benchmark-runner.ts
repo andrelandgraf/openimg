@@ -15,15 +15,7 @@ export type BenchmarkConfig = {
 
 export type BenchmarkResult = {
   config: BenchmarkConfig;
-  serverDuration?: number;
-  clientDuration?: number;
-  memoryDiffMB: {
-    rss: number;
-    heapUsed: number;
-    heapTotal: number;
-    external: number;
-    arrayBuffers: number;
-  };
+  duration: number;
 };
 
 type BenchmarkServerConfig = {
@@ -63,14 +55,13 @@ export function runSingleImageBenchmark(config: BenchmarkServerConfig) {
       const result = await runBenchmark(singleImageConfig);
 
       // Save the benchmark results
-      const timestamp = new Date().toISOString();
       const resultsPath = path.join(
         resultsDir,
         `${type}-single-image-benchmark.json`
       );
 
       const benchmarkResults = {
-        timestamp,
+        timestamp: new Date().toISOString(),
         platform: type,
         version: type === "bun" ? Bun.version : process.version,
         result,
