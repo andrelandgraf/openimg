@@ -1,8 +1,8 @@
 import { runPlaceholderTests } from "../../shared/test-runner-placeholder.js";
-import { getImgPlaceholder } from "openimg/bun";
+import { getImgPlaceholder } from "openimg/node";
 
-// Configure the Bun-specific placeholder tests
+// Configure the Node.js-specific placeholder tests
 runPlaceholderTests({
-  type: "bun",
+  type: "node",
   getImgPlaceholder,
 });

@@ -1,6 +1,4 @@
-// import { getImgResponse } from "openimg-node";
-// import { getImgResponse } from "openimg-bun";
-import { getImgResponse } from "openimg/node";
+import { getImgResponse } from "openimg/bun";
 
 const remote = "http://localhost:3003";
 

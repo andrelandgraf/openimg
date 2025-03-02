@@ -5,7 +5,7 @@ import * as matchers from "@testing-library/jest-dom/matchers";
 // Add custom matcher for toInclude
 const customMatchers = {
   toInclude: (received: unknown, expected: string) => {
-    if (received === null || typeof received !== 'string') {
+    if (received === null || typeof received !== "string") {
       return {
         pass: false,
         message: () => `Expected ${received} to include "${expected}"`,
@@ -14,7 +14,7 @@ const customMatchers = {
     const pass = received.includes(expected);
     return {
       pass,
-      message: () => 
+      message: () =>
         pass
           ? `Expected "${received}" not to include "${expected}"`
           : `Expected "${received}" to include "${expected}"`,

@@ -3,7 +3,11 @@
   "type": "module",
   "scripts": {
     "fmt": "bunx prettier . -w",
-    "build": "./scripts/build.sh"
+    "build": "./scripts/build.sh",
+    "test:bun": "cd tests/bun && bun test",
+    "test:node": "cd tests/node && bun test",
+    "test:react": "cd tests/react && bun test",
+    "test": "bun run test:bun && bun run test:node && bun run test:react"
   },
   "workspaces": [
     "packages/*",

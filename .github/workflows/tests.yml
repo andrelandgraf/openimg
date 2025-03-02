@@ -1,14 +1,14 @@
-name: React Tests
+name: OpenImg Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
-    name: Run React Tests
+    name: Run All Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +22,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install
-      
+
       - name: Build packages
         run: bun run build
-        
-      - name: Run tests
-        run: cd tests/react && bun test 
+
+      - name: Run all tests
+        run: bun run test

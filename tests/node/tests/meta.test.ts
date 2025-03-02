@@ -1,8 +1,8 @@
 import { runMetadataTests } from "../../shared/test-runner-metadata.js";
-import { getImgMetadata } from "openimg/bun";
+import { getImgMetadata } from "openimg/node";
 
-// Configure the Bun-specific metadata tests
+// Configure the Node.js-specific metadata tests
 runMetadataTests({
-  type: "bun",
+  type: "node",
   getImgMetadata,
 });

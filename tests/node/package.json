@@ -1,12 +1,15 @@
 {
-  "name": "openimg-bun-tests",
-  "module": "server.ts",
+  "name": "openimg-node-tests",
   "type": "module",
   "dependencies": {
     "openimg": "workspace:*"
   },
+  "scripts": {
+    "test": "bun test"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/node": "latest",
+    "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

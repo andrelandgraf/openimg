@@ -1,92 +1,27 @@
-import fs from "node:fs";
-import { expect, test, beforeAll, afterAll } from "bun:test";
+import { runNoCacheTests } from "../../shared/test-runner-no-cache.js";
 import { type Subprocess } from "bun";
 
-const port = 3001;
-const origin = `http://localhost:${port}/`;
-let serverProcess: Subprocess | undefined;
+// Configure the Bun-specific server setup for no-cache tests
+runNoCacheTests({
+  type: "bun",
+  port: 3001,
+  startServer: async () => {
+    // Start the server as a subprocess and store the reference
+    const serverProcess = Bun.spawn(["bun", "run", "server-no-cache.ts"], {
+      stdout: "inherit",
+      stderr: "inherit",
+    });
 
-beforeAll(async () => {
-  try {
-    // reset cache folder
-    fs.rmdirSync("./data", { recursive: true });
-  } catch {}
-
-  console.log("starting server...");
-
-  // Start the server as a subprocess and store the reference
-  serverProcess = Bun.spawn(["bun", "run", "server-no-cache.ts"], {
-    stdout: "inherit",
-    stderr: "inherit",
-  });
-
-  let waiting = true;
-  const timeout = setTimeout(() => {
-    console.error("could not start or reach server");
-    process.exit(1);
-  }, 3000);
-  while (waiting) {
-    try {
-      await fetch(origin);
-      clearTimeout(timeout);
-      waiting = false;
-    } catch (err: unknown) {
-      console.log("waiting for server res", err);
-      await new Promise((res) => setTimeout(res, 300));
+    return serverProcess;
+  },
+  stopServer: async (serverProcess: Subprocess) => {
+    if (serverProcess) {
+      // Kill only the server process we started
+      serverProcess.kill();
+      console.log("Server process terminated");
     }
-  }
-});
-
-afterAll(async () => {
-  console.log("shutting down server...");
-  
-  if (serverProcess) {
-    // Kill only the server process we started
-    serverProcess.kill();
-    console.log("Server process terminated");
-  }
-});
-
-test("it returns 404 if the img path maps to not image in the public folder", async () => {
-  const res = await fetch(origin + "?src=/cat2.png&w=100&h=100&format=avif");
-  expect(res.status).toBe(404);
-});
-
-test("it returns 403 if the img path maps to an remote origin not in allowlist", async () => {
-  const res = await fetch(
-    origin + "?src=https://example.com/cat2.png&w=100&h=100&format=avif"
-  );
-  expect(res.status).toBe(403);
-});
-
-test("it does not cache and returns webp", async () => {
-  const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=webp");
-  expect(res.status).toBe(200);
-  expect(res.headers.get("Content-Type")).toBe("image/webp");
-
-  const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.webp"
-  );
-  expect(await cachedFile.exists()).toBe(false);
-});
-
-test("it does not cache and returns avif", async () => {
-  const res = await fetch(origin + "?src=/cat.png&w=100&h=100&format=avif");
-  expect(res.status).toBe(200);
-  expect(res.headers.get("Content-Type")).toBe("image/avif");
-
-  const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.avif"
-  );
-  expect(await cachedFile.exists()).toBe(false);
-});
-
-test("it does not cache and returns original format", async () => {
-  const res = await fetch(origin + "?src=/cat.png&w=100&h=100");
-  expect(res.status).toBe(200);
-
-  const cachedFile = Bun.file(
-    "./data/images/public/cat-png-w-100-h-100-fit-base.png"
-  );
-  expect(await cachedFile.exists()).toBe(false);
+  },
+  fileExists: async (path: string) => {
+    return await Bun.file(path).exists();
+  },
 });
