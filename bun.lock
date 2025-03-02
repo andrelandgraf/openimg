@@ -82,6 +82,7 @@
         "openimg": "workspace:*",
       },
       "devDependencies": {
+        "@types/bun": "latest",
         "@types/node": "latest",
         "bun-types": "latest",
       },

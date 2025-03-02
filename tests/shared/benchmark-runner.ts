@@ -198,13 +198,7 @@ export function runSingleImageBenchmark(config: BenchmarkServerConfig) {
         fs.rmdirSync("./data", { recursive: true });
       } catch {}
 
-      // Run the single image benchmark multiple times to get an average
-      const iterations = 5;
       const result = await runBenchmark(singleImageConfig);
-
-      // Record overall memory usage
-      const finalMemory = process.memoryUsage();
-      const finalMemoryMB = convertToMB(finalMemory);
 
       // Save the benchmark results
       const timestamp = new Date().toISOString();
@@ -217,8 +211,6 @@ export function runSingleImageBenchmark(config: BenchmarkServerConfig) {
         timestamp,
         platform: type,
         version: type === "bun" ? Bun.version : process.version,
-        iterations,
-        finalMemoryMB: finalMemoryMB,
         result,
       };
 
