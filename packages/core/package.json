@@ -33,7 +33,8 @@
   },
   "scripts": {
     "build": "./scripts/build.sh",
-    "release": "./scripts/release.sh"
+    "release": "./scripts/release.sh",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "latest"

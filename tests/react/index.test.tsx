@@ -1,8 +1,8 @@
-import React from "react";
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
-import { Img, OpenImgContextProvider, GetSrc } from "openimg-react";
-import { TargetFormat } from "../../packages/react/dist/types/react";
+import { Img, OpenImgContextProvider, type GetSrc } from "openimg-react";
+// Import the testing setup to ensure matchers are properly registered
+import "./testing-library";
 
 test("renders without errors when required props are provided", () => {
   render(<Img src="/cat.png" width={800} height={800} alt="A cute cat" />);
@@ -75,9 +75,8 @@ test("generates <source> elements for each format", () => {
 });
 
 test("generates only specified <source> element when custom formats are provided", () => {
-  const customFormats = ["webp"] satisfies TargetFormat[]; // Only use "webp" format
   const { container } = render(
-    <OpenImgContextProvider targetFormats={customFormats}>
+    <OpenImgContextProvider targetFormats={["webp"]}>
       <Img src="/cat.png" width={800} height={800} alt="A cute cat" />
     </OpenImgContextProvider>
   );

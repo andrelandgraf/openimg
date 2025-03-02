@@ -7,7 +7,10 @@
     "test:bun": "cd tests/bun && bun test",
     "test:node": "cd tests/node && bun test",
     "test:react": "cd tests/react && bun test",
-    "test": "bun run test:bun && bun run test:node && bun run test:react"
+    "test": "bun run test:bun && bun run test:node && bun run test:react",
+    "typecheck": "bun run typecheck:packages && bun run typecheck:tests",
+    "typecheck:packages": "cd packages/core && bun run typecheck",
+    "typecheck:tests": "cd tests/bun && bun run typecheck && cd ../node && bun run typecheck && cd ../react && bun run typecheck"
   },
   "workspaces": [
     "packages/*",

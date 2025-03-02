@@ -3,7 +3,8 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "test": "bun test index.test.tsx"
+    "test": "bun test index.test.tsx",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^16.7.3",
