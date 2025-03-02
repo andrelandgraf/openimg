@@ -1,12 +1,10 @@
 import { type Subprocess } from "bun";
-import {
-  runSingleImageBenchmark,
-  convertToMB,
-} from "../../shared/benchmark-runner";
+import { runSingleImageBenchmark } from "../../shared/benchmark-runner";
 import type {
   BenchmarkConfig,
   BenchmarkResult,
 } from "../../shared/benchmark-runner";
+import { waitForServer, convertToMB } from "../../shared/utils";
 
 // Run the single image benchmark for Bun
 runSingleImageBenchmark({
@@ -21,8 +19,8 @@ runSingleImageBenchmark({
       stderr: "inherit",
     });
 
-    // Wait a moment for the server to start
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Wait for the server to be ready
+    await waitForServer("http://localhost:3000");
 
     return serverProcess;
   },
@@ -34,7 +32,7 @@ runSingleImageBenchmark({
   },
   runBenchmark: async (config: BenchmarkConfig): Promise<BenchmarkResult> => {
     const { width, height, format } = config;
-    const url = `http://localhost:3000/?src=https://picsum.photos/seed/openimg/1000/1000&w=${width}&h=${height}&format=${format}`;
+    const url = `http://localhost:3000/?src=/cat.png&w=${width}&h=${height}&format=${format}`;
 
     console.log(`Requesting: ${url}`);
 
@@ -50,7 +48,7 @@ runSingleImageBenchmark({
     // Make the request and measure duration
     const startTime = performance.now();
     const response = await fetch(url);
-    const buffer = await response.arrayBuffer();
+    await response.arrayBuffer();
     const endTime = performance.now();
     const duration = endTime - startTime;
 

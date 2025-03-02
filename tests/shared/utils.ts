@@ -1,7 +1,3 @@
-/**
- * Shared test utilities for both Bun and Node.js tests
- */
-
 // Common test cases that can be reused across both Bun and Node.js tests
 export const testCases = {
   notFoundImage: {
@@ -39,9 +35,42 @@ export const testCases = {
   },
 };
 
-// Helper function to clean up cache directory
 export function cleanupCache(fs: any) {
   try {
     fs.rmdirSync("./data", { recursive: true });
   } catch {}
+}
+
+export function convertToMB(memory: NodeJS.MemoryUsage) {
+  const MB = 1024 * 1024;
+  return {
+    rss: memory.rss / MB,
+    heapTotal: memory.heapTotal / MB,
+    heapUsed: memory.heapUsed / MB,
+    external: memory.external / MB,
+    arrayBuffers: memory.arrayBuffers / MB,
+  };
+}
+
+export async function waitForServer(
+  url: string,
+  timeoutMs: number = 3000,
+  retryIntervalMs: number = 300
+): Promise<void> {
+  let waiting = true;
+  const timeout = setTimeout(() => {
+    console.error(`Could not start or reach server at ${url}`);
+    process.exit(1);
+  }, timeoutMs);
+
+  while (waiting) {
+    try {
+      await fetch(url);
+      clearTimeout(timeout);
+      waiting = false;
+    } catch (err: unknown) {
+      console.log("Waiting for server response...", err);
+      await new Promise((res) => setTimeout(res, retryIntervalMs));
+    }
+  }
 }

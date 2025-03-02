@@ -1,6 +1,3 @@
-/**
- * Shared test runner for placeholder tests (both Bun and Node.js)
- */
 import { expect, test } from "bun:test";
 import { createReadStream, readFileSync } from "fs";
 

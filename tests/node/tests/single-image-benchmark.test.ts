@@ -1,13 +1,11 @@
 import { createServer } from "node:http";
 import { getImgResponse } from "openimg/node";
-import {
-  runSingleImageBenchmark,
-  convertToMB,
-} from "../../shared/benchmark-runner";
+import { runSingleImageBenchmark } from "../../shared/benchmark-runner";
 import type {
   BenchmarkConfig,
   BenchmarkResult,
 } from "../../shared/benchmark-runner";
+import { convertToMB } from "../../shared/utils";
 
 // Run the single image benchmark for Node.js
 runSingleImageBenchmark({

@@ -1,9 +1,6 @@
-/**
- * Shared test runner for fetch-remote tests (both Bun and Node.js)
- */
 import fs from "node:fs";
 import { expect, test, afterEach, beforeAll, afterAll } from "bun:test";
-import { waitForServer } from "./server-utils.js";
+import { waitForServer } from "./utils.ts";
 
 type ServerConfig = {
   type: "bun" | "node";

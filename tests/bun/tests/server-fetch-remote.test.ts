@@ -1,6 +1,5 @@
-import { runFetchRemoteTests } from "../../shared/test-runner-fetch-remote.js";
 import { type Subprocess } from "bun";
-import fs from "node:fs";
+import { runFetchRemoteTests } from "../../shared/test-runner-fetch-remote.ts";
 
 // Configure the Bun-specific server setup for fetch-remote tests
 runFetchRemoteTests({

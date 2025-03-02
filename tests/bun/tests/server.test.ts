@@ -1,6 +1,5 @@
-import { runTests } from "../../shared/test-runner.js";
 import { type Subprocess } from "bun";
-import fs from "node:fs";
+import { runTests } from "../../shared/test-runner.ts";
 
 // Configure the Bun-specific server setup
 runTests({

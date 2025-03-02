@@ -1,28 +1,20 @@
 {
-  "timestamp": "2025-03-02T02:52:26.884Z",
+  "timestamp": "2025-03-02T03:07:32.269Z",
   "platform": "bun",
   "version": "1.2.1",
-  "iterations": 5,
-  "finalMemoryMB": {
-    "rss": 149.953125,
-    "heapTotal": 3.9658203125,
-    "heapUsed": 21.914475440979004,
-    "external": 19.72449493408203,
-    "arrayBuffers": 18.025821685791016
-  },
   "result": {
     "config": {
-      "width": 300,
-      "height": 300,
+      "width": 1000,
+      "height": 1000,
       "format": "webp"
     },
-    "clientDuration": 2.1037089999999807,
+    "clientDuration": 405.9675000000001,
     "memoryDiffMB": {
-      "rss": 0.078125,
-      "heapUsed": 0,
-      "heapTotal": 0.001953125,
-      "external": 0.0034704208374023438,
-      "arrayBuffers": 0.000091552734375
+      "rss": 0.9375,
+      "heapUsed": 0.026238441467285156,
+      "heapTotal": 0.0009765625,
+      "external": 0.2061319351196289,
+      "arrayBuffers": 0.19402122497558594
     }
   }
 }

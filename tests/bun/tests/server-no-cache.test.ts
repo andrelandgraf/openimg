@@ -1,5 +1,5 @@
-import { runNoCacheTests } from "../../shared/test-runner-no-cache.js";
 import { type Subprocess } from "bun";
+import { runNoCacheTests } from "../../shared/test-runner-no-cache.ts";
 
 // Configure the Bun-specific server setup for no-cache tests
 runNoCacheTests({

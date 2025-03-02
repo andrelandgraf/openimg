@@ -1,10 +1,7 @@
-/**
- * Shared test runner for both openimg/bun and openimg/node
- */
 import fs from "node:fs";
 import { expect, test, afterEach, beforeAll, afterAll } from "bun:test";
-import { testCases } from "./test-utils.js";
-import { waitForServer } from "./server-utils.js";
+import { testCases } from "./utils.ts";
+import { waitForServer } from "./utils.ts";
 
 type ServerConfig = {
   type: "bun" | "node";
