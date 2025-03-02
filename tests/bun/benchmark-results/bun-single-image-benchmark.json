@@ -1,0 +1,106 @@
+{
+  "timestamp": "2025-03-02T02:48:27.314Z",
+  "platform": "bun",
+  "version": "1.2.1",
+  "iterations": 5,
+  "finalMemoryMB": {
+    "rss": 169.984375,
+    "heapTotal": 3.9189453125,
+    "heapUsed": 3.920114517211914,
+    "external": 1.723801612854004,
+    "arrayBuffers": 0.0025205612182617188
+  },
+  "result": {
+    "config": {
+      "width": 300,
+      "height": 300,
+      "format": "webp"
+    },
+    "serverDuration": 0,
+    "clientDuration": 1.3339168000000428,
+    "memoryDiffMB": {
+      "rss": 0.01875,
+      "heapUsed": 0.0015588760375976562,
+      "heapTotal": 0.0015625,
+      "external": 0.0035068511962890623,
+      "arrayBuffers": 0.000091552734375
+    }
+  },
+  "allResults": [
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "webp"
+      },
+      "clientDuration": 0.6375000000000455,
+      "memoryDiffMB": {
+        "rss": 0.09375,
+        "heapUsed": 0,
+        "heapTotal": 0.001953125,
+        "external": 0.0034704208374023438,
+        "arrayBuffers": 0.000091552734375
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "webp"
+      },
+      "clientDuration": 1.3764579999999569,
+      "memoryDiffMB": {
+        "rss": 0,
+        "heapUsed": 0,
+        "heapTotal": 0.001953125,
+        "external": 0.0034704208374023438,
+        "arrayBuffers": 0.000091552734375
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "webp"
+      },
+      "clientDuration": 1.4852920000000722,
+      "memoryDiffMB": {
+        "rss": 0,
+        "heapUsed": 0,
+        "heapTotal": 0.001953125,
+        "external": 0.0034704208374023438,
+        "arrayBuffers": 0.000091552734375
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "webp"
+      },
+      "clientDuration": 2.065166999999974,
+      "memoryDiffMB": {
+        "rss": 0,
+        "heapUsed": 0.007794380187988281,
+        "heapTotal": 0,
+        "external": 0.0036525726318359375,
+        "arrayBuffers": 0.000091552734375
+      }
+    },
+    {
+      "config": {
+        "width": 300,
+        "height": 300,
+        "format": "webp"
+      },
+      "clientDuration": 1.105167000000165,
+      "memoryDiffMB": {
+        "rss": 0,
+        "heapUsed": 0,
+        "heapTotal": 0.001953125,
+        "external": 0.0034704208374023438,
+        "arrayBuffers": 0.000091552734375
+      }
+    }
+  ]
+}

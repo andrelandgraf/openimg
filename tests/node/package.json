@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/node": "latest",
     "bun-types": "latest"
   },

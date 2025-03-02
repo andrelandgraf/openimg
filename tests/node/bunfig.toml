@@ -1,0 +1,3 @@
+[test]
+# Set to 1 to run tests sequentially
+concurrency = 1 
