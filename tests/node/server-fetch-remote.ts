@@ -1,5 +1,6 @@
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import { getImgResponse } from "openimg/node";
-import http from "node:http";
 
 const remote = "http://localhost:3003";
 
@@ -7,21 +8,12 @@ async function computeKey(): Promise<string> {
   return Promise.resolve("123");
 }
 
-const server = http.createServer(async (req, res) => {
-  console.log("GET", req.url);
+const app = new Hono();
 
-  // getImgResponse expects a Request object, but we have an IncomingMessage
-  // We need to create a proper Request object from the IncomingMessage
-  const url = new URL(
-    req.url || "",
-    `http://${req.headers.host || "localhost"}`
-  );
-  const request = new Request(url.toString(), {
-    method: req.method,
-    headers: req.headers as HeadersInit,
-  });
+app.get("*", async (c) => {
+  console.log("GET", c.req.url);
 
-  const response = await getImgResponse(request, {
+  return getImgResponse(c.req.raw, {
     allowlistedOrigins: [remote],
     getImgSource: async ({ request }) => {
       const src = new URL(request.url).searchParams.get("src");
@@ -40,20 +32,12 @@ const server = http.createServer(async (req, res) => {
       };
     },
   });
-
-  // Copy status
-  res.statusCode = response.status;
-
-  // Copy headers
-  response.headers.forEach((value, key) => {
-    res.setHeader(key, value);
-  });
-
-  // Copy body
-  const buffer = await response.arrayBuffer();
-  res.end(Buffer.from(buffer));
 });
 
-server.listen(3002, () => {
-  console.log("'server' server running on port 3002!");
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3002;
+console.log(`Remote fetch server running on port ${port}`);
+
+serve({
+  fetch: app.fetch,
+  port,
 });

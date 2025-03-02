@@ -1,37 +1,19 @@
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import { getImgResponse } from "openimg/node";
-import http from "node:http";
 
-const server = http.createServer(async (req, res) => {
-  const headers = {
-    "x-openimg-test": "true",
-  };
+const app = new Hono();
 
-  // getImgResponse expects a Request object, but we have an IncomingMessage
-  // We need to create a proper Request object from the IncomingMessage
-  const url = new URL(
-    req.url || "",
-    `http://${req.headers.host || "localhost"}`
-  );
-  const request = new Request(url.toString(), {
-    method: req.method,
-    headers: req.headers as HeadersInit,
-  });
-
-  const response = await getImgResponse(request, { headers });
-
-  // Copy status
-  res.statusCode = response.status;
-
-  // Copy headers
-  response.headers.forEach((value, key) => {
-    res.setHeader(key, value);
-  });
-
-  // Copy body
-  const buffer = await response.arrayBuffer();
-  res.end(Buffer.from(buffer));
+app.get("*", async (c) => {
+  const headers = new Headers();
+  headers.set("x-openimg-test", "true");
+  return getImgResponse(c.req.raw, { headers });
 });
 
-server.listen(3000, () => {
-  console.log("Server started on port 3000");
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+console.log(`Server started on port ${port}`);
+
+serve({
+  fetch: app.fetch,
+  port,
 });
