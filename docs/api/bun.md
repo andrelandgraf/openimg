@@ -140,7 +140,21 @@ type ImgSource =
       type: "fetch";
       url: string;
       headers?: HeadersInit | undefined;
+    }
+  | {
+      type: "data";
+      data: ImgData;
+      cacheKey: string | null;
     };
+
+/**
+ * ImgData is the response body (ReadableStream), buffer, or other readable representation of an image.
+ */
+type ImgData =
+  | ReadableStream<Uint8Array>
+  | Readable
+  | Buffer
+  | Uint8Array;
 
 type GetImgSourceArgs = { request: Request; params: ImgParams };
 
@@ -239,6 +253,47 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
   };
 }
 ```
+
+Example for a custom `getImgSource` function that provides image data directly:
+
+```typescript
+import { GetImgSourceArgs, ImgSource } from "openimg/bun";
+import { createReadStream } from "node:fs";
+
+export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
+  const src = new URL(request.url).searchParams.get("src");
+  if (!src) {
+    return new Response(null, {
+      status: 400,
+      statusText: 'Search param "src" must be set',
+    });
+  }
+  
+  // For a specific image, provide the data directly
+  if (src === "/special-image.png") {
+    const imageStream = createReadStream("./private/special-image.png");
+    return {
+      type: "data",
+      data: imageStream,
+      cacheKey: "special-image", // Provide a unique cache key for caching
+    };
+  }
+  
+  // For other images, use the default behavior
+  if (URL.canParse(src)) {
+    return {
+      type: "fetch",
+      url: src,
+    };
+  }
+  return {
+    type: "fs",
+    path: "./public" + src,
+  };
+}
+```
+
+**Note:** When using the `type: "data"` option, you must provide a `cacheKey` if caching is enabled (i.e., if `cacheFolder` is not set to `"no_cache"`). This is because there is no path or URL to generate a cache key from. If you don't want to cache the image, you can set `cacheKey` to `null`.
 
 You then pass the custom `getImgSource` function to `getImgResponse`:
 

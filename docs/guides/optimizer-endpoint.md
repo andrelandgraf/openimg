@@ -146,10 +146,17 @@ export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
 
 Note that the result from `getImgSource` will further be validated against the `allowlistedOrigins` config option.
 
-You may have to override the default `getImgSource` function if you have different locations for hosted images, e.g., dev vs. production, or if you need to sign the URL for a remote S3 bucket.
+You may have to override the default `getImgSource` function if:
+
+- you have different locations for hosted images, e.g., dev vs. production
+- you need to sign the URL for a remote S3 bucket
+- you want to provide image data directly
+
+Here's an example implementation:
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
+import { createReadStream } from "node:fs";
 
 export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
   const src = new URL(request.url).searchParams.get("src"); // "https://example.com/folder/cat.png", "/cat.png"
@@ -161,6 +168,7 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
   }
 
   if (URL.canParse(src)) {
+    // Handle S3 URLs that need signing
     if (src.startsWith(process.env.S3_URL)) {
       // Sign the URL for S3
       const url = new URL(src);
@@ -170,7 +178,19 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
         url: signedUrl,
       };
     }
-    // You can also add custom headers to the request
+
+  // For a specific image, provide the data directly from a private location
+  if (src === "/protected-image.png") {
+    // This could be an image from a private location or a database
+    const imageStream = createReadStream("./private/protected-image.png");
+    return {
+      type: "data",
+      data: imageStream, // Can be a Readable stream, ReadableStream, Buffer, or Uint8Array
+      cacheKey: "protected-image", // Provide a unique cache key for caching
+    };
+  }
+
+    // Add custom headers for other remote URLs
     const headers = new Headers();
     headers.set("x-api-key", process.env.API_KEY);
     return {
@@ -179,6 +199,8 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
       headers,
     };
   }
+  
+  // For local files, use different folders based on environment
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";
   return {
@@ -187,6 +209,8 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
   };
 }
 ```
+
+Note: When using the `type: "data"` option, you must provide a `cacheKey` if caching is enabled (i.e., if `cacheFolder` is not set to `"no_cache"`). This is because there is no path or URL to generate a cache key from.
 
 You then pass the custom `getImgSource` function to `getImgResponse`:
 
