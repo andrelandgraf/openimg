@@ -179,16 +179,16 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
       };
     }
 
-  // For a specific image, provide the data directly from a private location
-  if (src === "/protected-image.png") {
-    // This could be an image from a private location or a database
-    const imageStream = createReadStream("./private/protected-image.png");
-    return {
-      type: "data",
-      data: imageStream, // Can be a Readable stream, ReadableStream, Buffer, or Uint8Array
-      cacheKey: "protected-image", // Provide a unique cache key for caching
-    };
-  }
+    // For a specific image, provide the data directly from a private location
+    if (src === "/protected-image.png") {
+      // This could be an image from a private location or a database
+      const imageStream = createReadStream("./private/protected-image.png");
+      return {
+        type: "data",
+        data: imageStream, // Can be a Readable stream, ReadableStream, Buffer, or Uint8Array
+        cacheKey: "protected-image", // Provide a unique cache key for caching
+      };
+    }
 
     // Add custom headers for other remote URLs
     const headers = new Headers();
@@ -199,7 +199,7 @@ export async function getImgSource({ request }: GetImgSourceArgs): ImgSource {
       headers,
     };
   }
-  
+
   // For local files, use different folders based on environment
   const isDev = process.env.NODE_ENV === "development";
   const folder = isDev ? "./public" : "./build/client/assets";

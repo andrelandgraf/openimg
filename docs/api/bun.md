@@ -150,11 +150,7 @@ type ImgSource =
 /**
  * ImgData is the response body (ReadableStream), buffer, or other readable representation of an image.
  */
-type ImgData =
-  | ReadableStream<Uint8Array>
-  | Readable
-  | Buffer
-  | Uint8Array;
+type ImgData = ReadableStream<Uint8Array> | Readable | Buffer | Uint8Array;
 
 type GetImgSourceArgs = { request: Request; params: ImgParams };
 
@@ -268,7 +264,7 @@ export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
       statusText: 'Search param "src" must be set',
     });
   }
-  
+
   // For a specific image, provide the data directly
   if (src === "/special-image.png") {
     const imageStream = createReadStream("./private/special-image.png");
@@ -278,7 +274,7 @@ export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
       cacheKey: "special-image", // Provide a unique cache key for caching
     };
   }
-  
+
   // For other images, use the default behavior
   if (URL.canParse(src)) {
     return {
