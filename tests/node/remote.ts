@@ -5,8 +5,6 @@ import { getImgResponse } from "openimg/node";
 const app = new Hono();
 
 app.get("*", async (c) => {
-  console.log("GET", c.req.url);
-
   const key = c.req.header("api-key");
   if (!key || key !== "123") {
     console.error("Unauthorized");

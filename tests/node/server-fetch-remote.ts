@@ -11,8 +11,6 @@ async function computeKey(): Promise<string> {
 const app = new Hono();
 
 app.get("*", async (c) => {
-  console.log("GET", c.req.url);
-
   return getImgResponse(c.req.raw, {
     allowlistedOrigins: [remote],
     getImgSource: async ({ request }) => {

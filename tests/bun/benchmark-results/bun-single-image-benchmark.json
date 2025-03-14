@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-03-14T04:39:07.002Z",
+  "timestamp": "2025-03-14T05:06:31.070Z",
   "platform": "bun",
   "version": "1.2.1",
   "result": {
@@ -8,6 +8,6 @@
       "height": 1000,
       "format": "webp"
     },
-    "duration": 413.56841600000007
+    "duration": 396.6131660000001
   }
 }

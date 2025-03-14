@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-03-14T04:39:13.549Z",
+  "timestamp": "2025-03-14T05:06:39.662Z",
   "platform": "node",
   "version": "v22.6.0",
   "result": {
@@ -8,6 +8,6 @@
       "height": 1000,
       "format": "webp"
     },
-    "duration": 385.34395800000016
+    "duration": 387.6126250000002
   }
 }
