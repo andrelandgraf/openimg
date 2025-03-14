@@ -12,16 +12,19 @@ import invariant, {
   validateImgSource,
   DEFAULT_CACHE_FOLDER,
   getContentType,
+  fromWebStream,
+  toWebStream,
 } from "../utils";
-import { exists, FileCache, toWebStreamFromReadable } from "./utils";
+import { exists, FileCache } from "./utils";
 
 const pipelineLock = new PipelineLock();
 const caches = new Map<string, FileCache>();
 
 /**
  * getImgResponse retrieves an image, optimizes it, and returns a HTTP response
- * getImgResponse returns failure responses for 404, 401 and similar cases
- * but may also throw errors if the image is not found or cannot be processed.
+ * it returns failure responses for 404, 401 and similar cases
+ * but may also throw errors if the image is not found or cannot be processed
+ * or if the config options are invalid.
  * @param {Request} request - the incoming HTTP request, using the Web Fetch API's Request object
  * @param {Config} config - the config object
  * @returns {Promise<Response>} - a promise resolving to a Response object
@@ -48,7 +51,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
   const source: ImgSource = sourceRes;
 
   // Validate the image source against the allowlisted origins
-  const res = validateImgSource(source, config.allowlistedOrigins);
+  const res = validateImgSource(source, config);
   if (res instanceof Response) {
     return res;
   }
@@ -94,8 +97,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
           statusText: fetchRes.statusText || "Image not found",
         });
       }
-      readStream = Readable.fromWeb(fetchRes.body as any);
-    } else {
+      readStream = fromWebStream(fetchRes.body);
+    } else if (source.type === "fs") {
       if (!exists(source.path)) {
         pipelineLock.resolve(cachePath);
         return new Response(null, {
@@ -104,6 +107,15 @@ export async function getImgResponse(request: Request, config: Config = {}) {
         });
       }
       readStream = createReadStream(source.path);
+    } else {
+      // type === "data"
+      if (source.data instanceof Readable) {
+        readStream = source.data;
+      } else if (source.data instanceof ReadableStream) {
+        readStream = fromWebStream(source.data);
+      } else {
+        readStream = Readable.from(source.data);
+      }
     }
 
     const pipeline = sharp();
@@ -145,7 +157,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
     headers.set("Content-Type", getContentType(outputImgInfo.format));
     headers.set("Content-Length", outputImgInfo.size.toString());
-    return new Response(toWebStreamFromReadable(outputStream), {
+    return new Response(toWebStream(outputStream), {
       headers,
     });
   } catch (e: unknown) {

@@ -2,19 +2,6 @@ import fs from "node:fs";
 import { Readable } from "node:stream";
 import path from "node:path";
 
-export function toWebStream(readable: Readable) {
-  return new ReadableStream({
-    start(controller) {
-      readable.on("data", (chunk) => controller.enqueue(chunk));
-      readable.on("end", () => controller.close());
-      readable.on("error", (error) => controller.error(error));
-    },
-    cancel() {
-      readable.destroy();
-    },
-  });
-}
-
 export function exists(path: string): { size: number } | false {
   try {
     const file = Bun.file(path);

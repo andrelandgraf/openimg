@@ -1,6 +1,6 @@
 # openimg/react
 
-openimg-react (Open Image React) provides an `Image` component (aliased as `Img`) for querying optimized images from an image optimization endpoint (e.g., openimg/node) and a context provider `OpenImgContextProvider` for global configuration options. The `Image` component renders an HTML picture element utilizing modern HTML attributes and best practices.
+openimg/react (Open Image React) provides an `Image` component (aliased as `Img`) for querying optimized images from an image optimization endpoint (e.g., openimg/node or openimg/bun) and a context provider `OpenImgContextProvider` for global configuration options. The `Image` component renders an HTML picture element utilizing modern HTML attributes and best practices.
 
 ## Features
 
@@ -14,19 +14,13 @@ openimg-react (Open Image React) provides an `Image` component (aliased as `Img`
 
 ## Installation
 
-The code is available via `openimg/react` and `openimg-react`. For most use cases, you probably want to install `openimg`:
+The code is available via `openimg/react`:
 
 ```bash
 npm i sharp openimg
 ```
 
 Note, `sharp` is only needed if you want to use the server-side functionality.
-
-If you only want to use the React utilities, you can also install `openimg-react` independently:
-
-```bash
-npm i openimg-react
-```
 
 ## API
 

@@ -1,10 +1,11 @@
 import { createReadStream } from "fs";
 import { PassThrough, Readable } from "node:stream";
 import sharp from "sharp";
-import { exists, FileCache, toWebStream } from "./utils";
+import { exists, FileCache } from "./utils";
 import invariant, {
   Config,
   DEFAULT_CACHE_FOLDER,
+  fromWebStream,
   getCachePath,
   getContentType,
   getImgParams,
@@ -12,6 +13,7 @@ import invariant, {
   ImgParams,
   ImgSource,
   PipelineLock,
+  toWebStream,
   validateImgSource,
 } from "../utils";
 
@@ -20,8 +22,9 @@ const caches = new Map<string, FileCache>();
 
 /**
  * getImgResponse retrieves an image, optimizes it, and returns a HTTP response
- * getImgResponse returns failure responses for 404, 401 and similar cases
- * but may also throw errors if the image is not found or cannot be processed.
+ * it returns failure responses for 404, 401 and similar cases
+ * but may also throw errors if the image is not found or cannot be processed
+ * or if the config options are invalid.
  * @param {Request} request - the incoming HTTP request, using the Web Fetch API's Request object
  * @param {Config} config - the config object
  * @returns {Promise<Response>} - a promise resolving to a Response object
@@ -47,8 +50,8 @@ export async function getImgResponse(request: Request, config: Config = {}) {
   }
   const source: ImgSource = sourceRes;
 
-  // Validate the image source against the allowlisted origins
-  const res = validateImgSource(source, config.allowlistedOrigins);
+  // Validate the image source against the allowlisted origins and other config options
+  const res = validateImgSource(source, config);
   if (res instanceof Response) {
     return res;
   }
@@ -94,9 +97,9 @@ export async function getImgResponse(request: Request, config: Config = {}) {
           statusText: fetchRes.statusText || "Image not found",
         });
       }
-      readStream = Readable.fromWeb(fetchRes.body as any);
-    } else {
-      if (!(await exists(source.path))) {
+      readStream = fromWebStream(fetchRes.body);
+    } else if (source.type === "fs") {
+      if (!exists(source.path)) {
         pipelineLock.resolve(cachePath);
         return new Response(null, {
           status: 404,
@@ -104,6 +107,15 @@ export async function getImgResponse(request: Request, config: Config = {}) {
         });
       }
       readStream = createReadStream(source.path);
+    } else {
+      // type === "data"
+      if (source.data instanceof Readable) {
+        readStream = source.data;
+      } else if (source.data instanceof ReadableStream) {
+        readStream = fromWebStream(source.data);
+      } else {
+        readStream = Readable.from(source.data);
+      }
     }
 
     const pipeline = sharp();

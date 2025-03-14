@@ -1,6 +1,6 @@
 # openimg/node
 
-openimg/node (Open Image Node) provides a HTTP request handler function to optimize images using sharp, using Node-compatible APIs for Bun, Deno, and Node.js. It also provides utilities for generating low quality image placeholders and retrieving image metadata.
+openimg/node (Open Image Node) provides a HTTP request handler function to optimize images with [sharp](https://sharp.pixelplumbing.com), using Node-compatible APIs for Bun, Deno, and Node.js. It also provides utilities for generating low quality image placeholders and retrieving image metadata.
 
 ## Features
 
@@ -16,19 +16,13 @@ The `openimg/bun` and `openimg/node` request handlers utilize the Web Fetch API'
 
 ## Installation
 
-The code is available via `openimg/node` and `openimg-node`. For most use cases, you probably want to install `openimg`:
+The code is available via `openimg/node`:
 
 ```bash
 npm i sharp openimg
 ```
 
-However, if you only want to use the server-side utilities for Node, you can also install `openimg-node`:
-
-```bash
-npm i sharp openimg-node
-```
-
-openimg package uses [sharp](https://sharp.pixelplumbing.com) and can only be used in environments that can run sharp (and [libvips](https://github.com/libvips/libvips)).
+Note, openimg uses [sharp](https://sharp.pixelplumbing.com) and can only be used in environments that can run sharp (and [libvips](https://github.com/libvips/libvips)).
 
 ## getImgResponse
 
@@ -258,7 +252,7 @@ getImgResponse(request, { getImgSource });
 
 ## getImgPlaceholder
 
-Import `getImgPlaceholder` from `openimg/node` and pass in a Readable stream (like `ReadStream`) or image Buffer. The function will return a low quality image placeholder as a base64-encoded string using [thumbhash](https://github.com/evanw/thumbhash). The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
+Import `getImgPlaceholder` from `openimg/node` and pass in a Readable stream (like `ReadStream`), a ReadableStream, or image Buffer. The function will return a low quality image placeholder as a base64-encoded string using [thumbhash](https://github.com/evanw/thumbhash). The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
 
 Example using a Readable stream:
 
@@ -268,6 +262,17 @@ import { createReadStream } from "node:fs";
 
 const stream = createReadStream("./public/cat.png");
 const placeholder = await getImgPlaceholder(stream);
+console.log(placeholder); // data:image/png;base64,...
+```
+
+Example using a ReadableStream:
+
+```typescript
+import { getImgPlaceholder } from "openimg/node";
+
+const response = await fetch("https://example.com/cat.png");
+const readableStream = response.body;
+const placeholder = await getImgPlaceholder(readableStream);
 console.log(placeholder); // data:image/png;base64,...
 ```
 
@@ -284,7 +289,7 @@ console.log(placeholder); // data:image/png;base64,...
 
 ## getImgMetadata
 
-Import `getImgMetadata` from `openimg/node` and pass in a Readable stream (like `ReadStream`) or image Buffer. The function will return the width, height, and format of the image.
+Import `getImgMetadata` from `openimg/node` and pass in a Readable stream (like `ReadStream`), a ReadableStream, or image Buffer. The function will return the width, height, and format of the image.
 
 Example using a Readable stream:
 
@@ -293,8 +298,19 @@ import { getImgMetadata } from "openimg/node";
 import { createReadStream } from "node:fs";
 
 const stream = createReadStream("./public/cat.png");
-const placeholder = await getImgMetadata(stream);
-console.log(placeholder); // { width: 300, height: 300, format: "png" }
+const metadata = await getImgMetadata(stream);
+console.log(metadata); // { width: 300, height: 300, format: "png" }
+```
+
+Example using a ReadableStream:
+
+```typescript
+import { getImgMetadata } from "openimg/node";
+
+const response = await fetch("https://example.com/cat.png");
+const readableStream = response.body;
+const metadata = await getImgMetadata(readableStream);
+console.log(metadata); // { width: 300, height: 300, format: "png" }
 ```
 
 Example using an image Buffer:
@@ -303,7 +319,7 @@ Example using an image Buffer:
 import { getImgMetadata } from "openimg/node";
 import { readFileSync } from "node:fs";
 
-const buffer = getImgMetadata("./public/cat.png");
-const placeholder = await readFileSync(buffer);
-console.log(placeholder); // { width: 300, height: 300, format: "png" }
+const buffer = readFileSync("./public/cat.png");
+const metadata = await getImgMetadata(buffer);
+console.log(metadata); // { width: 300, height: 300, format: "png" }
 ```

@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
-import { Img, OpenImgContextProvider, type GetSrc } from "openimg-react";
+import { Img, OpenImgContextProvider, type GetSrc } from "openimg/react";
 // Import the testing setup to ensure matchers are properly registered
 import "./testing-library";
 

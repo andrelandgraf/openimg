@@ -1,32 +1,7 @@
-import fs, { createReadStream, ReadStream } from "node:fs";
+import fs, { createReadStream } from "node:fs";
 import { Readable } from "node:stream";
 import path from "node:path";
-
-function toWebStream(nodeStream: ReadStream) {
-  return new ReadableStream({
-    start(controller) {
-      nodeStream.on("data", (chunk) => controller.enqueue(chunk));
-      nodeStream.on("end", () => controller.close());
-      nodeStream.on("error", (error) => controller.error(error));
-    },
-    cancel() {
-      nodeStream.destroy();
-    },
-  });
-}
-
-export function toWebStreamFromReadable(readable: Readable) {
-  return new ReadableStream({
-    start(controller) {
-      readable.on("data", (chunk) => controller.enqueue(chunk));
-      readable.on("end", () => controller.close());
-      readable.on("error", (error) => controller.error(error));
-    },
-    cancel() {
-      readable.destroy();
-    },
-  });
-}
+import { toWebStream } from "../utils";
 
 export function exists(path: string): { size: number } | false {
   try {

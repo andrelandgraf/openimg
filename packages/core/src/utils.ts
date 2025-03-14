@@ -1,4 +1,6 @@
 import path from "node:path";
+import { ReadStream } from "node:fs";
+import { Readable } from "node:stream";
 
 const FORMATS = ["webp", "avif", "png", "jpeg", "jpg"] as const;
 export type Format = (typeof FORMATS)[number];
@@ -33,11 +35,22 @@ export type GetImgParams = (
 ) => Promise<ImgParams | Response> | ImgParams | Response;
 
 /**
+ * ImgData is the response body (ReadableStream), buffer, or other readable representation of an image.
+ */
+export type ImgData =
+  | ReadableStream<Uint8Array<ArrayBufferLike>>
+  | Readable
+  | Buffer<ArrayBufferLike>
+  | Uint8Array<ArrayBufferLike>;
+
+/**
  * ImgSource describes where and how to retrieve the original image.
- * - type: The type of the source, either "fs" for local file system or "fetch" for remote URL.
+ * - type: The type of the source, either "fs" for local file system, "fetch" for remote URL, or "data" for supplying the image data directly.
  * - path: The path to the image if type is "fs".
  * - url: The URL to fetch the image from if type is "fetch", can be a relative path or an absolute URL.
  * - headers: Optional headers to be sent with the fetch request if type is "fetch".
+ * - data: The image data if type is "data".
+ * - cacheKey: If you provide custom image data and want the image to be cached, you need to provide your own cache key because there is no path or url to generate a cache key from.
  */
 export type ImgSource =
   | {
@@ -48,6 +61,11 @@ export type ImgSource =
       type: "fetch";
       url: string;
       headers?: HeadersInit | undefined;
+    }
+  | {
+      type: "data";
+      data: ImgData;
+      cacheKey: string | null;
     };
 
 export type GetImgSourceArgs = { request: Request; params: ImgParams };
@@ -80,6 +98,14 @@ export type Config = {
   getImgSource?: GetImgSource;
   cacheFolder?: string | "no_cache"; // default: "./data/images"
 };
+
+export function fromWebStream(stream: ReadableStream): Readable {
+  return Readable.fromWeb(stream as any);
+}
+
+export function toWebStream(readable: Readable | ReadStream): ReadableStream {
+  return Readable.toWeb(readable) as any as ReadableStream;
+}
 
 function isFitValue(fit: string | undefined): fit is Fit | undefined {
   if (fit === undefined) {
@@ -154,12 +180,23 @@ type GetCachePathArgs = {
   cacheFolder?: string | undefined | null;
 };
 
+function getCacheKey(source: ImgSource) {
+  if (source.type === "fs") {
+    return source.path;
+  }
+  if (source.type === "fetch") {
+    return source.url;
+  }
+  return source.cacheKey;
+}
+
 export function getCachePath({
   params,
   source,
   cacheFolder = DEFAULT_CACHE_FOLDER,
 }: GetCachePathArgs): string {
-  const src = source.type === "fetch" ? source.url : source.path; // "https://example.com/folder/cat.png", "/cat.png"
+  const src = getCacheKey(source); // "https://example.com/folder/cat.png", "/cat.png"
+  invariant(src, "Invalid source"); // We should have errored in validateImgSource if there was no cacheKey
   const srcUrl = source.type === "fetch" ? new URL(src) : null;
   let srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
   const originExtension = path.extname(srcPath); // ".png"
@@ -208,12 +245,21 @@ export function getImgSource({
 
 export function validateImgSource(
   source: ImgSource,
-  allowlistedOrigins: string[] = []
+  config: Config
 ): Response | null {
   if (source.type === "fs") {
-    // file system always allowed
+    // nothing to validate for file system sources
     return null;
   }
+  if (source.type === "data") {
+    if (config.cacheFolder !== "no_cache" && !source.cacheKey) {
+      throw new Error(
+        'Caching is enabled but getImgSource did not return a ImgSource cacheKey. Set cacheFolder to no_cache or provide a unique cacheKey as part of type "data" ImgSource.'
+      );
+    }
+    return null;
+  }
+  const allowlistedOrigins = config.allowlistedOrigins || [];
   const allAllowed = allowlistedOrigins.includes("*");
   if (allAllowed) {
     return null;

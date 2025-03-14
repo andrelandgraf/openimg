@@ -1,6 +1,7 @@
 import { Readable } from "node:stream";
 import sharp from "sharp";
-import invariant from "./utils";
+import invariant, { fromWebStream } from "./utils";
+import { type ImgData } from "./utils";
 
 export type Metadata = {
   width: number;
@@ -11,20 +12,24 @@ export type Metadata = {
 /**
  * Retrieves the metadata of an image.
  *
- * @param {Readable | Buffer<ArrayBufferLike>  | Uint8Array<ArrayBufferLike>} input - The readable stream or buffer of the original image.
+ * @param {ImgData} input - The readable stream or buffer of the image.
  * @returns {Promise<Metadata>} object containing the width, height, and format of the image.
  */
-export async function getImgMetadata(
-  input: Readable | Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>
-): Promise<Metadata> {
+export async function getImgMetadata(input: ImgData): Promise<Metadata> {
   const pipeline =
     input instanceof Buffer || input instanceof Uint8Array
       ? sharp(input)
       : sharp();
 
-  if (input instanceof Readable) {
+  if (input instanceof Readable || input instanceof ReadableStream) {
+    let stream: Readable;
+    if (input instanceof ReadableStream) {
+      stream = fromWebStream(input);
+    } else {
+      stream = input;
+    }
     // Pipe the incoming stream into the Sharp pipeline.
-    input.pipe(pipeline);
+    stream.pipe(pipeline);
   }
 
   const { width, height, format } = await pipeline.metadata();

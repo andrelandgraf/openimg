@@ -1,5 +1,15 @@
 # Changelog
 
+# 0.7.0
+
+- Remove `openimg-node`, `openimg-bun`, and `openimg-react` duplicate packages.
+
+## openimg/node & openimg/bun
+
+- Add support for `getImgSource` to return `type` `"data"` with a `data` property that contains the image data as a buffer or stream.
+- `getImgPlaceholder` now supports passing in a `ReadableStream`.
+- `getImgMetadata` now supports passing in a `ReadableStream`.
+
 # 0.6.0
 
 ## openimg/node & openimg/bun

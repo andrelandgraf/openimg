@@ -1,28 +1,28 @@
 {
-  "timestamp": "2025-03-02T06:38:16.465Z",
+  "timestamp": "2025-03-14T04:39:13.547Z",
   "platform": "node",
   "version": "v22.12.0",
   "url": "http://localhost:3005/?src=/cat.png&w=1000&h=1000&format=webp",
   "memoryBeforeMB": {
-    "rss": 96.703125,
+    "rss": 95.09375,
     "heapTotal": 18.546875,
-    "heapUsed": 11.490547180175781,
-    "external": 3.7481088638305664,
-    "arrayBuffers": 0.07074928283691406
+    "heapUsed": 11.622726440429688,
+    "external": 3.811389923095703,
+    "arrayBuffers": 0.13403034210205078
   },
   "memoryAfterMB": {
-    "rss": 203.171875,
+    "rss": 194.5,
     "heapTotal": 18.546875,
-    "heapUsed": 12.386459350585938,
-    "external": 40.05678653717041,
-    "arrayBuffers": 36.18549728393555
+    "heapUsed": 12.5548095703125,
+    "external": 40.144765853881836,
+    "arrayBuffers": 36.248778343200684
   },
   "memoryDiffMB": {
-    "rss": 106.46875,
-    "heapUsed": 0.8959121704101562,
+    "rss": 99.40625,
+    "heapUsed": 0.9320831298828125,
     "heapTotal": 0,
-    "external": 36.308677673339844,
+    "external": 36.33337593078613,
     "arrayBuffers": 36.11474800109863
   },
-  "serverDuration": 380.133875
+  "serverDuration": 382.75645900000006
 }
