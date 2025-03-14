@@ -48,7 +48,7 @@ You can pass in all standard HTML img element attributes to the Img component. T
 - isAboveFold (defaults to `false`): whether the image is above the fold or not, affects what default optimization settings are used.
 - placeholder (optional): base64 encoded string of a low quality image to use as a placeholder until the full image loads.
 
-**placeholder: string | undefined**
+#### placeholder: string | undefined
 
 The placeholder prop is optional, but a great way to improve the user experience. It allows you to provide a low-quality image that will be displayed while the full image is loading. Make sure to pass the `Image` component the placeholder image as soon as possible. For instance, during server-side rendering or the initial render of the image component. This ensures that the placeholder is displayed immediately. You can use the `getImgPlaceholder` function from `openimg/node` or `openimg/bun` to generate the placeholder.
 
@@ -92,7 +92,7 @@ export default function App() {
 - `targetFormats`: string[] formats that are supported. Defaults to ["avif", "webp"] (original image format is always included and doesn't need to be specified).
 - `optimizerEndpoint`: The path ("/path/to/optimizer") or URL ("https://my-optimizer.com") to the image optimizer endpoint. Defaults to "/img".
 
-**getSrc:**
+#### getSrc
 
 Default looks like this:
 

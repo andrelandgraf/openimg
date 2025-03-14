@@ -75,7 +75,7 @@ The configuration object accepts the following optional options:
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
 - `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
 
-**headers: HeadersInit**
+#### headers: HeadersInit
 
 Headers to be added to the HTTP response.
 
@@ -87,7 +87,7 @@ return getImgResponse(request, { headers });
 
 Note, that `getImgResponse` will only set the `Content-Type` & `Content-Length` headers. All other headers (e.g., `Cache-Control`) must be set manually. This is to allow for more flexibility in how you want to handle caching. In most cases, you probably want to enforce unique file names and set an aggressive cache policy. It is also recommended to use a CDN in front of your image server.
 
-**cacheFolder: string | 'no_cache'**
+#### cacheFolder: string | 'no_cache'
 
 Defaults to `./data/img`. The folder to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 
@@ -99,7 +99,7 @@ return getImgResponse(request, { headers, cacheFolder: "no_cache" });
 
 If you set `cacheFolder` to `no_cache`, the optimized image will not be cached to disk. This is useful for serverless environments or when you want to cache the image only via a CDN.
 
-**allowlistedOrigins: string[] | ['*']**
+#### allowlistedOrigins: string[] | ['*']
 
 List of allowed remote origins. Defaults to `[]`, which means no remote origins are allowed and images will not be fetched from remote locations. Any attempt to query via absolute URLs will return a 403 response. Instead, only relative pathnames are allowed (e.g., `/cat.png`) for local images hosted on the server.
 
@@ -111,7 +111,7 @@ getImgResponse(request, {
 
 Set `allowlistedOrigins` to `['*']` to allow all remote origins. You should probably only do this if your image service is within a private network. Otherwise, everyone can utilize your server to optimize any images.
 
-**getImgParams: Function**
+#### getImgParams: Function
 
 ```typescript
 type ImgParams = {
@@ -132,7 +132,7 @@ A function that takes the `Request` object and returns an `ImgParams` object or 
 
 The default implementation retrieves the w (width), h (height), fit, format values from the search parameters of the request and you probably don't need to override the default `getImgParams` function used if no `getImgParams` function is provided. However, for more flexibility, you can implement your own logic to determine the image parameters.
 
-**getImgSource: Function**
+#### getImgSource: Function
 
 ```typescript
 type ImgSource =
@@ -196,7 +196,7 @@ Note that the result from `getImgSource` will further be validated against the `
 
 You may have to override the default `getImgSource` function if you want to prevent using the file system, even for local images, or if you have different locations for hosted images, e.g., dev vs. production.
 
-Example for a custom `getImgSource` function that always returns a file from the file system, but with different folders for dev and production:
+##### Example for a custom `getImgSource` function that always returns a file from the file system, but with different folders for dev and production:
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
@@ -223,7 +223,7 @@ export function getImgSource({ request }: GetImgSourceArgs): ImgSource {
 }
 ```
 
-Example for a custom async `getImgSource` function that adds an authorization header to the request for remote images:
+##### Example for a custom async `getImgSource` function that adds an authorization header to the request for remote images:
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
@@ -254,7 +254,7 @@ export async function getImgSource({ params }: GetImgSourceArgs): ImgSource {
 }
 ```
 
-Example for a custom `getImgSource` function that provides image data directly:
+##### Example for a custom `getImgSource` function that provides image data directly:
 
 ```typescript
 import { GetImgSourceArgs, ImgSource } from "openimg/node";
@@ -305,7 +305,7 @@ getImgResponse(request, { getImgSource });
 
 Import `getImgPlaceholder` from `openimg/node` and pass in a Readable stream (like `ReadStream`), a ReadableStream, or image Buffer. The function will return a low quality image placeholder as a base64-encoded string using [thumbhash](https://github.com/evanw/thumbhash). The generated string can be stored in a database or inlined in your client bundle as a placeholder until the full image is loaded.
 
-Example using a Readable stream:
+##### Example using a Readable stream:
 
 ```typescript
 import { getImgPlaceholder } from "openimg/node";
@@ -316,7 +316,7 @@ const placeholder = await getImgPlaceholder(stream);
 console.log(placeholder); // data:image/png;base64,...
 ```
 
-Example using a ReadableStream:
+##### Example using a ReadableStream:
 
 ```typescript
 import { getImgPlaceholder } from "openimg/node";
@@ -327,7 +327,7 @@ const placeholder = await getImgPlaceholder(readableStream);
 console.log(placeholder); // data:image/png;base64,...
 ```
 
-Example using an image Buffer:
+##### Example using an image Buffer:
 
 ```typescript
 import { getImgPlaceholder } from "openimg/node";
@@ -342,7 +342,7 @@ console.log(placeholder); // data:image/png;base64,...
 
 Import `getImgMetadata` from `openimg/node` and pass in a Readable stream (like `ReadStream`), a ReadableStream, or image Buffer. The function will return the width, height, and format of the image.
 
-Example using a Readable stream:
+##### Example using a Readable stream:
 
 ```typescript
 import { getImgMetadata } from "openimg/node";
@@ -353,7 +353,7 @@ const metadata = await getImgMetadata(stream);
 console.log(metadata); // { width: 300, height: 300, format: "png" }
 ```
 
-Example using a ReadableStream:
+##### Example using a ReadableStream:
 
 ```typescript
 import { getImgMetadata } from "openimg/node";
@@ -364,7 +364,7 @@ const metadata = await getImgMetadata(readableStream);
 console.log(metadata); // { width: 300, height: 300, format: "png" }
 ```
 
-Example using an image Buffer:
+##### Example using an image Buffer:
 
 ```typescript
 import { getImgMetadata } from "openimg/node";
