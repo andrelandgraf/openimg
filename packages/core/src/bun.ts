@@ -4,6 +4,8 @@ export type {
   Format,
   GetImgParamsArgs,
   GetImgParams,
+  TransformArgs,
+  Transform,
   GetImgSourceArgs,
   GetImgSource,
   ImgParams,

@@ -73,6 +73,7 @@ The configuration object accepts the following optional options:
 - `cacheFolder`: The location to cache optimized images to. Can be set to either a string path or `no_cache` to not cache to disk.
 - `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
+- `transform`: Provide a custom function to add transformation steps.
 - `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
 
 #### headers: HeadersInit
@@ -131,6 +132,82 @@ type GetImgParams = (
 A function that takes the `Request` object and returns an `ImgParams` object or a `Response` object. If it returns a `Response` object, the response is returned as-is. Otherwise, the returned image parameters is used to optimize the image.
 
 The default implementation retrieves the w (width), h (height), fit, format values from the search parameters of the request and you probably don't need to override the default `getImgParams` function used if no `getImgParams` function is provided. However, for more flexibility, you can implement your own logic to determine the image parameters.
+
+#### transform: Function
+
+```typescript
+type TransformArgs = {
+  params: ImgParams;
+  pipeline: sharp.Sharp;
+};
+
+type Transform = (
+  args: TransformArgs
+) => Promise<void | Response> | void | Response;
+```
+
+A function that takes a sharp instance `pipeline` and a `params` returned by `getImgParams`.
+
+The default implementation has no effect. To have more flexibiliy, you can implement your own transform steps here.
+
+##### Example for a custom `transform` function that colorize png or svg image:
+
+```typescript
+import { TransformArgs, Transform } from "openimg/node";
+
+export function transform({ request, params, pipeline }: TransformArgs): Transform {
+  const infoPromise = new Promise((resolve) => {
+    pipeline.on('info', (info) => {
+      resolve(info);
+    });
+  });
+  const outputImgInfo = await infoPromise;
+
+  const url = new URL(request.url);
+  const colorize = url.searchParams.get('colorize') || undefined;
+
+  if (colorize) {
+    if (!['white', 'black'].includes(colorize)) {
+      return new Response(null, {
+        status: 400,
+        statusText: 'Search param "colorize" must be either "white" or "black" or unset',
+      });
+    }
+
+    if (!['png', 'svg'].includes(outputImgInfo.format)) {
+      return new Response(null, {
+        status: 400,
+        statusText: 'Colorize is only supported for PNG and SVG images',
+      });
+    }
+
+    if (outputImgInfo.format === 'svg') {
+      // Convert SVG to PNG before colorizing
+      pipeline.png();
+    }
+
+    switch (colorize) {
+      case 'white':
+        pipeline.grayscale().modulate({
+          brightness: 100,
+          saturation: 0,
+        });
+        break;
+      case 'black':
+        pipeline.grayscale().modulate({
+          brightness: 0,
+          saturation: 0,
+        });
+        break;
+      default:
+        return new Response(null, {
+          status: 400,
+          statusText: 'Unhandled colorize value',
+        });
+    }
+  }
+}
+```
 
 #### getImgSource: Function
 

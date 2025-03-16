@@ -1,6 +1,7 @@
 import path from "node:path";
 import { ReadStream } from "node:fs";
 import { Readable } from "node:stream";
+import sharp from "sharp";
 
 const FORMATS = ["webp", "avif", "png", "jpeg", "jpg"] as const;
 export type Format = (typeof FORMATS)[number];
@@ -81,6 +82,21 @@ export type GetImgSource = (
   args: GetImgSourceArgs
 ) => Promise<ImgSource | Response> | ImgSource | Response;
 
+export type TransformArgs = {
+  request: Request;
+  params: ImgParams;
+  pipeline: sharp.Sharp;
+};
+
+/**
+ * Called to transform the image pipeline.
+ * The default implementation does nothing.
+ * Implement this function to customize the image transformation logic.
+ */
+export type Transform = (
+  args: TransformArgs
+) => Promise<void | Response> | void | Response;
+
 /**
  * Configuration values for the getImgResponse function.
  * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
@@ -95,6 +111,7 @@ export type Config = {
   headers?: HeadersInit;
   allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
+  transform?: Transform;
   getImgSource?: GetImgSource;
   cacheFolder?: string | "no_cache"; // default: "./data/images"
 };

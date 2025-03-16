@@ -129,6 +129,13 @@ export async function getImgResponse(request: Request, config: Config = {}) {
       pipeline.resize(params.width, params.height, { fit: params.fit });
     }
 
+    if (config.transform) {
+      const transformRes = await config.transform({ request, pipeline, params });
+      if (transformRes instanceof Response) {
+        return transformRes;
+      }
+    }
+
     const infoPromise = new Promise<sharp.OutputInfo>((resolve) => {
       pipeline.on("info", (info) => {
         resolve(info);
