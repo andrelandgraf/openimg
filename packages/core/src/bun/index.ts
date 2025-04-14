@@ -130,7 +130,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     }
 
     if (config.transform) {
-      const transformRes = await config.transform({ request,pipeline, params });
+      const transformRes = await config.transform({ request, pipeline, params });
       if (transformRes instanceof Response) {
         return transformRes;
       }
