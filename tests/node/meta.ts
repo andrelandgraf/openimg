@@ -1,4 +1,4 @@
-import { getImgMetadata } from "openimg/bun";
+import { getImgMetadata } from "openimg/node";
 import { createReadStream } from "fs";
 
 const stream = createReadStream("./public/cat.png");

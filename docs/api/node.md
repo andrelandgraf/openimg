@@ -340,6 +340,8 @@ console.log(placeholder); // data:image/png;base64,...
 
 ## getImgMetadata
 
+`getImgMetadata` returns the width, height, and format of an image. The width and height parameters correspond to the auto-oriented version of the image taking the EXIF tag into account (see [sharp autoOrient](https://sharp.pixelplumbing.com/api-operation/#autoorient)).
+
 Import `getImgMetadata` from `openimg/node` and pass in a Readable stream (like `ReadStream`), a ReadableStream, or image Buffer. The function will return the width, height, and format of the image.
 
 ##### Example using a Readable stream:

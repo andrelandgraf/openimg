@@ -32,7 +32,9 @@ export async function getImgMetadata(input: ImgData): Promise<Metadata> {
     stream.pipe(pipeline);
   }
 
-  const { width, height, format } = await pipeline.metadata();
+  const { format, autoOrient } = await pipeline.metadata();
+  // Return the width, height of the image after autoOrient is applied (taking EXIF orientation into account)
+  const { width, height } = autoOrient;
   invariant(width && height && format, "Failed to retrieve image metadata.");
   return { width, height, format };
 }
