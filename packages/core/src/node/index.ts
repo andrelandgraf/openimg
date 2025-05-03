@@ -118,7 +118,7 @@ export async function getImgResponse(request: Request, config: Config = {}) {
       }
     }
 
-    const pipeline = sharp();
+    const pipeline = sharp().rotate();
     if (params.format === "avif") {
       pipeline.avif();
     } else if (params.format === "webp") {

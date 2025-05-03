@@ -1,6 +1,6 @@
 {
   "name": "openimg",
-  "version": "0.7.0",
+  "version": "1.0.0-alpha.2",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -37,12 +37,13 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "thumbhash": "^0.1.1"
   },
   "optionalDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.1"
   },
   "files": [
     "dist",

@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-03-14T05:06:31.070Z",
+  "timestamp": "2025-05-03T21:30:55.058Z",
   "platform": "bun",
-  "version": "1.2.1",
+  "version": "1.2.11",
   "result": {
     "config": {
       "width": 1000,
       "height": 1000,
       "format": "webp"
     },
-    "duration": 396.6131660000001
+    "duration": 288.45804199999975
   }
 }

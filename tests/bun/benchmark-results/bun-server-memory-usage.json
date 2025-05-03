@@ -1,28 +1,28 @@
 {
-  "timestamp": "2025-03-14T05:06:31.070Z",
+  "timestamp": "2025-05-03T21:30:55.057Z",
   "platform": "bun",
-  "version": "1.2.1",
+  "version": "1.2.11",
   "url": "http://localhost:3005/?src=/cat.png&w=1000&h=1000&format=webp",
   "memoryBeforeMB": {
-    "rss": 58.4375,
-    "heapTotal": 3.6875,
-    "heapUsed": 3.0086488723754883,
-    "external": 1.0416688919067383,
-    "arrayBuffers": 0.0020627975463867188
+    "rss": 54.84375,
+    "heapTotal": 2.67578125,
+    "heapUsed": 2.024188995361328,
+    "external": 0.6710853576660156,
+    "arrayBuffers": 0
   },
   "memoryAfterMB": {
-    "rss": 165.40625,
-    "heapTotal": 3.8955078125,
-    "heapUsed": 39.75746154785156,
-    "external": 19.7952241897583,
-    "arrayBuffers": 0.19608402252197266
-  },
-  "memoryDiffMB": {
-    "rss": 106.96875,
-    "heapUsed": 36.748812675476074,
-    "heapTotal": 0.2080078125,
-    "external": 18.753555297851562,
+    "rss": 163.796875,
+    "heapTotal": 2.90625,
+    "heapUsed": 20.7650785446167,
+    "external": 19.393059730529785,
     "arrayBuffers": 0.19402122497558594
   },
-  "serverDuration": 395.77566699999994
+  "memoryDiffMB": {
+    "rss": 108.953125,
+    "heapUsed": 18.74088954925537,
+    "heapTotal": 0.23046875,
+    "external": 18.72197437286377,
+    "arrayBuffers": 0.19402122497558594
+  },
+  "serverDuration": 287.278667
 }

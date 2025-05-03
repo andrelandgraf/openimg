@@ -24,7 +24,7 @@ runSingleImageBenchmark({
 
     return serverProcess;
   },
-  stopServer: async (serverProcess: Subprocess) => {
+  stopServer: async (serverProcess: Subprocess<any, any, any>) => {
     if (serverProcess) {
       serverProcess.kill();
       console.log("Benchmark server process terminated");

@@ -24,13 +24,13 @@ runFetchRemoteTests({
 
     return remoteServerProcess;
   },
-  stopServer: async (serverProcess: Subprocess) => {
+  stopServer: async (serverProcess: Subprocess<any, any, any>) => {
     if (serverProcess) {
       // Kill only the server process we started
       serverProcess.kill();
     }
   },
-  stopRemoteServer: async (remoteServerProcess: Subprocess) => {
+  stopRemoteServer: async (remoteServerProcess: Subprocess<any, any, any>) => {
     if (remoteServerProcess) {
       // Kill the remote server process
       remoteServerProcess.kill();

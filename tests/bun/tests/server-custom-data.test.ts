@@ -14,7 +14,7 @@ runCustomDataTests({
 
     return serverProcess;
   },
-  stopServer: async (serverProcess: Subprocess) => {
+  stopServer: async (serverProcess: Subprocess<any, any, any>) => {
     if (serverProcess) {
       // Kill only the server process we started
       serverProcess.kill();
