@@ -1,13 +1,15 @@
 # Custom Image Processing
 
-OpenImg v1 introduces custom image processing capabilities through the React component's `params` prop and the optimizer endpoint's `getSharpPipeline` function. This enables custom image effects, filters, and processing logic. When utilizing custom processing, it's important to ensure that each unquie image returned by the optimizer endpoint has a unqiue URL and cache location. Otherwise, two separate image requests may conflict.
+OpenImg v1 introduces custom image processing capabilities through the React component's `params` prop and the optimizer endpoint's `getSharpPipeline` function. This enables custom image effects, filters, and processing logic.
+
+Note: When using custom transformations, it's important that each unique image returned by the optimizer endpoint has a unqiue URL (for HTTP caching) and caching key (for file-based caching). Otherwise, two separate image requests may conflict. Let's dive into it:
 
 ## Overview
 
-The implementation consists of two components:
+The implementation consists of two pieces:
 
-1. **Frontend (React)**: Use the `params` prop on the `<Img>` component to specify custom processing parameters
-2. **Backend (Optimizer)**: Use the `getSharpPipeline` function to parse parameters and create custom Sharp pipelines
+1. **Frontend (React)**: Use the `params` prop on the `<Img>` component to specify custom processing parameters (results in a unique URL for caching)
+2. **Backend (Optimizer)**: Use the `getSharpPipeline` function to parse parameters and create custom Sharp pipelines (and create a custom `cacheKey` for file-based caching)
 
 ## Frontend: Using the params prop
 
