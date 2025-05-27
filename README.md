@@ -6,10 +6,11 @@ openimg (Open Image) is a set of JavaScript packages for working with images on 
 
 The easiest way to get started is to integrate openimg as an image optimization endpoint on your existing server. From there, you can utilize the React component to query for optimized images and use the Vite plugin to integrate local image assets from your Vite project. You can follow the [optimization endpoint guide](./docs/guides/optimizer-endpoint.md) for a step-by-step walkthrough.
 
-## Use cases
+## Use cases & guides
 
 - [Add an image optimization endpoint to your server](./docs/guides/optimizer-endpoint.md)
 - [Deploy a standalone image optimization server](./docs/guides/optimizer-server.md)
+- [Custom image transformations](./docs/guides/custom-image-processing.md)
 
 ## API reference
 
