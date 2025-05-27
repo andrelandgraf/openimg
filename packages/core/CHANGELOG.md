@@ -1,5 +1,14 @@
 # Changelog
 
+# 1.0.0
+
+- Switch from `optionalDependencies` to `peerDependencies` for sharp
+- Fix image orientation based on EXIF orientation.
+
+Note: In case you're experiencing image orientation issues, clear the openimg file cache to ensure source images are re-optimized with correct orientation.
+
+- Support passing in custom sharp pipelines via `getSharpPipeline`
+
 # 0.7.0
 
 - Remove `openimg-node`, `openimg-bun`, and `openimg-react` duplicate packages.

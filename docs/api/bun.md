@@ -70,6 +70,7 @@ The configuration object accepts the following optional options:
 - `allowlistedOrigins`: List of allowed remote origins. Defaults to none and can also be set to all (`['*']`).
 - `getImgParams`: Provide a custom function to retrieve the image parameters from the request.
 - `getImgSource`: Provide a function to map the `src` image parameter to an image source image. This is useful if you have several locations for hosted images and want provide a custom mapper. Read more about the default `getImgSource` function below.
+- `getSharpPipeline`: Provide a custom Sharp pipeline for advanced image processing. This enables custom image transformations like black & white conversion, custom filters, etc.
 
 #### headers: HeadersInit
 
@@ -296,6 +297,133 @@ You then pass the custom `getImgSource` function to `getImgResponse`:
 ```typescript
 getImgResponse(request, { getImgSource });
 ```
+
+#### getSharpPipeline: Function
+
+```typescript
+type GetSharpPipelineArgs = { params: ImgParams; source: ImgSource };
+
+type SharpConfig = {
+  pipeline: sharp.Sharp;
+  cacheKey?: string;
+};
+
+type GetSharpPipeline = (
+  args: GetSharpPipelineArgs
+) => Promise<SharpConfig | undefined> | SharpConfig | undefined;
+```
+
+A function that takes the `ImgParams` and `ImgSource` objects and returns a custom Sharp pipeline configuration. This allows you to implement advanced image processing features beyond the default resize and format operations.
+
+The default implementation uses `getDefaultSharpPipeline(params)` which applies auto-orientation, resizing (if width/height specified), and format conversion.
+
+**Return `undefined`** to use the default pipeline.  
+**Return a `SharpConfig`** object with a custom pipeline and optional cache key.
+
+**Important:** When file caching is enabled (default), you **must** provide a unique `cacheKey` for custom pipelines. This ensures different pipeline configurations don't serve cached results from other pipelines.
+
+##### Example for a black & white filter:
+
+```typescript
+import {
+  GetSharpPipelineArgs,
+  SharpConfig,
+  getDefaultSharpPipeline,
+} from "openimg/bun";
+import sharp from "sharp";
+
+export function getSharpPipeline({
+  params,
+  source,
+}: GetSharpPipelineArgs): SharpConfig | undefined {
+  const url = new URL(request.url);
+  const blackAndWhite = url.searchParams.get("bw") === "true";
+
+  if (blackAndWhite) {
+    // Start with the default pipeline and add black & white conversion
+    const pipeline = getDefaultSharpPipeline(params).greyscale();
+
+    return {
+      pipeline,
+      cacheKey: `${getCacheKeyFromSource(source)}-bw`, // Unique cache key
+    };
+  }
+
+  // Use default pipeline for other cases
+  return undefined;
+}
+
+// Helper function to get cache key from source
+function getCacheKeyFromSource(source: ImgSource): string {
+  if (source.type === "fs") return source.path;
+  if (source.type === "fetch") return source.url;
+  return source.cacheKey; // custom cacheKey when source.type === "data"
+}
+```
+
+##### Example for custom quality and sharpening:
+
+```typescript
+import { GetSharpPipelineArgs, SharpConfig } from "openimg/bun";
+import sharp from "sharp";
+
+export function getSharpPipeline({
+  params,
+  source,
+}: GetSharpPipelineArgs): SharpConfig {
+  const pipeline = sharp().autoOrient();
+
+  // Custom resize with lanczos3 kernel for better quality
+  if (params.width && params.height) {
+    pipeline.resize(params.width, params.height, {
+      fit: params.fit,
+      kernel: sharp.kernel.lanczos3,
+    });
+  }
+
+  // Add sharpening
+  pipeline.sharpen();
+
+  // Custom format with specific quality
+  if (params.format === "webp") {
+    pipeline.webp({ quality: 90 });
+  } else if (params.format === "avif") {
+    pipeline.avif({ quality: 85 });
+  }
+
+  return {
+    pipeline,
+    // Unique cache key for this specific image source + specific custom sharp pipeline
+    cacheKey: `${getCacheKeyFromSource(source)}-hq`, // High quality variant
+  };
+}
+```
+
+You then pass the custom `getSharpPipeline` function to `getImgResponse`:
+
+```typescript
+getImgResponse(request, { getSharpPipeline });
+```
+
+## getDefaultSharpPipeline
+
+The `getDefaultSharpPipeline` helper function is also exported and can be used as a starting point for custom pipelines:
+
+```typescript
+import { getDefaultSharpPipeline } from "openimg/bun";
+
+const defaultPipeline = getDefaultSharpPipeline(params);
+// defaultPipeline already includes autoOrient(), resize(), and format conversion
+
+// Extend the default pipeline
+const customPipeline = defaultPipeline.blur(2).tint({ r: 255, g: 240, b: 16 });
+```
+
+The default pipeline applies:
+
+1. Auto-orientation based on EXIF data
+2. Resizing (if width and height are specified)
+3. Format conversion (webp, avif, png, jpeg)
 
 ## getImgPlaceholder
 

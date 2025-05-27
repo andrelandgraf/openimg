@@ -15,5 +15,8 @@
   "workspaces": [
     "packages/*",
     "tests/*"
-  ]
+  ],
+  "devDependencies": {
+    "sharp": "^0.34.2"
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "openimg",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0",
   "homepage": "https://github.com/andrelandgraf/openimg",
   "repository": {
     "type": "git",
@@ -42,8 +42,10 @@
   },
   "optionalDependencies": {
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "sharp": "^0.34.1"
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "sharp": "^0.34.2"
   },
   "files": [
     "dist",

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { ReadStream } from "node:fs";
 import { Readable } from "node:stream";
+import sharp from "sharp";
 
 const FORMATS = ["webp", "avif", "png", "jpeg", "jpg"] as const;
 export type Format = (typeof FORMATS)[number];
@@ -81,6 +82,33 @@ export type GetImgSource = (
   args: GetImgSourceArgs
 ) => Promise<ImgSource | Response> | ImgSource | Response;
 
+export type GetSharpPipelineArgs = { params: ImgParams; source: ImgSource };
+
+export type SharpConfig = {
+  pipeline: sharp.Sharp;
+  cacheKey?: string;
+};
+
+/**
+ * Called to use a custom Sharp pipeline for a given request.
+ * The default implementation uses the params and source to determine the pipeline: autoOrient, resize, format, etc.
+ * Implement this function to return a custom Sharp pipeline for different image sources or parameters,
+ * this is useful if you want to support custom image processing logic, e.g., support for black and white images, etc.
+ *
+ * Return undefined to use the default pipeline.
+ * Return a custom SharpConfig for customizing the pipeline.
+ *
+ * Make sure to enforce custom URLs (e.g., /cat.png?no-colors=true) when returning a custom SharpConfig.
+ * Otherwise, caching won't be able to differentiate between different pipelines and their output images.
+ *
+ * You must also return a custom cacheKey when file caching is enabled.
+ * Otherwise, openimg's image cache won't be able to differentiate between different pipelines
+ * and their output images.
+ */
+export type GetSharpPipeline = (
+  args: GetSharpPipelineArgs
+) => Promise<SharpConfig | undefined> | SharpConfig | undefined;
+
 /**
  * Configuration values for the getImgResponse function.
  * - headers: Headers to be added to the response. Note that no caching headers will be added automatically.
@@ -96,6 +124,7 @@ export type Config = {
   allowlistedOrigins?: string[]; // default: []
   getImgParams?: GetImgParams;
   getImgSource?: GetImgSource;
+  getSharpPipeline?: GetSharpPipeline;
   cacheFolder?: string | "no_cache"; // default: "./data/images"
 };
 
@@ -178,9 +207,23 @@ type GetCachePathArgs = {
   params: ImgParams;
   source: ImgSource;
   cacheFolder?: string | undefined | null;
+  sharpConfig?: SharpConfig | undefined;
 };
 
-function getCacheKey(source: ImgSource) {
+function getCacheKey(source: ImgSource, sharpConfig?: SharpConfig | undefined) {
+  if (sharpConfig && sharpConfig.cacheKey) {
+    if (source.type === "data" && source.cacheKey) {
+      invariant(
+        sharpConfig.cacheKey === source.cacheKey,
+        "type='data' source image and sharp pipeline cacheKey mismatch. You provided a custom cacheKey for the custom sharp pipeline and a custom cacheKey for the data source. These must match when both are provided."
+      );
+    }
+    invariant(
+      sharpConfig.cacheKey,
+      "cacheKey is required when file caching is enabled and a custom Sharp pipeline is used. Otherwise, openimg's image cache won't be able to differentiate between different pipelines and their output images and serve wrong images."
+    );
+    return sharpConfig.cacheKey;
+  }
   if (source.type === "fs") {
     return source.path;
   }
@@ -194,8 +237,9 @@ export function getCachePath({
   params,
   source,
   cacheFolder = DEFAULT_CACHE_FOLDER,
+  sharpConfig,
 }: GetCachePathArgs): string {
-  const src = getCacheKey(source); // "https://example.com/folder/cat.png", "/cat.png"
+  const src = getCacheKey(source, sharpConfig); // "https://example.com/folder/cat.png", "/cat.png"
   invariant(src, "Invalid source"); // We should have errored in validateImgSource if there was no cacheKey
   const srcUrl = source.type === "fetch" ? new URL(src) : null;
   let srcPath = srcUrl ? srcUrl.pathname : src; // "/folder/cat.png", "/cat.png"
@@ -283,6 +327,20 @@ export function parseUrl(src: string) {
     return false;
   }
   return new URL(src);
+}
+
+export function getDefaultSharpPipeline(params: ImgParams) {
+  const pipeline = sharp().autoOrient();
+  if (params.format === "avif") {
+    pipeline.avif();
+  } else if (params.format === "webp") {
+    pipeline.webp();
+  }
+
+  if (params.width && params.height) {
+    pipeline.resize(params.width, params.height, { fit: params.fit });
+  }
+  return pipeline;
 }
 
 export class PipelineLock {

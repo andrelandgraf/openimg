@@ -14,6 +14,7 @@ import invariant, {
   getContentType,
   fromWebStream,
   toWebStream,
+  getDefaultSharpPipeline,
 } from "../utils";
 import { exists, FileCache } from "./utils";
 
@@ -56,6 +57,27 @@ export async function getImgResponse(request: Request, config: Config = {}) {
     return res;
   }
 
+  const sharpConfig = config.getSharpPipeline
+    ? await config.getSharpPipeline({ params, source })
+    : undefined;
+  if (sharpConfig && config.cacheFolder !== "no_cache") {
+    invariant(
+      sharpConfig.cacheKey,
+      "cacheKey is required when file caching is enabled and a custom Sharp pipeline is used. Otherwise, openimg's image cache won't be able to differentiate between different pipelines and their output images and serve wrong images."
+    );
+  }
+  if (
+    sharpConfig &&
+    sharpConfig.cacheKey &&
+    source.type === "data" &&
+    source.cacheKey
+  ) {
+    invariant(
+      sharpConfig.cacheKey === source.cacheKey,
+      "type='data' source image and sharp pipeline cacheKey mismatch. You provided a custom cacheKey for the custom sharp pipeline and a custom cacheKey for the data source. These must match when both are provided."
+    );
+  }
+
   if (config.cacheFolder !== "no_cache") {
     const cacheFolder = config.cacheFolder || DEFAULT_CACHE_FOLDER;
     let cache = caches.get(cacheFolder);
@@ -66,7 +88,12 @@ export async function getImgResponse(request: Request, config: Config = {}) {
 
   const cachePath =
     config.cacheFolder !== "no_cache"
-      ? getCachePath({ params, source, cacheFolder: config.cacheFolder })
+      ? getCachePath({
+          params,
+          source,
+          sharpConfig,
+          cacheFolder: config.cacheFolder,
+        })
       : null;
   try {
     if (config.cacheFolder !== "no_cache") {
@@ -118,15 +145,11 @@ export async function getImgResponse(request: Request, config: Config = {}) {
       }
     }
 
-    const pipeline = sharp().autoOrient();
-    if (params.format === "avif") {
-      pipeline.avif();
-    } else if (params.format === "webp") {
-      pipeline.webp();
-    }
-
-    if (params.width && params.height) {
-      pipeline.resize(params.width, params.height, { fit: params.fit });
+    let pipeline: sharp.Sharp;
+    if (sharpConfig) {
+      pipeline = sharpConfig.pipeline;
+    } else {
+      pipeline = getDefaultSharpPipeline(params);
     }
 
     const infoPromise = new Promise<sharp.OutputInfo>((resolve) => {
