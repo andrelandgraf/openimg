@@ -47,12 +47,36 @@ You can pass in all standard HTML img element attributes to the Img component. T
 - fit (optional): how the image should be resized to fit the aspect ratio (if different from intrinsic ratio): "cover" or "contain".
 - isAboveFold (defaults to `false`): whether the image is above the fold or not, affects what default optimization settings are used.
 - placeholder (optional): base64 encoded string of a low quality image to use as a placeholder until the full image loads.
+- params (optional): Record<string, string> of additional parameters to add to the img src URL, for instance `{ 'black-white': 'true', 'blur': '10' }` to be used for custom optimizations.
 
 #### placeholder: string | undefined
 
 The placeholder prop is optional, but a great way to improve the user experience. It allows you to provide a low-quality image that will be displayed while the full image is loading. Make sure to pass the `Image` component the placeholder image as soon as possible. For instance, during server-side rendering or the initial render of the image component. This ensures that the placeholder is displayed immediately. You can use the `getImgPlaceholder` function from `openimg/node` or `openimg/bun` to generate the placeholder.
 
 Transparent images and no JavaScript: This package utilizes the CSS `background-image` property to display the placeholder. Once the image is fully loaded, client-side JavaScript is used to remove the `background-image` styling. Note that if JS is disabled and a transparent image (e.g., PNG with transparency) is loaded with a placeholder, the placeholder will still be visible in the back. In this case, it may be better to avoid using placeholders.
+
+#### params: Record<string, string> | undefined
+
+The params prop allows you to pass custom optimization parameters to your image optimizer endpoint. This is particularly useful when you want to apply custom sharp transformations or other image processing options that your optimizer supports.
+
+```tsx
+<Img
+  src="/cat.png"
+  width={800}
+  height={600}
+  fit="cover"
+  alt="A cute cat"
+  params={{
+    "black-white": "true",
+    blur: "5",
+    quality: "80",
+  }}
+/>
+```
+
+These parameters will be appended to the generated image URL as query parameters.
+
+This is useful if you want to implement custom sharp pipelines via `getSharpPipeline` for e.g., black & white image transformations for specific images on your site. In the optimizer endpoint, when set, you can then pass these parameters to the `cacheKey` and specifcy a custom sharp pipeline.
 
 ### Alt text
 

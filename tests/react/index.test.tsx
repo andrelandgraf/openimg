@@ -1,6 +1,10 @@
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
-import { Img, OpenImgContextProvider, type GetSrc } from "openimg/react";
+import {
+  Img,
+  OpenImgContextProvider,
+  type GetSrc,
+} from "../../packages/core/src/react/index";
 // Import the testing setup to ensure matchers are properly registered
 import "./testing-library";
 
@@ -202,15 +206,16 @@ test("applies custom getSrc function to generate source URLs", () => {
     width,
     height,
     format,
+    params,
     optimizerEndpoint,
   }) => {
     const baseUrl = `${optimizerEndpoint}/custom-transform`;
-    const params = new URLSearchParams();
-    params.append("image", src);
-    params.append("width", width.toString());
-    params.append("height", height.toString());
-    if (format) params.append("fmt", format);
-    return `${baseUrl}?${params.toString()}`;
+    const searchParams = new URLSearchParams();
+    searchParams.append("image", src);
+    searchParams.append("width", width.toString());
+    searchParams.append("height", height.toString());
+    if (format) searchParams.append("fmt", format);
+    return `${baseUrl}?${searchParams.toString()}`;
   };
 
   const { container } = render(
@@ -355,6 +360,7 @@ test("combines custom breakpoints with custom getSrc function", () => {
     width,
     height,
     format,
+    params,
     optimizerEndpoint,
   }) => {
     return `${optimizerEndpoint}/resize/${width}x${height}/${
@@ -530,4 +536,202 @@ test("clears placeholder styles when image is already complete", () => {
 
   // After load, the background image style should be cleared
   expect(imgElement.style.backgroundImage).toBe("");
+});
+
+test("applies custom params to img src URL", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={800}
+      height={600}
+      alt="A cat with custom params"
+      params={{ hq: "true", blur: "5" }}
+      data-testid="params-image"
+    />
+  );
+
+  const imgElement = screen.getByTestId("params-image");
+  const imgSrc = imgElement.getAttribute("src");
+
+  // Verify that custom params are included in the img src
+  expect(imgSrc).toInclude("hq=true");
+  expect(imgSrc).toInclude("blur=5");
+
+  // Verify the complete src structure
+  expect(imgSrc).toBe("/img?src=%2Fcat.png&w=800&h=600&hq=true&blur=5");
+});
+
+test("applies custom params to img srcset URLs", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={1200}
+      height={800}
+      alt="A cat with custom params"
+      params={{ quality: "90", sharpen: "true" }}
+      data-testid="params-srcset-image"
+    />
+  );
+
+  const imgElement = screen.getByTestId("params-srcset-image");
+  const imgSrcset = imgElement.getAttribute("srcset");
+
+  // Verify that custom params are included in each srcset entry
+  expect(imgSrcset).toInclude("quality=90");
+  expect(imgSrcset).toInclude("sharpen=true");
+
+  // Check that params appear in multiple srcset entries
+  const srcsetEntries = imgSrcset?.split(", ") || [];
+  expect(srcsetEntries.length).toBeGreaterThan(1);
+
+  srcsetEntries.forEach((entry) => {
+    if (entry.includes("/img?")) {
+      expect(entry).toInclude("quality=90");
+      expect(entry).toInclude("sharpen=true");
+    }
+  });
+});
+
+test("applies custom params to source element srcset URLs", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={1000}
+      height={750}
+      alt="A cat with custom params"
+      params={{ "black-white": "true", contrast: "20" }}
+      data-testid="params-source-image"
+    />
+  );
+
+  const sourceElements = container.querySelectorAll("source");
+
+  // Verify that both AVIF and WebP sources include the custom params
+  const formats = ["avif", "webp"];
+  formats.forEach((format, i) => {
+    const source = sourceElements[i];
+    const sourceSrcset = source.getAttribute("srcset");
+
+    expect(sourceSrcset).toInclude("black-white=true");
+    expect(sourceSrcset).toInclude("contrast=20");
+    expect(sourceSrcset).toInclude(`format=${format}`);
+
+    // Check that params appear in multiple srcset entries for each source
+    const srcsetEntries = sourceSrcset?.split(", ") || [];
+    srcsetEntries.forEach((entry) => {
+      if (entry.includes("/img?")) {
+        expect(entry).toInclude("black-white=true");
+        expect(entry).toInclude("contrast=20");
+      }
+    });
+  });
+});
+
+test("handles URL encoding of param values correctly", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={800}
+      height={600}
+      alt="A cat with encoded params"
+      params={{ overlay: "hello world", special: "a&b=c" }}
+      data-testid="encoded-params-image"
+    />
+  );
+
+  const imgElement = screen.getByTestId("encoded-params-image");
+  const imgSrc = imgElement.getAttribute("src");
+
+  // Verify that param values are properly URL encoded
+  expect(imgSrc).toInclude("overlay=hello+world");
+  expect(imgSrc).toInclude("special=a%26b%3Dc");
+});
+
+test("works with custom getSrc function and params", () => {
+  const customGetSrc: GetSrc = ({
+    src,
+    width,
+    height,
+    format,
+    params,
+    optimizerEndpoint,
+  }) => {
+    const searchParams = new URLSearchParams({
+      image: src,
+      w: width.toString(),
+      h: height.toString(),
+    });
+
+    if (format) searchParams.set("fmt", format);
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        searchParams.set(`custom_${key}`, value);
+      });
+    }
+
+    return `${optimizerEndpoint}/transform?${searchParams.toString()}`;
+  };
+
+  const { container } = render(
+    <OpenImgContextProvider getSrc={customGetSrc}>
+      <Img
+        src="/cat.png"
+        width={800}
+        height={600}
+        alt="A cat with custom getSrc and params"
+        params={{ effect: "vintage", brightness: "10" }}
+        data-testid="custom-getsrc-params-image"
+      />
+    </OpenImgContextProvider>
+  );
+
+  const imgElement = screen.getByTestId("custom-getsrc-params-image");
+  const imgSrc = imgElement.getAttribute("src");
+
+  // Verify that custom getSrc function receives and processes params correctly
+  expect(imgSrc).toInclude("/transform?");
+  expect(imgSrc).toInclude("custom_effect=vintage");
+  expect(imgSrc).toInclude("custom_brightness=10");
+  expect(imgSrc).toInclude("image=%2Fcat.png");
+});
+
+test("works without params (backward compatibility)", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={800}
+      height={600}
+      alt="A cat without params"
+      data-testid="no-params-image"
+    />
+  );
+
+  const imgElement = screen.getByTestId("no-params-image");
+  const imgSrc = imgElement.getAttribute("src");
+
+  // Verify that the component still works correctly without params
+  expect(imgSrc).toBe("/img?src=%2Fcat.png&w=800&h=600");
+
+  // Should not contain any unexpected parameters
+  expect(imgSrc).not.toInclude("undefined");
+  expect(imgSrc).not.toInclude("null");
+});
+
+test("handles empty params object", () => {
+  const { container } = render(
+    <Img
+      src="/cat.png"
+      width={800}
+      height={600}
+      alt="A cat with empty params"
+      params={{}}
+      data-testid="empty-params-image"
+    />
+  );
+
+  const imgElement = screen.getByTestId("empty-params-image");
+  const imgSrc = imgElement.getAttribute("src");
+
+  // Verify that empty params object doesn't break anything
+  expect(imgSrc).toBe("/img?src=%2Fcat.png&w=800&h=600");
 });

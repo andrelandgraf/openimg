@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.1.0
+
+## openimg/react
+
+- Add optional `params` prop to `Image`/`Img` component to pass custom optimization parameters to the optimizer endpoint. This enables custom sharp transformations by adding arbitrary query parameters to the image URL.
+
 # 1.0.0
 
 - Switch from `optionalDependencies` to `peerDependencies` for sharp

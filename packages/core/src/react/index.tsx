@@ -10,6 +10,7 @@ export type TargetFormat = "webp" | "avif";
  * - fit: the fit prop passed to the Image component
  * - format: the format prop passed to the Image component
  * - optimizerEndpoint: the OpenImgContext optimizerEndpoint value
+ * - params: additional parameters to add to the img src URL, for instance 'black-white=true' or 'blur=10' to be used for custom optimizations
  */
 export type GetSrcArgs = {
   src: string;
@@ -17,6 +18,7 @@ export type GetSrcArgs = {
   height: number;
   fit?: Fit;
   format?: TargetFormat;
+  params?: Record<string, string>;
   optimizerEndpoint: string;
 };
 
@@ -56,16 +58,22 @@ export const defaultGetSrc: GetSrc = ({
   height,
   fit,
   format,
+  params,
   optimizerEndpoint,
 }) => {
-  const params = new URLSearchParams({
+  const searchParams = new URLSearchParams({
     src,
     w: width.toString(),
     h: height.toString(),
   });
-  if (fit) params.append("fit", fit);
-  if (format) params.append("format", format);
-  return optimizerEndpoint + "?" + params.toString();
+  if (fit) searchParams.set("fit", fit);
+  if (format) searchParams.set("format", format);
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.set(key, value);
+    });
+  }
+  return optimizerEndpoint + "?" + searchParams.toString();
 };
 
 const defaultContext: OpenImgContextProps = {
@@ -144,6 +152,7 @@ export type ImageProps = Omit<
   fit?: Fit;
   isAboveFold?: boolean;
   placeholder?: string;
+  params?: Record<string, string>;
 };
 
 /**
@@ -155,6 +164,7 @@ export type ImageProps = Omit<
  * @param {Fit} [props.fit] - How the image should be resized to fit the aspect ratio (if different from intrinsic ratio): "cover" or "contain"
  * @param {boolean} [props.isAboveFold] - Whether the image is above the fold or not, affects what default optimization settings are used
  * @param {string} [props.placeholder] - Base64 encoded string of a low quality image to use as a placeholder until the full image loads
+ * @param {Record<string, string>} [props.params] - Additional parameters to add to the img src URL, for instance 'black-white=true' or 'blur=10' to be used for custom optimizations
  */
 export function Image({
   src,
@@ -163,6 +173,7 @@ export function Image({
   fit,
   isAboveFold,
   placeholder,
+  params,
   ...imgProps
 }: ImageProps) {
   const ref = useRef<HTMLImageElement>(null);
@@ -227,6 +238,7 @@ export function Image({
                         height: w / ratio,
                         fit,
                         format,
+                        params,
                         optimizerEndpoint,
                       }) + ` ${w}w`
                   )
@@ -237,6 +249,7 @@ export function Image({
                   height: heightNum,
                   fit,
                   format,
+                  params,
                   optimizerEndpoint,
                 })
           }
@@ -263,6 +276,7 @@ export function Image({
           width: widthNum,
           height: heightNum,
           fit,
+          params,
           optimizerEndpoint,
         })}
         srcSet={
@@ -275,6 +289,7 @@ export function Image({
                       width: w,
                       height: w / ratio,
                       fit,
+                      params,
                       optimizerEndpoint,
                     }) + ` ${w}w`
                 )
