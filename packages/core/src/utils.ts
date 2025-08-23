@@ -338,7 +338,13 @@ export function getDefaultSharpPipeline(params: ImgParams) {
   }
 
   if (params.width && params.height) {
-    pipeline.resize(params.width, params.height, { fit: params.fit });
+    pipeline.resize(params.width, params.height, {
+      fit: params.fit,
+      // Set a transparent background to prevent a black background from appearing around the original image
+      // when it is resized using the “contain” fit property.
+      // The final result is much better, especially when the original image is a PNG without a background.
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    });
   }
   return pipeline;
 }
