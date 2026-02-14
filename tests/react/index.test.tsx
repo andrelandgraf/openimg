@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
 import { screen, render } from "@testing-library/react";
+import { resolve } from "node:path";
 import {
   Img,
   OpenImgContextProvider,
@@ -12,6 +13,22 @@ test("renders without errors when required props are provided", () => {
   render(<Img src="/cat.png" width={800} height={800} alt="A cute cat" />);
   const imgElement = screen.getByAltText("A cute cat");
   expect(imgElement).toBeInTheDocument();
+});
+
+test("renders on server without throwing hook errors", () => {
+  const command =
+    "import React from 'react'; " +
+    "import { renderToString } from 'react-dom/server'; " +
+    "import { Img } from './packages/core/src/react/index.tsx'; " +
+    "const html = renderToString(React.createElement(Img, { src: '/cat.png', width: 800, height: 800, alt: 'SSR cat' })); " +
+    "if (!html.includes('<img')) throw new Error('SSR output missing img element');";
+  const result = Bun.spawnSync(["bun", "--eval", command], {
+    cwd: resolve(process.cwd(), "../.."),
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  expect(result.exitCode).toBe(0);
 });
 
 test("applies additional attributes to the <img> tag", () => {

@@ -40,12 +40,18 @@
     "@types/bun": "latest",
     "thumbhash": "^0.1.1"
   },
-  "optionalDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  },
   "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
     "sharp": "^0.34.2"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "files": [
     "dist",
