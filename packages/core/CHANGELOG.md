@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.1.1
+
+## openimg/react
+
+- Fix SSR invalid hook call failures by moving `react` and `react-dom` from `optionalDependencies` to optional `peerDependencies`.
+
 # 1.1.0
 
 ## openimg/react
